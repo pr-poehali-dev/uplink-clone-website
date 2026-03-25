@@ -20,9 +20,24 @@ export default function Hero({ onContactClick }: HeroProps) {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center grid-bg overflow-hidden"
+      className="relative min-h-screen flex items-center overflow-hidden"
     >
-      <div className="absolute inset-0 pointer-events-none">
+      {/* Background video */}
+      <div className="absolute inset-0 z-0">
+        <iframe
+          src="https://www.youtube.com/embed/KPCZpPHBCMk?autoplay=1&mute=1&loop=1&playlist=KPCZpPHBCMk&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+          className="absolute w-[300%] h-[300%] -top-[100%] -left-[100%] pointer-events-none"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          title="background"
+        />
+        {/* Dark overlay with cyan tint */}
+        <div className="absolute inset-0 bg-[#080c14]/80" />
+        {/* Grid overlay */}
+        <div className="absolute inset-0 grid-bg opacity-20" />
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none z-10">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse-slow" />
         <div
           className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-400/4 rounded-full blur-3xl animate-pulse-slow"
@@ -39,7 +54,7 @@ export default function Hero({ onContactClick }: HeroProps) {
         />
       </div>
 
-      <div className="container mx-auto px-4 pt-24 pb-16 relative z-10">
+      <div className="container mx-auto px-4 pt-24 pb-16 relative z-20">
         <div className="max-w-4xl mx-auto text-center">
           <div
             className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
