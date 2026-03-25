@@ -93,7 +93,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[0]; index: number }) {
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl overflow-hidden flex flex-col transition-all duration-700 group hover:scale-[1.02] ${
+      className={`glass-card neon-border rounded-2xl overflow-hidden flex flex-col transition-[opacity,transform] duration-700 group hover:scale-[1.02] ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
       style={{ transitionDelay: `${index * 80}ms` }}
