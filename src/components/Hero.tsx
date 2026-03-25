@@ -22,17 +22,15 @@ export default function Hero({ onContactClick }: HeroProps) {
       id="home"
       className="relative min-h-screen flex items-center overflow-hidden"
     >
-      {/* Background video */}
+      {/* Background image */}
       <div className="absolute inset-0 z-0">
-        <iframe
-          src="https://www.youtube.com/embed/KPCZpPHBCMk?autoplay=1&mute=1&loop=1&playlist=KPCZpPHBCMk&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
-          className="absolute w-[300%] h-[300%] -top-[100%] -left-[100%] pointer-events-none"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-          title="background"
+        <img
+          src="https://cdn.poehali.dev/projects/6a0cfa0f-533f-4025-84e5-e46c21ae7e0b/files/abfbd579-d889-4000-ad09-65f5733c9fe9.jpg"
+          alt=""
+          className="w-full h-full object-cover"
         />
-        {/* Dark overlay with cyan tint */}
-        <div className="absolute inset-0 bg-[#080c14]/80" />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-[#080c14]/75" />
         {/* Grid overlay */}
         <div className="absolute inset-0 grid-bg opacity-20" />
       </div>
