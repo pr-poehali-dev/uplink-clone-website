@@ -40,7 +40,7 @@ function ContactCard({
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl p-7 text-center transition-[opacity,transform] duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      className={`glass-card neon-border rounded-2xl p-7 text-center transition-all duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <div

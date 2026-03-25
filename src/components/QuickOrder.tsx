@@ -83,7 +83,7 @@ function ServiceAccordion({ s }: { s: (typeof services)[0] }) {
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl overflow-hidden transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}
+      className={`glass-card neon-border rounded-2xl overflow-hidden transition-all duration-700 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}
     >
       <button
         onClick={() => setOpen(!open)}
