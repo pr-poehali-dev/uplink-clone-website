@@ -42,7 +42,7 @@ export default function Hero({ onContactClick }: HeroProps) {
       <div className="container mx-auto px-4 pt-24 pb-16 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <div
-            className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            className={`transition-[opacity,transform] duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-8">
               <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
@@ -51,7 +51,7 @@ export default function Hero({ onContactClick }: HeroProps) {
           </div>
 
           <div
-            className={`transition-all duration-700 delay-100 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            className={`transition-[opacity,transform] duration-700 delay-100 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
             <h1 className="section-title text-white mb-6">
               ИТК <span className="gradient-text">Аплинк-IT</span>
@@ -63,7 +63,7 @@ export default function Hero({ onContactClick }: HeroProps) {
           </div>
 
           <div
-            className={`transition-all duration-700 delay-200 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            className={`transition-[opacity,transform] duration-700 delay-200 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
             <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
               Аутсорсинг IT-инфраструктуры, администрирование серверов, монтаж
@@ -73,7 +73,7 @@ export default function Hero({ onContactClick }: HeroProps) {
           </div>
 
           <div
-            className={`flex flex-col sm:flex-row gap-4 justify-center mb-16 transition-all duration-700 delay-300 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            className={`flex flex-col sm:flex-row gap-4 justify-center mb-16 transition-[opacity,transform] duration-700 delay-300 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
             <button
               onClick={onContactClick}
@@ -96,7 +96,7 @@ export default function Hero({ onContactClick }: HeroProps) {
           </div>
 
           <div
-            className={`flex flex-wrap justify-center gap-6 transition-all duration-700 delay-400 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            className={`flex flex-wrap justify-center gap-6 transition-[opacity,transform] duration-700 delay-400 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
             {stats.map((s) => (
               <div

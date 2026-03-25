@@ -1,4 +1,4 @@
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { useScrollAnimation, useScrollAnimationDelayed } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
 
 const timeline = [
@@ -70,12 +70,12 @@ function TimelineItem({
   item: (typeof timeline)[0];
   index: number;
 }) {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible, animationStyle } = useScrollAnimationDelayed(0.15, index * 100);
   return (
     <div
       ref={ref}
-      className={`flex gap-4 transition-all duration-700 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}
-      style={{ transitionDelay: `${index * 100}ms` }}
+      className={`flex gap-4 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}
+      style={animationStyle}
     >
       <div className="flex flex-col items-center">
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-[#080c14] font-bold text-xs flex-shrink-0 shadow-lg shadow-cyan-500/30">
@@ -105,12 +105,12 @@ function ApproachItem({
   item: (typeof approaches)[0];
   index: number;
 }) {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible, animationStyle } = useScrollAnimationDelayed(0.15, index * 100);
   return (
     <div
       ref={ref}
-      className={`flex gap-4 glass-card neon-border rounded-xl p-4 transition-all duration-700 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`}
-      style={{ transitionDelay: `${index * 100}ms` }}
+      className={`flex gap-4 glass-card neon-border rounded-xl p-4 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`}
+      style={animationStyle}
     >
       <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
         <Icon name={item.icon as "Zap"} size={20} className="text-cyan-400" />
@@ -132,12 +132,12 @@ function TeamCard({
   member: (typeof team)[0];
   index: number;
 }) {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible, animationStyle } = useScrollAnimationDelayed(0.15, index * 100);
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl p-5 text-center transition-all duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-      style={{ transitionDelay: `${index * 100}ms` }}
+      className={`glass-card neon-border rounded-2xl p-5 text-center transition-[opacity,transform] duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      style={animationStyle}
     >
       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center mx-auto mb-3">
         <Icon name="User" size={32} className="text-cyan-400" />
@@ -164,7 +164,7 @@ export default function About() {
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-16 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="Info" size={14} />О компании
@@ -204,7 +204,7 @@ export default function About() {
 
         <div
           ref={teamRef}
-          className={`transition-all duration-700 ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`transition-[opacity,transform] duration-700 ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <h3 className="text-2xl font-bold text-white font-['Oswald'] mb-8 text-center flex items-center justify-center gap-2">
             <Icon name="Users" size={24} className="text-cyan-400" />
