@@ -70,16 +70,16 @@ function PricingCard({
   plan: (typeof plans)[0];
   index: number;
 }) {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible, animationStyle } = useScrollAnimation(0.15, index * 120);
   return (
     <div
       ref={ref}
-      className={`relative flex flex-col rounded-2xl p-8 border transition-all duration-700 ${plan.border} ${
+      className={`relative flex flex-col rounded-2xl p-8 border transition-[opacity,transform] duration-700 ${plan.border} ${
         plan.highlight
           ? "bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 scale-105"
           : "glass-card"
       } ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
-      style={{ transitionDelay: `${index * 120}ms` }}
+      style={animationStyle}
     >
       {plan.badge && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-[#080c14] text-xs font-bold shadow-lg shadow-cyan-500/30">

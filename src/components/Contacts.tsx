@@ -36,12 +36,12 @@ function ContactCard({
   item: (typeof contactItems)[0];
   index: number;
 }) {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible, animationStyle } = useScrollAnimation(0.15, index * 100);
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl p-7 text-center transition-all duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-      style={{ transitionDelay: `${index * 100}ms` }}
+      className={`glass-card neon-border rounded-2xl p-7 text-center transition-[opacity,transform] duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      style={animationStyle}
     >
       <div
         className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.accent} flex items-center justify-center mx-auto mb-4 shadow-lg`}

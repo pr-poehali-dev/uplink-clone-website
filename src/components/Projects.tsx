@@ -89,14 +89,14 @@ const projects = [
 ];
 
 function ProjectCard({ p, index }: { p: (typeof projects)[0]; index: number }) {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible, animationStyle } = useScrollAnimation(0.15, index * 80);
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl overflow-hidden flex flex-col transition-all duration-700 group hover:scale-[1.02] ${
+      className={`glass-card neon-border rounded-2xl overflow-hidden flex flex-col transition-[opacity,transform] duration-700 group hover:scale-[1.02] ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
-      style={{ transitionDelay: `${index * 80}ms` }}
+      style={animationStyle}
     >
       <div className={`h-1.5 bg-gradient-to-r ${p.accent}`} />
       <div className="p-6 flex flex-col flex-1 gap-4">

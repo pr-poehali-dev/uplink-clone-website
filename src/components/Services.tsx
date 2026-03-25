@@ -87,14 +87,14 @@ const services = [
 ];
 
 function ServiceCard({ s, index }: { s: (typeof services)[0]; index: number }) {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible, animationStyle } = useScrollAnimation(0.15, index * 80);
   return (
     <div
       ref={ref}
       className={`glass-card neon-border rounded-2xl p-6 flex flex-col gap-4 transition-[opacity,transform] duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
-      style={{ transitionDelay: isVisible ? "0ms" : `${index * 80}ms` }}
+      style={animationStyle}
     >
       <div
         className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.accent} flex items-center justify-center shadow-lg`}

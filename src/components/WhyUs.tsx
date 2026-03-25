@@ -56,12 +56,12 @@ function StatItem({
   label: string;
   delay: number;
 }) {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible, animationStyle } = useScrollAnimation(0.15, delay);
   return (
     <div
       ref={ref}
-      className={`text-center glass-card neon-border rounded-2xl p-6 transition-all duration-700 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}
-      style={{ transitionDelay: `${delay}ms` }}
+      className={`text-center glass-card neon-border rounded-2xl p-6 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}
+      style={animationStyle}
     >
       <div className="text-4xl font-bold gradient-text font-['Oswald'] mb-2">
         {num}
@@ -72,14 +72,14 @@ function StatItem({
 }
 
 function AdvCard({ a, index }: { a: (typeof advantages)[0]; index: number }) {
-  const { ref, isVisible } = useScrollAnimation();
+  const { ref, isVisible, animationStyle } = useScrollAnimation(0.15, index * 80);
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl p-6 transition-all duration-700 group hover:scale-[1.02] ${
+      className={`glass-card neon-border rounded-2xl p-6 transition-[opacity,transform] duration-700 group hover:scale-[1.02] ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
-      style={{ transitionDelay: `${index * 80}ms` }}
+      style={animationStyle}
     >
       <div
         className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${a.accent} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}
