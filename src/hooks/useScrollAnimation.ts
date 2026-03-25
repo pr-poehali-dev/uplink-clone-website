@@ -6,18 +6,25 @@ export function useScrollAnimation(threshold = 0.15, delay = 0) {
   const [delayCleared, setDelayCleared] = useState(false);
 
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
           observer.unobserve(entry.target);
-          setTimeout(() => setDelayCleared(true), delay + 700);
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              setIsVisible(true);
+              setTimeout(() => setDelayCleared(true), delay + 750);
+            });
+          });
         }
       },
       { threshold }
     );
 
-    if (ref.current) observer.observe(ref.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, [threshold, delay]);
 
