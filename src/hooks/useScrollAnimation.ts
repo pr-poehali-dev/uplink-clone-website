@@ -1,20 +1,26 @@
-import React, { useEffect, useRef, useState } from "react";
+import { CSSProperties, useEffect, useRef, useState } from "react";
 
 export function useScrollAnimation(threshold = 0.1, delay = 0) {
   const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [state, setState] = useState<"hidden" | "animating" | "done">("hidden");
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    // Check if already in viewport on mount
+    function trigger() {
+      // Set animating (applies transitionDelay + switches to visible classes)
+      setState("animating");
+      // After animation completes — remove transitionDelay so hover works instantly
+      const cleanup = setTimeout(() => setState("done"), delay + 1100);
+      return cleanup;
+    }
+
     const rect = el.getBoundingClientRect();
-    const alreadyVisible =
-      rect.top < window.innerHeight && rect.bottom > 0;
+    const alreadyVisible = rect.top < window.innerHeight && rect.bottom > 0;
 
     if (alreadyVisible) {
-      const t = setTimeout(() => setIsVisible(true), delay);
+      const t = trigger();
       return () => clearTimeout(t);
     }
 
@@ -22,9 +28,8 @@ export function useScrollAnimation(threshold = 0.1, delay = 0) {
       ([entry]) => {
         if (entry.isIntersecting) {
           observer.unobserve(entry.target);
-          const t = setTimeout(() => setIsVisible(true), delay);
-          // No cleanup needed after fire, but store for potential unmount
-          (el as HTMLElement & { _animTimer?: ReturnType<typeof setTimeout> })._animTimer = t;
+          const t = trigger();
+          (el as HTMLElement & { _t?: ReturnType<typeof setTimeout> })._t = t;
         }
       },
       { threshold, rootMargin: "0px 0px -40px 0px" }
@@ -33,15 +38,16 @@ export function useScrollAnimation(threshold = 0.1, delay = 0) {
     observer.observe(el);
     return () => {
       observer.disconnect();
-      const t = (el as HTMLElement & { _animTimer?: ReturnType<typeof setTimeout> })._animTimer;
+      const t = (el as HTMLElement & { _t?: ReturnType<typeof setTimeout> })._t;
       if (t) clearTimeout(t);
     };
   }, [threshold, delay]);
 
-  // Always keep transitionDelay in style so CSS transition applies correctly
-  const animationStyle: React.CSSProperties = isVisible
-    ? {}
-    : { transitionDelay: `${delay}ms` };
+  const isVisible = state !== "hidden";
+
+  // Keep transitionDelay while animating; remove after done (so hover is instant)
+  const animationStyle: CSSProperties =
+    state === "animating" ? { transitionDelay: `${delay}ms` } : {};
 
   return { ref, isVisible, animationStyle };
 }
