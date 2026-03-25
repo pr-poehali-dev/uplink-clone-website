@@ -70,16 +70,16 @@ function PricingCard({
   plan: (typeof plans)[0];
   index: number;
 }) {
-  const { ref, isVisible, animationStyle } = useScrollAnimation(0.1, index * 150);
+  const { ref, isVisible } = useScrollAnimation();
   return (
     <div
       ref={ref}
-      className={`relative flex flex-col rounded-2xl p-8 border transition-[opacity,transform] ease-out duration-[1000ms] ${plan.border} ${
+      className={`relative flex flex-col rounded-2xl p-8 border transition-all duration-700 ${plan.border} ${
         plan.highlight
           ? "bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 scale-105"
           : "glass-card"
-      } ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16"}`}
-      style={animationStyle}
+      } ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+      style={{ transitionDelay: `${index * 120}ms` }}
     >
       {plan.badge && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-[#080c14] text-xs font-bold shadow-lg shadow-cyan-500/30">
@@ -131,7 +131,7 @@ export default function Pricing({ onContactClick }: PricingProps) {
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-all ease-out duration-[1000ms] ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16"}`}
+          className={`text-center mb-16 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="CreditCard" size={14} />

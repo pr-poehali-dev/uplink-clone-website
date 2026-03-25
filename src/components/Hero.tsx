@@ -20,22 +20,9 @@ export default function Hero({ onContactClick }: HeroProps) {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center overflow-hidden"
+      className="relative min-h-screen flex items-center grid-bg overflow-hidden"
     >
-      {/* Background image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://cdn.poehali.dev/projects/6a0cfa0f-533f-4025-84e5-e46c21ae7e0b/files/abfbd579-d889-4000-ad09-65f5733c9fe9.jpg"
-          alt=""
-          className="w-full h-full object-cover"
-        />
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-[#080c14]/75" />
-        {/* Grid overlay */}
-        <div className="absolute inset-0 grid-bg opacity-20" />
-      </div>
-
-      <div className="absolute inset-0 pointer-events-none z-10">
+      <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse-slow" />
         <div
           className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-400/4 rounded-full blur-3xl animate-pulse-slow"
@@ -52,7 +39,7 @@ export default function Hero({ onContactClick }: HeroProps) {
         />
       </div>
 
-      <div className="container mx-auto px-4 pt-24 pb-16 relative z-20">
+      <div className="container mx-auto px-4 pt-24 pb-16 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <div
             className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}

@@ -87,14 +87,14 @@ const services = [
 ];
 
 function ServiceCard({ s, index }: { s: (typeof services)[0]; index: number }) {
-  const { ref, isVisible, animationStyle } = useScrollAnimation(0.1, index * 120);
+  const { ref, isVisible } = useScrollAnimation();
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl p-6 flex flex-col gap-4 transition-[opacity,transform] ease-out duration-[1000ms] ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16"
+      className={`glass-card neon-border rounded-2xl p-6 flex flex-col gap-4 transition-all duration-700 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
-      style={animationStyle}
+      style={{ transitionDelay: `${index * 80}ms` }}
     >
       <div
         className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.accent} flex items-center justify-center shadow-lg`}
@@ -135,7 +135,7 @@ export default function Services({ onContactClick }: ServicesProps) {
       <div className="container mx-auto px-4">
         <div
           ref={titleRef}
-          className={`text-center mb-16 transition-all ease-out duration-[1000ms] ${titleVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16"}`}
+          className={`text-center mb-16 transition-all duration-700 ${titleVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="Settings" size={14} />
