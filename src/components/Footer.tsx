@@ -118,7 +118,7 @@ export default function Footer({ onContactClick }: FooterProps) {
                   href="tel:+78007079303"
                   className="text-gray-400 hover:text-cyan-400 text-sm transition-colors"
                 >
-                  8 (800) 707-93-03
+                  8 (986) 986-01-36
                 </a>
               </li>
               <li className="flex items-start gap-2">
@@ -131,7 +131,7 @@ export default function Footer({ onContactClick }: FooterProps) {
                   href="mailto:info@uplink-it.ru"
                   className="text-gray-400 hover:text-cyan-400 text-sm transition-colors"
                 >
-                  info@uplink-it.ru
+                  support@uplink-it.ru
                 </a>
               </li>
               <li className="flex items-start gap-2">
