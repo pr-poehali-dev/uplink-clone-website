@@ -1,4 +1,4 @@
-import { useScrollAnimation, useScrollAnimationDelayed } from "@/hooks/useScrollAnimation";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
 
 const projects = [
@@ -89,14 +89,14 @@ const projects = [
 ];
 
 function ProjectCard({ p, index }: { p: (typeof projects)[0]; index: number }) {
-  const { ref, isVisible, animationStyle } = useScrollAnimationDelayed(0.15, index * 80);
+  const { ref, isVisible } = useScrollAnimation();
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl overflow-hidden flex flex-col transition-[opacity,transform] duration-700 group hover:scale-[1.02] ${
+      className={`glass-card neon-border rounded-2xl overflow-hidden flex flex-col transition-all duration-700 group hover:scale-[1.02] ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
-      style={animationStyle}
+      style={{ transitionDelay: `${index * 80}ms` }}
     >
       <div className={`h-1.5 bg-gradient-to-r ${p.accent}`} />
       <div className="p-6 flex flex-col flex-1 gap-4">
@@ -168,7 +168,7 @@ export default function Projects() {
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-16 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="Briefcase" size={14} />

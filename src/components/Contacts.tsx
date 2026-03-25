@@ -1,4 +1,4 @@
-import { useScrollAnimation, useScrollAnimationDelayed } from "@/hooks/useScrollAnimation";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
 
 interface ContactsProps {
@@ -36,12 +36,12 @@ function ContactCard({
   item: (typeof contactItems)[0];
   index: number;
 }) {
-  const { ref, isVisible, animationStyle } = useScrollAnimationDelayed(0.15, index * 100);
+  const { ref, isVisible } = useScrollAnimation();
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl p-7 text-center transition-[opacity,transform] duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-      style={animationStyle}
+      className={`glass-card neon-border rounded-2xl p-7 text-center transition-all duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      style={{ transitionDelay: `${index * 100}ms` }}
     >
       <div
         className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.accent} flex items-center justify-center mx-auto mb-4 shadow-lg`}
@@ -78,7 +78,7 @@ export default function Contacts({ onContactClick }: ContactsProps) {
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-16 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="Phone" size={14} />
