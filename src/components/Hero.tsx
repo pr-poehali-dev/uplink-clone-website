@@ -8,7 +8,6 @@ interface HeroProps {
 const stats = [
   { value: "10+", label: "лет опыта" },
   { value: "15+", label: "клиентов" },
-  { value: "500+", label: "проектов" },
   { value: "24/7", label: "поддержка" },
 ];
 
@@ -97,7 +96,7 @@ export default function Hero({ onContactClick }: HeroProps) {
           </div>
 
           <div
-            className={`grid grid-cols-2 md:grid-cols-4 gap-6 transition-all duration-700 delay-400 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            className={`flex flex-wrap justify-center gap-6 transition-all duration-700 delay-400 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
             {stats.map((s) => (
               <div
