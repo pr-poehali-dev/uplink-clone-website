@@ -87,7 +87,7 @@ const services = [
 ];
 
 function ServiceCard({ s, index }: { s: (typeof services)[0]; index: number }) {
-  const { ref, isVisible, animationStyle } = useScrollAnimation(0.15, index * 80);
+  const { ref, isVisible, animationStyle } = useScrollAnimation(0.1, index * 100);
   return (
     <div
       ref={ref}
