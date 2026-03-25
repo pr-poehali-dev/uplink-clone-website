@@ -2,28 +2,74 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
 
 const timeline = [
-  { year: "2014", title: "Основание компании", desc: "Начали с небольшой команды из 3 специалистов. Первые клиенты — малый бизнес Москвы." },
-  { year: "2016", title: "Расширение услуг", desc: "Добавили монтаж систем видеонаблюдения и СКС. Команда выросла до 15 человек." },
-  { year: "2019", title: "100+ клиентов", desc: "Преодолели отметку в 100 постоянных клиентов. Открыли второй офис." },
-  { year: "2022", title: "Сертификации", desc: "Получили статус партнёра Microsoft и сертификации Cisco. Запустили круглосуточную поддержку." },
-  { year: "2024", title: "10 лет на рынке", desc: "Отметили 10-летие. 150+ клиентов, 500+ проектов, 30+ специалистов в команде." },
+  {
+    year: "2014-2024",
+    title: "Пройденый путь",
+    desc: "От младшего сис-админа до руководителя службы ИТ.",
+  },
+  {
+    year: "2024",
+    title: "Основание компании",
+    desc: "Начали с небольшой команды из 3 специалистов. Первые клиенты — малый и средний бизнес Саратова",
+  },
+  {
+    year: "2025",
+    title: "Расширение услуг",
+    desc: "Добавили монтаж систем видеонаблюдения, СКС и домофонии. Команда выросла до 5 человек.",
+  },
+  //{ year: "2022", title: "Сертификации", desc: "Получили статус партнёра Microsoft и сертификации Cisco. Запустили круглосуточную поддержку." },
+  //{ year: "2026", title: "10 лет на рынке", desc: "Отметили 10-летие. 150+ клиентов, 500+ проектов, 30+ специалистов в команде." },
 ];
 
 const approaches = [
-  { icon: "Zap", title: "Проактивность", desc: "Мы не ждём, пока что-то сломается. Мониторим инфраструктуру и устраняем угрозы до их появления." },
-  { icon: "Lock", title: "Безопасность", desc: "Конфиденциальность данных клиентов — наш приоритет. Все работы ведутся согласно политике NDA." },
-  { icon: "BarChart", title: "Результат", desc: "Измеримые KPI: время реагирования, uptime, количество инцидентов. Прозрачная отчётность каждый месяц." },
-  { icon: "Heart", title: "Партнёрство", desc: "Строим долгосрочные отношения. 85% наших клиентов сотрудничают с нами более 3 лет." },
+  {
+    icon: "Zap",
+    title: "Проактивность",
+    desc: "Мы не ждём, пока что-то сломается. Мониторим инфраструктуру и устраняем угрозы до их появления.",
+  },
+  {
+    icon: "Lock",
+    title: "Безопасность",
+    desc: "Конфиденциальность данных клиентов — наш приоритет. Все работы ведутся согласно политике NDA.",
+  },
+  {
+    icon: "BarChart",
+    title: "Результат",
+    desc: "Измеримые KPI: время реагирования, uptime, количество инцидентов. Прозрачная отчётность каждый месяц.",
+  },
+  {
+    icon: "Heart",
+    title: "Партнёрство",
+    desc: "Строим долгосрочные отношения. 85% наших клиентов сотрудничают с нами более 3 лет.",
+  },
 ];
 
 const team = [
-  { name: "Александр Петров", role: "Генеральный директор", exp: "15 лет в IT" },
-  { name: "Михаил Соколов", role: "Главный инженер сетей", exp: "CCNP, 12 лет опыта" },
-  { name: "Дмитрий Волков", role: "Администратор серверов", exp: "MCSE, 10 лет опыта" },
-  { name: "Андрей Морозов", role: "Специалист по безопасности", exp: "CEH, 8 лет опыта" },
+  { name: "Латифов Тимур", role: "Генеральный директор", exp: "12 лет в IT" },
+  {
+    name: "Емельянов Илья",
+    role: "Главный инженер сетей",
+    exp: "17 лет опыта",
+  },
+  {
+    name: "Ангелов Иван",
+    role: "Руководитель монтажной группы",
+    exp: "10 лет опыта",
+  },
+  {
+    name: "Андрей Морозов",
+    role: "Системный администратор",
+    exp: "10 лет опыта",
+  },
 ];
 
-function TimelineItem({ item, index }: { item: (typeof timeline)[0]; index: number }) {
+function TimelineItem({
+  item,
+  index,
+}: {
+  item: (typeof timeline)[0];
+  index: number;
+}) {
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div
@@ -40,15 +86,25 @@ function TimelineItem({ item, index }: { item: (typeof timeline)[0]; index: numb
         )}
       </div>
       <div className="pb-8">
-        <div className="text-cyan-400 text-sm font-medium mb-0.5">{item.year}</div>
-        <h4 className="text-white font-bold font-['Oswald'] text-lg mb-1">{item.title}</h4>
+        <div className="text-cyan-400 text-sm font-medium mb-0.5">
+          {item.year}
+        </div>
+        <h4 className="text-white font-bold font-['Oswald'] text-lg mb-1">
+          {item.title}
+        </h4>
         <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
       </div>
     </div>
   );
 }
 
-function ApproachItem({ item, index }: { item: (typeof approaches)[0]; index: number }) {
+function ApproachItem({
+  item,
+  index,
+}: {
+  item: (typeof approaches)[0];
+  index: number;
+}) {
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div
@@ -60,14 +116,22 @@ function ApproachItem({ item, index }: { item: (typeof approaches)[0]; index: nu
         <Icon name={item.icon as "Zap"} size={20} className="text-cyan-400" />
       </div>
       <div>
-        <h4 className="text-white font-bold mb-1 font-['Oswald']">{item.title}</h4>
+        <h4 className="text-white font-bold mb-1 font-['Oswald']">
+          {item.title}
+        </h4>
         <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
       </div>
     </div>
   );
 }
 
-function TeamCard({ member, index }: { member: (typeof team)[0]; index: number }) {
+function TeamCard({
+  member,
+  index,
+}: {
+  member: (typeof team)[0];
+  index: number;
+}) {
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div
@@ -78,7 +142,9 @@ function TeamCard({ member, index }: { member: (typeof team)[0]; index: number }
       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center mx-auto mb-3">
         <Icon name="User" size={32} className="text-cyan-400" />
       </div>
-      <h4 className="text-white font-bold text-sm font-['Oswald'] mb-1">{member.name}</h4>
+      <h4 className="text-white font-bold text-sm font-['Oswald'] mb-1">
+        {member.name}
+      </h4>
       <div className="text-cyan-400 text-xs mb-1">{member.role}</div>
       <div className="text-gray-500 text-xs">{member.exp}</div>
     </div>
@@ -101,16 +167,16 @@ export default function About() {
           className={`text-center mb-16 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
-            <Icon name="Info" size={14} />
-            О компании
+            <Icon name="Info" size={14} />О компании
           </div>
           <h2 className="section-title text-white mb-4">
             ИТК <span className="gradient-text">Аплинк-IT</span>
           </h2>
           <p className="text-gray-400 max-w-3xl mx-auto text-lg leading-relaxed">
-            Мы — команда профессиональных IT-специалистов, работающая с 2014 года.
-            Специализируемся на комплексном обслуживании IT-инфраструктуры малого и среднего бизнеса.
-            Наша миссия — освободить предпринимателей от IT-головной боли и дать им инструменты для роста.
+            Мы — команда профессиональных IT-специалистов. Специализируемся на
+            комплексном обслуживании IT-инфраструктуры малого и среднего
+            бизнеса. Наша миссия — освободить предпринимателей от IT-головной
+            боли и дать им инструменты для роста.
           </p>
         </div>
 
@@ -136,7 +202,10 @@ export default function About() {
           </div>
         </div>
 
-        <div ref={teamRef} className={`transition-all duration-700 ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div
+          ref={teamRef}
+          className={`transition-all duration-700 ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+        >
           <h3 className="text-2xl font-bold text-white font-['Oswald'] mb-8 text-center flex items-center justify-center gap-2">
             <Icon name="Users" size={24} className="text-cyan-400" />
             Наша команда

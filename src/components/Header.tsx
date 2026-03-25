@@ -39,7 +39,11 @@ export default function Header({ onContactClick }: HeaderProps) {
       }`}
     >
       <div className="container mx-auto px-4 flex items-center justify-between h-20">
-        <a href="#home" onClick={() => handleNav("#home")} className="flex items-center gap-3 group">
+        <a
+          href="#home"
+          onClick={() => handleNav("#home")}
+          className="flex items-center gap-3 group"
+        >
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 group-hover:shadow-cyan-500/50 transition-all duration-300">
             <Icon name="Wifi" size={22} className="text-[#080c14]" />
           </div>
@@ -47,7 +51,9 @@ export default function Header({ onContactClick }: HeaderProps) {
             <div className="font-bold text-lg leading-none text-white font-['Oswald'] tracking-wide">
               ИТК <span className="text-cyan-400">Аплинк-IT</span>
             </div>
-            <div className="text-xs text-gray-400 leading-none mt-0.5">IT-услуги для вашего бизнеса</div>
+            <div className="text-xs text-gray-400 leading-none mt-0.5">
+              IT-услуги для вашего бизнеса
+            </div>
           </div>
         </a>
 
@@ -64,9 +70,12 @@ export default function Header({ onContactClick }: HeaderProps) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <a href="tel:+78007079303" className="flex items-center gap-2 text-gray-300 hover:text-cyan-400 transition-colors text-sm font-medium">
-            <Icon name="Phone" size={16} className="text-cyan-400" />
-            8 (800) 707-93-03
+          <a
+            href="tel:+78007079303"
+            className="flex items-center gap-2 text-gray-300 hover:text-cyan-400 transition-colors text-sm font-medium"
+          >
+            <Icon name="Phone" size={16} className="text-cyan-400" />8 (986)
+            986-01-36
           </a>
           <button
             onClick={onContactClick}
@@ -96,11 +105,19 @@ export default function Header({ onContactClick }: HeaderProps) {
             </button>
           ))}
           <div className="pt-4 flex flex-col gap-2">
-            <a href="tel:+78007079303" className="flex items-center gap-2 text-cyan-400 text-sm font-medium">
-              <Icon name="Phone" size={16} />
-              8 (800) 707-93-03
+            <a
+              href="tel:+78007079303"
+              className="flex items-center gap-2 text-cyan-400 text-sm font-medium"
+            >
+              <Icon name="Phone" size={16} />8 (986) 986-01-36
             </a>
-            <button onClick={() => { setMenuOpen(false); onContactClick(); }} className="btn-neon px-5 py-2.5 rounded-lg text-sm font-semibold mt-1">
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                onContactClick();
+              }}
+              className="btn-neon px-5 py-2.5 rounded-lg text-sm font-semibold mt-1"
+            >
               Связаться с нами
             </button>
           </div>

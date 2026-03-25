@@ -11,7 +11,7 @@ const advantages = [
   {
     icon: "Users",
     title: "Опытная команда",
-    desc: "В нашей команде сертифицированные специалисты с опытом от 5 лет. Знаем всё о Windows Server, Linux, Cisco, Mikrotik.",
+    desc: "В нашей команде сертифицированные специалисты с опытом от 5 лет. Знаем всё о Windows Server, Linux, Mikrotik.",
     accent: "from-green-400 to-cyan-400",
   },
   {
@@ -23,7 +23,7 @@ const advantages = [
   {
     icon: "FileText",
     title: "Прозрачная отчётность",
-    desc: "Ежемесячные отчёты о выполненных работах. Личный кабинет с историей заявок и статусом решения задач.",
+    desc: "Ежемесячные отчёты о выполненных работах (по необходимости).",
     accent: "from-purple-400 to-pink-400",
   },
   {
@@ -42,12 +42,20 @@ const advantages = [
 
 const statsData = [
   { num: "10+", label: "Лет на рынке" },
-  { num: "150+", label: "Довольных клиентов" },
-  { num: "500+", label: "Завершённых проектов" },
+  { num: "10+", label: "Довольных клиентов" },
+  { num: "20+", label: "Завершённых проектов" },
   { num: "99%", label: "Индекс удовлетворённости" },
 ];
 
-function StatItem({ num, label, delay }: { num: string; label: string; delay: number }) {
+function StatItem({
+  num,
+  label,
+  delay,
+}: {
+  num: string;
+  label: string;
+  delay: number;
+}) {
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div
@@ -55,7 +63,9 @@ function StatItem({ num, label, delay }: { num: string; label: string; delay: nu
       className={`text-center glass-card neon-border rounded-2xl p-6 transition-all duration-700 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <div className="text-4xl font-bold gradient-text font-['Oswald'] mb-2">{num}</div>
+      <div className="text-4xl font-bold gradient-text font-['Oswald'] mb-2">
+        {num}
+      </div>
       <div className="text-gray-400 text-sm">{label}</div>
     </div>
   );
@@ -71,10 +81,14 @@ function AdvCard({ a, index }: { a: (typeof advantages)[0]; index: number }) {
       }`}
       style={{ transitionDelay: `${index * 80}ms` }}
     >
-      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${a.accent} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+      <div
+        className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${a.accent} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}
+      >
         <Icon name={a.icon as "Clock"} size={28} className="text-white" />
       </div>
-      <h3 className="text-lg font-bold text-white font-['Oswald'] mb-2">{a.title}</h3>
+      <h3 className="text-lg font-bold text-white font-['Oswald'] mb-2">
+        {a.title}
+      </h3>
       <p className="text-gray-400 text-sm leading-relaxed">{a.desc}</p>
     </div>
   );
@@ -99,8 +113,8 @@ export default function WhyUs() {
             Почему стоит работать <span className="gradient-text">с нами</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Мы не просто подрядчики — мы становимся частью вашей команды.
-            Вот что отличает нас от других IT-компаний.
+            Мы не просто подрядчики — мы становимся частью вашей команды. Вот
+            что отличает нас от других IT-компаний.
           </p>
         </div>
 
@@ -112,7 +126,12 @@ export default function WhyUs() {
 
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
           {statsData.map((s, i) => (
-            <StatItem key={s.label} num={s.num} label={s.label} delay={i * 100} />
+            <StatItem
+              key={s.label}
+              num={s.num}
+              label={s.label}
+              delay={i * 100}
+            />
           ))}
         </div>
       </div>

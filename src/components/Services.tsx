@@ -72,14 +72,14 @@ const services = [
     accent: "from-blue-400 to-purple-500",
   },
   {
-    icon: "Shield",
-    title: "Информационная безопасность",
-    desc: "Защита данных и IT-инфраструктуры вашей компании от угроз. Комплексный подход к кибербезопасности.",
+    icon: "IP-tel",
+    title: "IP-телефония",
+    desc: "Установка, настройка и администрирование цифровой связи",
     items: [
-      "Аудит безопасности инфраструктуры",
-      "Настройка антивирусной защиты",
-      "Настройка межсетевых экранов",
-      "Политики доступа и паролей",
+      "Установка и конфигурация IP-АТС и ВАТС",
+      "Подключение и настройка IP-телефонов",
+      "Интеграция с CRM",
+      "Администрирование и безопасность",
       "Обучение сотрудников",
     ],
     accent: "from-red-400 to-orange-400",
@@ -96,17 +96,28 @@ function ServiceCard({ s, index }: { s: (typeof services)[0]; index: number }) {
       }`}
       style={{ transitionDelay: `${index * 80}ms` }}
     >
-      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.accent} flex items-center justify-center shadow-lg`}>
+      <div
+        className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.accent} flex items-center justify-center shadow-lg`}
+      >
         <Icon name={s.icon as "Monitor"} size={24} className="text-[#080c14]" />
       </div>
       <div>
-        <h3 className="text-xl font-bold text-white font-['Oswald'] mb-2">{s.title}</h3>
+        <h3 className="text-xl font-bold text-white font-['Oswald'] mb-2">
+          {s.title}
+        </h3>
         <p className="text-gray-400 text-sm leading-relaxed">{s.desc}</p>
       </div>
       <ul className="space-y-1.5">
         {s.items.map((item) => (
-          <li key={item} className="flex items-start gap-2 text-sm text-gray-300">
-            <Icon name="ChevronRight" size={14} className="text-cyan-400 mt-0.5 flex-shrink-0" />
+          <li
+            key={item}
+            className="flex items-start gap-2 text-sm text-gray-300"
+          >
+            <Icon
+              name="ChevronRight"
+              size={14}
+              className="text-cyan-400 mt-0.5 flex-shrink-0"
+            />
             {item}
           </li>
         ))}
@@ -131,8 +142,7 @@ export default function Services({ onContactClick }: ServicesProps) {
             Наши услуги
           </div>
           <h2 className="section-title text-white mb-4">
-            Комплексные{" "}
-            <span className="gradient-text">IT-решения</span>
+            Комплексные <span className="gradient-text">IT-решения</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-lg">
             Предоставляем полный спектр IT-услуг для малого и среднего бизнеса.

@@ -8,7 +8,7 @@ interface PricingProps {
 const plans = [
   {
     name: "Базовый",
-    price: "от 5 000 ₽/мес",
+    price: "от 7 000 ₽/мес",
     badge: null,
     desc: "Пакет для небольших компаний и стартапов. Оптимальное решение по доступной цене.",
     features: [
@@ -25,13 +25,13 @@ const plans = [
   },
   {
     name: "Премиум",
-    price: "от 25 000 ₽/мес",
+    price: "от 30 000 ₽/мес",
     badge: "Рекомендуем",
     desc: "Расширенный пакет для комплексной поддержки. Быстрое реагирование и приоритетный сервис.",
     features: [
-      "Техподдержка до 30 ПК",
+      "Техподдержка до 25 ПК",
       "Администрирование серверов",
-      "Мониторинг инфраструктуры 24/7",
+      "Мониторинг инфраструктуры",
       "Неограниченные выезды специалиста",
       "Время реагирования до 2 часов",
       "Резервное копирование данных",
@@ -63,13 +63,21 @@ const plans = [
   },
 ];
 
-function PricingCard({ plan, index }: { plan: (typeof plans)[0]; index: number }) {
+function PricingCard({
+  plan,
+  index,
+}: {
+  plan: (typeof plans)[0];
+  index: number;
+}) {
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div
       ref={ref}
       className={`relative flex flex-col rounded-2xl p-8 border transition-all duration-700 ${plan.border} ${
-        plan.highlight ? "bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 scale-105" : "glass-card"
+        plan.highlight
+          ? "bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 scale-105"
+          : "glass-card"
       } ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
       style={{ transitionDelay: `${index * 120}ms` }}
     >
@@ -78,21 +86,33 @@ function PricingCard({ plan, index }: { plan: (typeof plans)[0]; index: number }
           {plan.badge}
         </div>
       )}
-      <div className={`inline-flex w-10 h-10 rounded-xl bg-gradient-to-br ${plan.color} items-center justify-center mb-4`}>
+      <div
+        className={`inline-flex w-10 h-10 rounded-xl bg-gradient-to-br ${plan.color} items-center justify-center mb-4`}
+      >
         <Icon name="Package" size={20} className="text-white" />
       </div>
-      <h3 className="text-2xl font-bold text-white font-['Oswald'] mb-1">{plan.name}</h3>
-      <div className="text-3xl font-bold gradient-text font-['Oswald'] mb-3">{plan.price}</div>
+      <h3 className="text-2xl font-bold text-white font-['Oswald'] mb-1">
+        {plan.name}
+      </h3>
+      <div className="text-3xl font-bold gradient-text font-['Oswald'] mb-3">
+        {plan.price}
+      </div>
       <p className="text-gray-400 text-sm mb-6 leading-relaxed">{plan.desc}</p>
       <ul className="space-y-2.5 flex-1 mb-8">
         {plan.features.map((f) => (
           <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
-            <Icon name="Check" size={16} className="text-cyan-400 mt-0.5 flex-shrink-0" />
+            <Icon
+              name="Check"
+              size={16}
+              className="text-cyan-400 mt-0.5 flex-shrink-0"
+            />
             {f}
           </li>
         ))}
       </ul>
-      <button className={`${plan.btnClass} w-full py-3 rounded-xl font-semibold text-sm`}>
+      <button
+        className={`${plan.btnClass} w-full py-3 rounded-xl font-semibold text-sm`}
+      >
         Выбрать тариф
       </button>
     </div>
@@ -121,7 +141,8 @@ export default function Pricing({ onContactClick }: PricingProps) {
             Прозрачные <span className="gradient-text">цены</span>
           </h2>
           <p className="text-gray-400 max-w-xl mx-auto">
-            Выберите подходящий пакет или обратитесь к нам для расчёта индивидуального предложения.
+            Выберите подходящий пакет или обратитесь к нам для расчёта
+            индивидуального предложения.
           </p>
         </div>
 
@@ -132,8 +153,13 @@ export default function Pricing({ onContactClick }: PricingProps) {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-gray-400 mb-4 text-sm">Нужен индивидуальный расчёт?</p>
-          <button onClick={onContactClick} className="btn-outline-neon px-8 py-3 rounded-xl font-semibold text-sm">
+          <p className="text-gray-400 mb-4 text-sm">
+            Нужен индивидуальный расчёт?
+          </p>
+          <button
+            onClick={onContactClick}
+            className="btn-outline-neon px-8 py-3 rounded-xl font-semibold text-sm"
+          >
             Получить коммерческое предложение
           </button>
         </div>

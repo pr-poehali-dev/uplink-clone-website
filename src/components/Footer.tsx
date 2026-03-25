@@ -19,12 +19,17 @@ export default function Footer({ onContactClick }: FooterProps) {
                 <Icon name="Wifi" size={20} className="text-[#080c14]" />
               </div>
               <div>
-                <div className="font-bold text-white font-['Oswald'] tracking-wide">ИТК <span className="text-cyan-400">Аплинк-IT</span></div>
-                <div className="text-xs text-gray-500">IT-услуги для вашего бизнеса</div>
+                <div className="font-bold text-white font-['Oswald'] tracking-wide">
+                  ИТК <span className="text-cyan-400">Аплинк-IT</span>
+                </div>
+                <div className="text-xs text-gray-500">
+                  IT-услуги для вашего бизнеса
+                </div>
               </div>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed mb-5">
-              Комплексное обслуживание IT-инфраструктуры с 2014 года. Работаем по всей Москве и Московской области.
+              Комплексное обслуживание IT-инфраструктуры с 2024 года. Работаем
+              по всему Саратову и Саратовской области.
             </p>
             <div className="flex gap-3">
               {["MessageCircle", "Send", "Phone"].map((icon) => (
@@ -39,15 +44,28 @@ export default function Footer({ onContactClick }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="text-white font-bold font-['Oswald'] mb-4 text-lg">Услуги</h4>
+            <h4 className="text-white font-bold font-['Oswald'] mb-4 text-lg">
+              Услуги
+            </h4>
             <ul className="space-y-2.5">
-              {["IT-аутсорсинг", "Администрирование серверов", "Монтаж ЛВС / СКС", "Видеонаблюдение", "IT-аудит", "Информационная безопасность"].map((s) => (
+              {[
+                "IT-аутсорсинг",
+                "Администрирование серверов",
+                "Монтаж ЛВС / СКС",
+                "Видеонаблюдение",
+                "IT-аудит",
+                "IP-телефония (FreePBX, ВАТС)",
+              ].map((s) => (
                 <li key={s}>
                   <button
                     onClick={() => scrollTo("#services")}
                     className="text-gray-500 hover:text-cyan-400 text-sm transition-colors flex items-center gap-1.5"
                   >
-                    <Icon name="ChevronRight" size={12} className="text-cyan-500/50" />
+                    <Icon
+                      name="ChevronRight"
+                      size={12}
+                      className="text-cyan-500/50"
+                    />
                     {s}
                   </button>
                 </li>
@@ -56,7 +74,9 @@ export default function Footer({ onContactClick }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="text-white font-bold font-['Oswald'] mb-4 text-lg">Навигация</h4>
+            <h4 className="text-white font-bold font-['Oswald'] mb-4 text-lg">
+              Навигация
+            </h4>
             <ul className="space-y-2.5">
               {[
                 { label: "Главная", id: "#home" },
@@ -71,7 +91,11 @@ export default function Footer({ onContactClick }: FooterProps) {
                     onClick={() => scrollTo(id)}
                     className="text-gray-500 hover:text-cyan-400 text-sm transition-colors flex items-center gap-1.5"
                   >
-                    <Icon name="ChevronRight" size={12} className="text-cyan-500/50" />
+                    <Icon
+                      name="ChevronRight"
+                      size={12}
+                      className="text-cyan-500/50"
+                    />
                     {label}
                   </button>
                 </li>
@@ -80,22 +104,50 @@ export default function Footer({ onContactClick }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="text-white font-bold font-['Oswald'] mb-4 text-lg">Контакты</h4>
+            <h4 className="text-white font-bold font-['Oswald'] mb-4 text-lg">
+              Контакты
+            </h4>
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
-                <Icon name="Phone" size={15} className="text-cyan-400 mt-0.5 flex-shrink-0" />
-                <a href="tel:+78007079303" className="text-gray-400 hover:text-cyan-400 text-sm transition-colors">8 (800) 707-93-03</a>
+                <Icon
+                  name="Phone"
+                  size={15}
+                  className="text-cyan-400 mt-0.5 flex-shrink-0"
+                />
+                <a
+                  href="tel:+78007079303"
+                  className="text-gray-400 hover:text-cyan-400 text-sm transition-colors"
+                >
+                  8 (800) 707-93-03
+                </a>
               </li>
               <li className="flex items-start gap-2">
-                <Icon name="Mail" size={15} className="text-cyan-400 mt-0.5 flex-shrink-0" />
-                <a href="mailto:info@uplink-it.ru" className="text-gray-400 hover:text-cyan-400 text-sm transition-colors">info@uplink-it.ru</a>
+                <Icon
+                  name="Mail"
+                  size={15}
+                  className="text-cyan-400 mt-0.5 flex-shrink-0"
+                />
+                <a
+                  href="mailto:info@uplink-it.ru"
+                  className="text-gray-400 hover:text-cyan-400 text-sm transition-colors"
+                >
+                  info@uplink-it.ru
+                </a>
               </li>
               <li className="flex items-start gap-2">
-                <Icon name="MapPin" size={15} className="text-cyan-400 mt-0.5 flex-shrink-0" />
-                <span className="text-gray-400 text-sm">Москва, Россия</span>
+                <Icon
+                  name="MapPin"
+                  size={15}
+                  className="text-cyan-400 mt-0.5 flex-shrink-0"
+                />
+                <span className="text-gray-400 text-sm">Саратов, Россия</span>
               </li>
               <li className="flex items-start gap-2">
-                <Icon name="Clock" size={15} className="text-cyan-400 mt-0.5 flex-shrink-0" />
+                <Icon
+                  name="Clock"
+                  size={15}
+                  className="text-cyan-400 mt-0.5 flex-shrink-0"
+                />
                 <span className="text-gray-400 text-sm">Поддержка 24/7</span>
               </li>
             </ul>
@@ -109,8 +161,12 @@ export default function Footer({ onContactClick }: FooterProps) {
         </div>
 
         <div className="border-t border-cyan-500/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-gray-600 text-sm">© 2024 ИТК Аплинк-IT. Все права защищены.</p>
-          <p className="text-gray-700 text-xs">Лицензионная IT-деятельность · ИНН указан в договоре</p>
+          <p className="text-gray-600 text-sm">
+            © 2024 ИТК Аплинк-IT. Все права защищены.
+          </p>
+          <p className="text-gray-700 text-xs">
+            Лицензионная IT-деятельность · ИНН указан в договоре
+          </p>
         </div>
       </div>
     </footer>
