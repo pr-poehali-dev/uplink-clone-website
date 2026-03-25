@@ -35,14 +35,11 @@ export function useScrollAnimationDelayed(threshold = 0.15, delay = 0) {
       ([entry]) => {
         if (entry.isIntersecting) {
           observer.unobserve(entry.target);
-          // Start animation after stagger delay
-          const t1 = setTimeout(() => {
-            setState("animating");
-            // Clear delay after animation completes so hover is instant
-            const t2 = setTimeout(() => setState("done"), 800);
-            (el as HTMLElement & { _t2?: ReturnType<typeof setTimeout> })._t2 = t2;
-          }, delay);
-          (el as HTMLElement & { _t1?: ReturnType<typeof setTimeout> })._t1 = t1;
+          // Switch to "animating" — CSS transition fires with transitionDelay applied
+          setState("animating");
+          // After delay + transition duration — remove delay so hover is instant
+          const t = setTimeout(() => setState("done"), delay + 800);
+          (el as HTMLElement & { _t?: ReturnType<typeof setTimeout> })._t = t;
         }
       },
       { threshold }
@@ -51,14 +48,14 @@ export function useScrollAnimationDelayed(threshold = 0.15, delay = 0) {
     observer.observe(el);
     return () => {
       observer.disconnect();
-      const e = el as HTMLElement & { _t1?: ReturnType<typeof setTimeout>; _t2?: ReturnType<typeof setTimeout> };
-      if (e._t1) clearTimeout(e._t1);
-      if (e._t2) clearTimeout(e._t2);
+      const t = (el as HTMLElement & { _t?: ReturnType<typeof setTimeout> })._t;
+      if (t) clearTimeout(t);
     };
   }, [threshold, delay]);
 
   const isVisible = state !== "hidden";
-  const animationStyle: CSSProperties = state === "animating" ? { transitionDelay: "0ms" } : {};
+  // Keep transitionDelay during hidden→animating transition; clear after done
+  const animationStyle: CSSProperties = state !== "done" ? { transitionDelay: `${delay}ms` } : {};
 
   return { ref, isVisible, animationStyle };
 }
