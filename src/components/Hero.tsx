@@ -5,12 +5,12 @@ interface HeroProps {
   onContactClick: () => void;
 }
 
-//const stats = [
-//{ value: "10+", label: "лет опыта" },
-//{ value: "15+", label: "клиентов" },
-//{ value: "500+", label: "проектов" },
-//{ value: "24/7", label: "поддержка" },
-//];
+const stats = [
+  { value: "10+", label: "лет опыта" },
+  { value: "15+", label: "клиентов" },
+  { value: "500+", label: "проектов" },
+  { value: "24/7", label: "поддержка" },
+];
 
 export default function Hero({ onContactClick }: HeroProps) {
   const [visible, setVisible] = useState(false);
