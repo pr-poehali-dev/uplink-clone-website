@@ -124,16 +124,6 @@ export default function WhyUs() {
           ))}
         </div>
 
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {statsData.map((s, i) => (
-            <StatItem
-              key={s.label}
-              num={s.num}
-              label={s.label}
-              delay={i * 100}
-            />
-          ))}
-        </div>
       </div>
     </section>
   );
