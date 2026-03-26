@@ -96,7 +96,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[0]; index: number }) {
       className={`glass-card neon-border neon-hover neon-scale rounded-2xl overflow-hidden flex flex-col ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
-      style={{ transitionDelay: `${index * 80}ms` }}
+      style={{ transitionDelay: isVisible ? '0ms' : `${index * 80}ms` }}
     >
       <div className={`h-1.5 bg-gradient-to-r ${p.accent}`} />
       <div className="p-6 flex flex-col flex-1 gap-4">

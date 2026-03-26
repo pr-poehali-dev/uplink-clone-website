@@ -61,7 +61,7 @@ function StatItem({
     <div
       ref={ref}
       className={`text-center glass-card neon-border neon-hover rounded-2xl p-6 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}
-      style={{ transitionDelay: `${delay}ms` }}
+      style={{ transitionDelay: isVisible ? '0ms' : `${delay}ms` }}
     >
       <div className="text-4xl font-bold gradient-text font-['Oswald'] mb-2">
         {num}
@@ -79,7 +79,7 @@ function AdvCard({ a, index }: { a: (typeof advantages)[0]; index: number }) {
       className={`glass-card neon-border neon-hover neon-scale rounded-2xl p-6 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
-      style={{ transitionDelay: `${index * 80}ms` }}
+      style={{ transitionDelay: isVisible ? '0ms' : `${index * 80}ms` }}
     >
       <div
         className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${a.accent} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}
