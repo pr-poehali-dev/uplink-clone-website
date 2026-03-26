@@ -85,12 +85,21 @@ export default function Header({ onContactClick }: HeaderProps) {
           </button>
         </div>
 
-        <button
-          className="lg:hidden text-gray-300 hover:text-cyan-400 transition-colors"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <Icon name={menuOpen ? "X" : "Menu"} size={26} />
-        </button>
+        <div className="lg:hidden flex items-center gap-2">
+          <a
+            href="tel:+79869860136"
+            className="flex items-center gap-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200"
+          >
+            <Icon name="Phone" size={16} />
+            Позвонить
+          </a>
+          <button
+            className="text-gray-300 hover:text-cyan-400 transition-colors"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <Icon name={menuOpen ? "X" : "Menu"} size={26} />
+          </button>
+        </div>
       </div>
 
       {menuOpen && (
