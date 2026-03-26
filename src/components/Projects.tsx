@@ -8,8 +8,8 @@ const projects = [
     desc: "Монтаж системы видеонаблюдения на 30 камер: прокладка кабельных трасс, установка и подключение оборудования, настройка записи и удалённого доступа для службы безопасности.",
     metrics: [
       { label: "Камер установлено", value: "30" },
-      { label: "Дней архива", value: "14" },
-      { label: "Дней монтажа", value: "5" },
+      { label: "Дней архива", value: "30" },
+      { label: "Дней монтажа", value: "3" },
     ],
     tags: ["Видеонаблюдение", "Монтаж", "Кабельные трассы"],
     icon: "Camera",
@@ -35,9 +35,9 @@ const projects = [
     title: "ООО ЛукБелОйл",
     desc: "Монтаж локальной вычислительной сети с межэтажной коммутацией: прокладка кабеля, установка коммутаторов, организация кроссовых узлов и проверка качества линий.",
     metrics: [
-      { label: "Портов ЛВС", value: "48" },
+      { label: "Портов ЛВС", value: "288" },
       { label: "Этажей", value: "3" },
-      { label: "Коммутаторов", value: "4" },
+      { label: "Коммутаторов", value: "6" },
     ],
     tags: ["ЛВС", "Монтаж", "Коммутация"],
     icon: "Cable",
@@ -54,7 +54,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[0]; index: number }) {
       className={`glass-card neon-border neon-hover neon-scale rounded-2xl overflow-hidden flex flex-col ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
-      style={{ transitionDelay: isVisible ? '0ms' : `${index * 80}ms` }}
+      style={{ transitionDelay: isVisible ? "0ms" : `${index * 80}ms` }}
     >
       <div className={`h-1.5 bg-gradient-to-r ${p.accent}`} />
       <div className="p-6 flex flex-col flex-1 gap-4">
