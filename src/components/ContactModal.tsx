@@ -1,9 +1,12 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
+const SEND_EMAIL_URL = "https://functions.poehali.dev/97638ab8-62ea-4ada-8078-f5aa05a3f044";
+
 interface ContactModalProps {
   open: boolean;
   onClose: () => void;
+  source?: string;
 }
 
 const services = [
@@ -17,7 +20,7 @@ const services = [
   "Другое",
 ];
 
-export default function ContactModal({ open, onClose }: ContactModalProps) {
+export default function ContactModal({ open, onClose, source = "Не указан" }: ContactModalProps) {
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -27,19 +30,32 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
   });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   if (!open) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setSent(true);
-    setLoading(false);
+    setError("");
+    try {
+      const res = await fetch(SEND_EMAIL_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, source }),
+      });
+      if (!res.ok) throw new Error("Ошибка отправки");
+      setSent(true);
+    } catch {
+      setError("Не удалось отправить заявку. Позвоните нам напрямую.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
     setSent(false);
+    setError("");
     setForm({ name: "", phone: "", email: "", service: "", message: "" });
     onClose();
   };
@@ -75,7 +91,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
                 Наш менеджер свяжется с вами в ближайшие 15 минут в рабочее
                 время. Или позвоните нам:{" "}
                 <a
-                  href="tel:+78007079303"
+                  href="tel:+79869860136"
                   className="text-cyan-400 hover:underline"
                 >
                   8 (986) 986-01-36
@@ -108,9 +124,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
                     <input
                       required
                       value={form.name}
-                      onChange={(e) =>
-                        setForm({ ...form, name: e.target.value })
-                      }
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
                       placeholder="Иван Иванов"
                       className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 transition-all"
                     />
@@ -122,9 +136,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
                     <input
                       required
                       value={form.phone}
-                      onChange={(e) =>
-                        setForm({ ...form, phone: e.target.value })
-                      }
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
                       placeholder="+7 (999) 000-00-00"
                       className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 transition-all"
                     />
@@ -138,9 +150,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
                   <input
                     type="email"
                     value={form.email}
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
                     placeholder="email@company.ru"
                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 transition-all"
                   />
@@ -152,16 +162,12 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
                   </label>
                   <select
                     value={form.service}
-                    onChange={(e) =>
-                      setForm({ ...form, service: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, service: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-[#0d1421] border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-all appearance-none"
                   >
                     <option value="">Выберите услугу...</option>
                     {services.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
+                      <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
                 </div>
@@ -173,13 +179,15 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
                   <textarea
                     rows={3}
                     value={form.message}
-                    onChange={(e) =>
-                      setForm({ ...form, message: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
                     placeholder="Опишите вашу задачу..."
                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-cyan-500/50 focus:bg-cyan-500/5 transition-all resize-none"
                   />
                 </div>
+
+                {error && (
+                  <p className="text-red-400 text-sm text-center">{error}</p>
+                )}
 
                 <button
                   type="submit"
@@ -200,8 +208,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
                 </button>
 
                 <p className="text-gray-600 text-xs text-center">
-                  Нажимая кнопку, вы соглашаетесь с обработкой персональных
-                  данных
+                  Нажимая кнопку, вы соглашаетесь с обработкой персональных данных
                 </p>
               </form>
             </>
