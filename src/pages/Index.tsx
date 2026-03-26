@@ -29,7 +29,7 @@ export default function Index() {
       <Pricing onContactClick={() => openModal("Блок тарифов")} />
       <QuickOrder />
       <Projects />
-      <About />
+      <div className="hidden"><About /></div>
       <Contacts onContactClick={() => openModal("Блок контактов")} />
       <Footer onContactClick={() => openModal("Подвал сайта")} />
       <ContactModal
