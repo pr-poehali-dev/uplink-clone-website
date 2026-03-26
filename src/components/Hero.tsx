@@ -101,7 +101,7 @@ export default function Hero({ onContactClick }: HeroProps) {
             {stats.map((s) => (
               <div
                 key={s.value}
-                className="glass-card rounded-xl p-5 neon-border"
+                className="glass-card rounded-xl p-5 neon-border neon-hover"
               >
                 <div className="text-3xl font-bold gradient-text font-['Oswald'] mb-1">
                   {s.value}

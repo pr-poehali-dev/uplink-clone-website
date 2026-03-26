@@ -40,7 +40,7 @@ function ContactCard({
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl p-7 text-center transition-all duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      className={`glass-card neon-border neon-hover rounded-2xl p-7 text-center transition-all duration-700 hover:scale-105 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <div
@@ -100,7 +100,7 @@ export default function Contacts({ onContactClick }: ContactsProps) {
         </div>
 
         <div className="mt-16 text-center">
-          <div className="glass-card neon-border rounded-3xl p-10 max-w-2xl mx-auto">
+          <div className="glass-card neon-border neon-hover rounded-3xl p-10 max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold text-white font-['Oswald'] mb-3">
               Готовы начать сотрудничество?
             </h3>

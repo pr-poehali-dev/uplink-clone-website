@@ -80,7 +80,13 @@
       inset 0 0 20px rgba(0, 212, 255, 0.03);
   }
 
-  .neon-border:hover {
+  .neon-hover {
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .neon-hover:hover {
     border-color: rgba(0, 212, 255, 0.6);
     box-shadow:
       0 0 30px rgba(0, 212, 255, 0.2),
