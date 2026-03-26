@@ -5,17 +5,20 @@ export function useScrollAnimation(threshold = 0.05) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
+          setTimeout(() => setIsVisible(true), 50);
           observer.unobserve(entry.target);
         }
       },
-      { threshold }
+      { threshold, rootMargin: "0px 0px -40px 0px" }
     );
 
-    if (ref.current) observer.observe(ref.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, [threshold]);
 

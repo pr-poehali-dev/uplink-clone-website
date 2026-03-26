@@ -91,7 +91,7 @@ function ServiceCard({ s, index }: { s: (typeof services)[0]; index: number }) {
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border neon-hover rounded-2xl p-6 flex flex-col gap-4 transition-[opacity,transform] duration-700 ${
+      className={`glass-card neon-border neon-hover rounded-2xl p-6 flex flex-col gap-4 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       }`}
       style={{ transitionDelay: `${index * 80}ms` }}

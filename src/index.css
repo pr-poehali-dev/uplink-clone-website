@@ -80,19 +80,6 @@
       inset 0 0 20px rgba(0, 212, 255, 0.03);
   }
 
-  .neon-hover {
-    transition:
-      border-color 0.15s ease,
-      box-shadow 0.15s ease;
-  }
-
-  .neon-hover:hover {
-    border-color: rgba(0, 212, 255, 0.6);
-    box-shadow:
-      0 0 30px rgba(0, 212, 255, 0.2),
-      inset 0 0 30px rgba(0, 212, 255, 0.05);
-  }
-
   .glass-card {
     background: rgba(13, 20, 33, 0.8);
     backdrop-filter: blur(20px);
@@ -239,6 +226,51 @@
 }
 .delay-500 {
   animation-delay: 0.5s;
+}
+
+/* Neon hover — вне @layer, transition задан через все нужные свойства сразу.
+   opacity/transform: 700ms (анимация появления при скролле)
+   border-color/box-shadow: 150ms (hover свечение) */
+.neon-hover {
+  transition:
+    opacity 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.neon-hover:hover {
+  border-color: rgba(0, 212, 255, 0.6);
+  box-shadow:
+    0 0 30px rgba(0, 212, 255, 0.2),
+    inset 0 0 30px rgba(0, 212, 255, 0.05);
+}
+
+/* CSS scale property (отдельно от transform) для быстрого hover */
+.neon-scale {
+  transition:
+    opacity 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    scale 250ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.neon-scale:hover {
+  scale: 1.02;
+}
+
+.neon-scale-sm {
+  transition:
+    opacity 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    scale 250ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.neon-scale-sm:hover {
+  scale: 1.05;
 }
 
 /* Scrollbar */
