@@ -1,6 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CmsContent, CmsProject, CmsTeamMember } from "@/hooks/useCmsContent";
 import { SaveButton, SaveFn } from "./AdminShared";
+import Icon from "@/components/ui/icon";
+import func2url from "../../../backend/func2url.json";
+
+const UPLOAD_URL: string = (func2url as Record<string, string>)["upload-photo"] ?? "";
 
 // ---- PROJECTS TAB ----
 export function ProjectsTab({ content, save, saving }: { content: CmsContent; password: string; save: SaveFn; saving: boolean }) {
@@ -78,8 +82,11 @@ export function ProjectsTab({ content, save, saving }: { content: CmsContent; pa
 }
 
 // ---- TEAM TAB ----
-export function TeamTab({ content, save, saving }: { content: CmsContent; password: string; save: SaveFn; saving: boolean }) {
+export function TeamTab({ content, password, save, saving }: { content: CmsContent; password: string; save: SaveFn; saving: boolean }) {
   const [selected, setSelected] = useState<CmsTeamMember | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (content.team.length && !selected) setSelected(content.team[0]);
@@ -87,13 +94,39 @@ export function TeamTab({ content, save, saving }: { content: CmsContent; passwo
 
   const handleSave = () => selected && save("save_team", { member: selected });
 
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selected) return;
+    setUploadError("");
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(",")[1];
+      const r = await fetch(UPLOAD_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password, file_base64: base64, file_name: file.name }),
+      });
+      setUploading(false);
+      if (r.ok) {
+        const data = await r.json();
+        setSelected({ ...selected, photo_url: data.url });
+      } else {
+        const data = await r.json();
+        setUploadError(data.error ?? "Ошибка загрузки");
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   if (!selected) return null;
 
   return (
     <div className="flex gap-4">
       <div className="w-48 flex-shrink-0 space-y-1">
         {content.team.map((m) => (
-          <button key={m.id} onClick={() => setSelected({ ...m })}
+          <button key={m.id} onClick={() => { setSelected({ ...m }); setUploadError(""); }}
             className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all ${selected.id === m.id ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "text-gray-400 hover:text-white hover:bg-white/5"}`}>
             {m.name}
           </button>
@@ -101,6 +134,38 @@ export function TeamTab({ content, save, saving }: { content: CmsContent; passwo
       </div>
       <div className="flex-1 glass-card neon-border rounded-2xl p-6 space-y-4">
         <h3 className="text-white font-bold font-['Oswald'] text-lg">Редактирование сотрудника</h3>
+
+        <div>
+          <label className="block text-gray-400 text-xs mb-2">Фото</label>
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {selected.photo_url
+                ? <img src={selected.photo_url} alt={selected.name} className="w-full h-full object-cover" />
+                : <Icon name="User" size={32} className="text-gray-600" />
+              }
+            </div>
+            <div className="space-y-2">
+              <button type="button" onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm hover:bg-white/10 transition-all disabled:opacity-50">
+                {uploading
+                  ? <><div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Загрузка...</>
+                  : <><Icon name="Upload" size={14} />Загрузить фото</>
+                }
+              </button>
+              {selected.photo_url && (
+                <button type="button" onClick={() => setSelected({ ...selected, photo_url: null })}
+                  className="flex items-center gap-1.5 text-red-400 text-xs hover:text-red-300 transition-colors">
+                  <Icon name="Trash2" size={12} />Удалить фото
+                </button>
+              )}
+              {uploadError && <p className="text-red-400 text-xs">{uploadError}</p>}
+              <p className="text-gray-600 text-xs">JPG, PNG, WEBP · до 5 МБ</p>
+            </div>
+          </div>
+          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handlePhotoChange} />
+        </div>
+
         <div>
           <label className="block text-gray-400 text-xs mb-1">Имя</label>
           <input value={selected.name} onChange={(e) => setSelected({ ...selected, name: e.target.value })}

@@ -244,11 +244,13 @@ def handler(event: dict, context) -> dict:
             cur = conn.cursor()
             if mid:
                 exp_val = "NULL" if not member.get("experience") else "'%s'" % member["experience"].replace("'", "''")
+                photo_val = "NULL" if not member.get("photo_url") else "'%s'" % member["photo_url"].replace("'", "''")
                 cur.execute(
-                    "UPDATE cms_team SET name='%s', position='%s', experience=%s, is_active=%s, sort_order=%s, updated_at=NOW() WHERE id=%s" % (
+                    "UPDATE cms_team SET name='%s', position='%s', experience=%s, photo_url=%s, is_active=%s, sort_order=%s, updated_at=NOW() WHERE id=%s" % (
                         member.get("name", "").replace("'", "''"),
                         member.get("position", "").replace("'", "''"),
                         exp_val,
+                        photo_val,
                         "true" if member.get("is_active", True) else "false",
                         int(member.get("sort_order", 0)),
                         int(mid)

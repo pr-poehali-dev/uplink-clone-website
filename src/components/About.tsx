@@ -128,7 +128,7 @@ function TeamCard({
   member,
   index,
 }: {
-  member: (typeof team)[0];
+  member: (typeof team)[0] & { photo?: string | null };
   index: number;
 }) {
   const { ref, isVisible } = useScrollAnimation();
@@ -138,8 +138,11 @@ function TeamCard({
       className={`glass-card neon-border neon-hover neon-scale-sm rounded-2xl p-5 text-center ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 100}ms` }}
     >
-      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center mx-auto mb-3">
-        <Icon name="User" size={32} className="text-cyan-400" />
+      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center mx-auto mb-3 overflow-hidden">
+        {member.photo
+          ? <img src={member.photo} alt={member.name} className="w-full h-full object-cover" />
+          : <Icon name="User" size={36} className="text-cyan-400" />
+        }
       </div>
       <h4 className="text-white font-bold text-sm font-['Oswald'] mb-1">
         {member.name}
@@ -152,7 +155,7 @@ function TeamCard({
 
 export default function About({ team: cmsTeam }: { team?: CmsTeamMember[] }) {
   const displayTeam = (cmsTeam && cmsTeam.length > 0)
-    ? cmsTeam.filter(m => m.is_active).map(m => ({ name: m.name, role: m.position, exp: m.experience ?? "" }))
+    ? cmsTeam.filter(m => m.is_active).map(m => ({ name: m.name, role: m.position, exp: m.experience ?? "", photo: m.photo_url }))
     : team;
   const { ref, isVisible } = useScrollAnimation();
   const { ref: teamRef, isVisible: teamVisible } = useScrollAnimation();
