@@ -86,6 +86,7 @@ export function TeamTab({ content, password, save, saving }: { content: CmsConte
   const [selected, setSelected] = useState<CmsTeamMember | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -93,6 +94,16 @@ export function TeamTab({ content, password, save, saving }: { content: CmsConte
   }, [content.team]);
 
   const handleSave = () => selected && save("save_team", { member: selected });
+
+  const handleAdd = () => save("add_team_member", {});
+
+  const handleDelete = async () => {
+    if (!selected || !confirm(`Удалить сотрудника «${selected.name}»?`)) return;
+    setDeleting(true);
+    await save("delete_team_member", { id: selected.id });
+    setSelected(null);
+    setDeleting(false);
+  };
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -120,20 +131,31 @@ export function TeamTab({ content, password, save, saving }: { content: CmsConte
     e.target.value = "";
   };
 
-  if (!selected) return null;
-
   return (
     <div className="flex gap-4">
       <div className="w-48 flex-shrink-0 space-y-1">
         {content.team.map((m) => (
           <button key={m.id} onClick={() => { setSelected({ ...m }); setUploadError(""); }}
-            className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all ${selected.id === m.id ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "text-gray-400 hover:text-white hover:bg-white/5"}`}>
+            className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all ${selected?.id === m.id ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "text-gray-400 hover:text-white hover:bg-white/5"}`}>
             {m.name}
           </button>
         ))}
+        <button onClick={handleAdd} disabled={saving}
+          className="w-full flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-cyan-400 border border-dashed border-cyan-500/30 hover:bg-cyan-500/5 transition-all disabled:opacity-50 mt-2">
+          <Icon name="Plus" size={14} />Добавить
+        </button>
       </div>
       <div className="flex-1 glass-card neon-border rounded-2xl p-6 space-y-4">
-        <h3 className="text-white font-bold font-['Oswald'] text-lg">Редактирование сотрудника</h3>
+        {!selected ? (
+          <p className="text-gray-500 text-sm">Выберите сотрудника</p>
+        ) : (<>
+        <div className="flex items-center justify-between">
+          <h3 className="text-white font-bold font-['Oswald'] text-lg">Редактирование сотрудника</h3>
+          <button onClick={handleDelete} disabled={deleting || saving}
+            className="flex items-center gap-1.5 text-red-400 text-xs hover:text-red-300 transition-colors disabled:opacity-50">
+            <Icon name="Trash2" size={13} />Удалить
+          </button>
+        </div>
 
         <div>
           <label className="block text-gray-400 text-xs mb-2">Фото</label>
@@ -187,6 +209,7 @@ export function TeamTab({ content, password, save, saving }: { content: CmsConte
           <label htmlFor="team_active" className="text-gray-400 text-sm">Показывать на сайте</label>
         </div>
         <SaveButton onClick={handleSave} saving={saving} />
+        </>)}
       </div>
     </div>
   );

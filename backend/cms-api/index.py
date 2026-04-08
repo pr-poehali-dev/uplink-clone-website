@@ -110,8 +110,10 @@ def handler(event: dict, context) -> dict:
             for key, value in updates.items():
                 if key == "admin_password":
                     continue
-                cur.execute("UPDATE cms_settings SET value = '%s', updated_at = NOW() WHERE key = '%s'" % (
-                    str(value).replace("'", "''"), key.replace("'", "''")))
+                cur.execute(
+                    "INSERT INTO cms_settings (key, value, updated_at) VALUES ('%s', '%s', NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()" % (
+                        key.replace("'", "''"), str(value).replace("'", "''"))
+                )
             conn.commit()
             cur.close()
             return ok({"ok": True})
@@ -258,6 +260,29 @@ def handler(event: dict, context) -> dict:
                 )
             conn.commit()
             cur.close()
+            return ok({"ok": True})
+
+        # --- add_team_member ---
+        if action == "add_team_member":
+            cur = conn.cursor()
+            cur.execute("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cms_team")
+            next_order = cur.fetchone()[0]
+            cur.execute(
+                "INSERT INTO cms_team (name, position, experience, photo_url, is_active, sort_order) VALUES ('Новый сотрудник', 'Должность', NULL, NULL, true, %s) RETURNING id" % int(next_order)
+            )
+            new_id = cur.fetchone()[0]
+            conn.commit()
+            cur.close()
+            return ok({"ok": True, "id": new_id})
+
+        # --- delete_team_member ---
+        if action == "delete_team_member":
+            mid = body.get("id")
+            if mid:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM cms_team WHERE id=%s" % int(mid))
+                conn.commit()
+                cur.close()
             return ok({"ok": True})
 
         return err("Unknown action", 404)
