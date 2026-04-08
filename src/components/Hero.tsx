@@ -46,7 +46,7 @@ export default function Hero({ onContactClick }: HeroProps) {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-8">
               <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-              Комплексные IT-решения для бизнеса
+              IT-аутсорсинг для бизнеса в Саратове
             </div>
           </div>
 
@@ -66,9 +66,9 @@ export default function Hero({ onContactClick }: HeroProps) {
             className={`transition-all duration-700 delay-200 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
             <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-              Аутсорсинг IT-инфраструктуры, администрирование серверов, монтаж
-              сетей и видеонаблюдения. Работаем быстро, профессионально, с
-              гарантией.
+              Обслуживание компьютеров и серверов, монтаж ЛВС/СКС, видеонаблюдение
+              под ключ и IP-телефония для малого и среднего бизнеса в Саратове.
+              Реагирование от 15 минут. Системный администратор без найма в штат.
             </p>
           </div>
 
