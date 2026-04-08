@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { CmsSettings } from "@/hooks/useCmsContent";
 
@@ -169,9 +170,17 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
           <p className="text-gray-600 text-sm">
             © 2024 ИТК Аплинк-IT. Все права защищены.
           </p>
-          <p className="text-gray-700 text-xs">
-            Лицензионная IT-деятельность · ИНН указан в договоре
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-gray-700 text-xs">
+              Лицензионная IT-деятельность · ИНН указан в договоре
+            </p>
+            <Link
+              to="/privacy"
+              className="text-gray-600 hover:text-cyan-400 text-xs transition-colors whitespace-nowrap"
+            >
+              Политика конфиденциальности
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
