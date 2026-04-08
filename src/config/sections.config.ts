@@ -22,6 +22,7 @@ export const SECTIONS_META: Record<string, SectionMeta> = {
   projects:   { label: "Проекты",        desc: "Кейсы и реализованные проекты" },
   team:       { label: "Наша команда",   desc: "История компании, подход и состав команды" },
   contacts:   { label: "Контакты",       desc: "Телефон, email, адрес" },
+  faq:        { label: "FAQ",            desc: "Часто задаваемые вопросы и ответы" },
 };
 
 export const SECTIONS_ORDER = Object.keys(SECTIONS_META);

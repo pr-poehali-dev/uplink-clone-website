@@ -44,6 +44,7 @@ export default function Index() {
     projects:   <Projects projects={content?.projects} />,
     team:       <About team={content?.team} />,
     contacts:   <Contacts onContactClick={() => openModal("Блок контактов")} settings={s} />,
+    faq:        <Faq items={content?.faq} />,
   };
 
   return (
@@ -51,8 +52,6 @@ export default function Index() {
       <Header onContactClick={() => openModal("Шапка сайта")} settings={s} />
 
       {order.map((id) => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
-
-      <Faq items={content?.faq} />
 
       <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} />
 
