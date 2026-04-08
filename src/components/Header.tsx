@@ -41,7 +41,13 @@ export default function Header({ onContactClick, settings }: HeaderProps) {
           ? "bg-[#080c14]/95 backdrop-blur-md shadow-lg shadow-cyan-500/10 border-b border-cyan-500/10"
           : "bg-transparent"
       }`}
+      itemScope
+      itemType="https://schema.org/Organization"
     >
+      <meta itemProp="name" content="ИТК Аплинк-IT" />
+      <meta itemProp="url" content="https://uplink-it.ru" />
+      <meta itemProp="description" content="IT-аутсорсинг и обслуживание IT-инфраструктуры для бизнеса в Саратове" />
+      <link itemProp="sameAs" href="https://uplink-it.ru" />
       <div className="container mx-auto px-4 flex items-center justify-between h-20">
         <a
           href="#home"
@@ -77,6 +83,7 @@ export default function Header({ onContactClick, settings }: HeaderProps) {
           <a
             href={phoneHref}
             className="flex items-center gap-2 text-gray-300 hover:text-cyan-400 transition-colors text-sm font-medium"
+            itemProp="telephone"
           >
             <Icon name="Phone" size={16} className="text-cyan-400" />{phone}
           </a>

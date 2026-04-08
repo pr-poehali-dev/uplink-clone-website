@@ -80,7 +80,18 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
     <section
       id="contacts"
       className="py-24 bg-[#0a0f1a] relative overflow-hidden"
+      itemScope
+      itemType="https://schema.org/LocalBusiness"
     >
+      <meta itemProp="name" content="ИТК Аплинк-IT" />
+      <meta itemProp="telephone" content="+79869860136" />
+      <meta itemProp="email" content="support@uplink-it.ru" />
+      <meta itemProp="priceRange" content="от 7000 ₽/мес" />
+      <div itemProp="address" itemScope itemType="https://schema.org/PostalAddress" className="hidden">
+        <meta itemProp="addressLocality" content="Саратов" />
+        <meta itemProp="addressRegion" content="Саратовская область" />
+        <meta itemProp="addressCountry" content="RU" />
+      </div>
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
       <div className="container mx-auto px-4">
         <div

@@ -8,6 +8,7 @@ import QuickOrder from "@/components/QuickOrder";
 import Projects from "@/components/Projects";
 import About from "@/components/About";
 import Contacts from "@/components/Contacts";
+import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
 import { useCmsContent } from "@/hooks/useCmsContent";
@@ -51,6 +52,8 @@ export default function Index() {
       <Header onContactClick={() => openModal("Шапка сайта")} settings={s} />
 
       {order.map((id) => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
+
+      <Faq />
 
       <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} />
 
