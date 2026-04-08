@@ -4,6 +4,7 @@ import Icon from "@/components/ui/icon";
 import { SettingsTab, ServicesTab, PlansTab } from "./admin/AdminTabs";
 import { ProjectsTab, TeamTab, PasswordTab } from "./admin/AdminTabs2";
 import { SectionsTab } from "./admin/SectionsTab";
+import { PreviewPanel } from "./admin/PreviewPanel";
 
 type Tab = "settings" | "sections" | "services" | "plans" | "projects" | "team" | "password";
 
@@ -16,6 +17,7 @@ export default function Admin() {
   const [tab, setTab] = useState<Tab>("settings");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
+  const [preview, setPreview] = useState(false);
 
   const loadContent = async (_pwd: string) => {
     setLoading(true);
@@ -120,6 +122,8 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
+      {preview && <PreviewPanel onClose={() => setPreview(false)} />}
+
       {/* Header */}
       <div className="border-b border-white/10 bg-[#0a0f1a]">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -135,6 +139,13 @@ export default function Admin() {
                 {saveMsg}
               </span>
             )}
+            <button
+              onClick={() => setPreview(true)}
+              className="text-gray-400 hover:text-cyan-400 text-sm flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-lg hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/20"
+            >
+              <Icon name="Monitor" size={14} />
+              Предпросмотр
+            </button>
             <a href="/" className="text-gray-400 hover:text-white text-sm flex items-center gap-1 transition-colors">
               <Icon name="ExternalLink" size={14} />
               Сайт
