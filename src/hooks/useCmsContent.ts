@@ -90,14 +90,45 @@ export interface CmsContent {
   faq: CmsFaqItem[];
 }
 
+const CACHE_KEY = "cms_content_cache";
+const CACHE_TTL = 10 * 60 * 1000; // 10 минут
+
+function getCached(): CmsContent | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null;
+    return data as CmsContent;
+  } catch {
+    return null;
+  }
+}
+
+function setCache(data: CmsContent) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+  } catch {
+    // localStorage недоступен — игнорируем
+  }
+}
+
 export function useCmsContent() {
-  const [content, setContent] = useState<CmsContent | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState<CmsContent | null>(() => getCached());
+  const [loading, setLoading] = useState(() => getCached() === null);
 
   useEffect(() => {
+    const cached = getCached();
+    if (cached) {
+      setContent(cached);
+      setLoading(false);
+      return;
+    }
+
     fetch(CMS_API)
       .then((r) => r.json())
       .then((data) => {
+        setCache(data);
         setContent(data);
         setLoading(false);
       })
