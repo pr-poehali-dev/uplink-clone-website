@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
+import { CmsSettings } from "@/hooks/useCmsContent";
 
 interface HeaderProps {
   onContactClick: () => void;
+  settings?: CmsSettings;
 }
 
 const navLinks = [
@@ -14,7 +16,9 @@ const navLinks = [
   { label: "Контакты", href: "#contacts" },
 ];
 
-export default function Header({ onContactClick }: HeaderProps) {
+export default function Header({ onContactClick, settings }: HeaderProps) {
+  const phone = settings?.phone ?? "8 (986) 986-01-36";
+  const phoneHref = settings?.phone_href ?? "tel:+79869860136";
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -71,11 +75,10 @@ export default function Header({ onContactClick }: HeaderProps) {
 
         <div className="hidden lg:flex items-center gap-3">
           <a
-            href="tel:+78007079303"
+            href={phoneHref}
             className="flex items-center gap-2 text-gray-300 hover:text-cyan-400 transition-colors text-sm font-medium"
           >
-            <Icon name="Phone" size={16} className="text-cyan-400" />8 (986)
-            986-01-36
+            <Icon name="Phone" size={16} className="text-cyan-400" />{phone}
           </a>
           <button
             onClick={onContactClick}
@@ -87,7 +90,7 @@ export default function Header({ onContactClick }: HeaderProps) {
 
         <div className="lg:hidden flex items-center gap-2">
           <a
-            href="tel:+79869860136"
+            href={phoneHref}
             className="flex items-center gap-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200"
           >
             <Icon name="Phone" size={16} />
@@ -115,10 +118,10 @@ export default function Header({ onContactClick }: HeaderProps) {
           ))}
           <div className="pt-4 flex flex-col gap-2">
             <a
-              href="tel:+78007079303"
+              href={phoneHref}
               className="flex items-center gap-2 text-cyan-400 text-sm font-medium"
             >
-              <Icon name="Phone" size={16} />8 (986) 986-01-36
+              <Icon name="Phone" size={16} />{phone}
             </a>
             <button
               onClick={() => {

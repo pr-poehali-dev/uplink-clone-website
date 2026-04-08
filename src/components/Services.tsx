@@ -1,8 +1,10 @@
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
+import { CmsService } from "@/hooks/useCmsContent";
 
 interface ServicesProps {
   onContactClick: () => void;
+  services?: CmsService[];
 }
 
 const services = [
@@ -86,7 +88,7 @@ const services = [
   },
 ];
 
-function ServiceCard({ s, index }: { s: (typeof services)[0]; index: number }) {
+function ServiceCard({ s, index }: { s: { icon: string; title: string; description: string; accent: string; items: { item_text: string }[] }; index: number }) {
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div
@@ -105,12 +107,12 @@ function ServiceCard({ s, index }: { s: (typeof services)[0]; index: number }) {
         <h3 className="text-xl font-bold text-white font-['Oswald'] mb-2">
           {s.title}
         </h3>
-        <p className="text-gray-400 text-sm leading-relaxed">{s.desc}</p>
+        <p className="text-gray-400 text-sm leading-relaxed">{s.description}</p>
       </div>
       <ul className="space-y-1.5">
         {s.items.map((item) => (
           <li
-            key={item}
+            key={item.item_text}
             className="flex items-start gap-2 text-sm text-gray-300"
           >
             <Icon
@@ -118,7 +120,7 @@ function ServiceCard({ s, index }: { s: (typeof services)[0]; index: number }) {
               size={14}
               className="text-cyan-400 mt-0.5 flex-shrink-0"
             />
-            {item}
+            {item.item_text}
           </li>
         ))}
       </ul>
@@ -126,7 +128,12 @@ function ServiceCard({ s, index }: { s: (typeof services)[0]; index: number }) {
   );
 }
 
-export default function Services({ onContactClick }: ServicesProps) {
+const defaultServices = services.map(s => ({ ...s, description: s.desc, items: s.items.map(i => ({ item_text: i })) }));
+
+export default function Services({ onContactClick, services: cmsServices }: ServicesProps) {
+  const displayServices = (cmsServices && cmsServices.length > 0)
+    ? cmsServices.filter(s => s.is_active)
+    : defaultServices;
   const { ref: titleRef, isVisible: titleVisible } = useScrollAnimation();
 
   return (
@@ -152,7 +159,7 @@ export default function Services({ onContactClick }: ServicesProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {services.map((s, i) => (
+          {displayServices.map((s, i) => (
             <ServiceCard key={s.title} s={s} index={i} />
           ))}
         </div>

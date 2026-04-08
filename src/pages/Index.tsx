@@ -10,10 +10,12 @@ import About from "@/components/About";
 import Contacts from "@/components/Contacts";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
+import { useCmsContent } from "@/hooks/useCmsContent";
 
 export default function Index() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSource, setModalSource] = useState("Не указан");
+  const { content } = useCmsContent();
 
   const openModal = (source: string) => {
     setModalSource(source);
@@ -22,16 +24,16 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-[#080c14]">
-      <Header onContactClick={() => openModal("Шапка сайта")} />
-      <Hero onContactClick={() => openModal("Главный экран (Hero)")} />
-      <Services onContactClick={() => openModal("Блок услуг")} />
-      <WhyUs />
-      <Pricing onContactClick={() => openModal("Блок тарифов")} />
+      <Header onContactClick={() => openModal("Шапка сайта")} settings={content?.settings} />
+      <Hero onContactClick={() => openModal("Главный экран (Hero)")} settings={content?.settings} />
+      <Services onContactClick={() => openModal("Блок услуг")} services={content?.services} />
+      <WhyUs settings={content?.settings} />
+      <Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} />
       <QuickOrder />
-      <Projects />
-      <div className="hidden"><About /></div>
-      <Contacts onContactClick={() => openModal("Блок контактов")} />
-      <Footer onContactClick={() => openModal("Подвал сайта")} />
+      <Projects projects={content?.projects} />
+      <div className="hidden"><About team={content?.team} /></div>
+      <Contacts onContactClick={() => openModal("Блок контактов")} settings={content?.settings} />
+      <Footer onContactClick={() => openModal("Подвал сайта")} settings={content?.settings} />
       <ContactModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

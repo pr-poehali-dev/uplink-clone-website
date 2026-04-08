@@ -1,10 +1,16 @@
 import Icon from "@/components/ui/icon";
+import { CmsSettings } from "@/hooks/useCmsContent";
 
 interface FooterProps {
   onContactClick: () => void;
+  settings?: CmsSettings;
 }
 
-export default function Footer({ onContactClick }: FooterProps) {
+export default function Footer({ onContactClick, settings }: FooterProps) {
+  const phone = settings?.phone ?? "8 (986) 986-01-36";
+  const phoneHref = settings?.phone_href ?? "tel:+79869860136";
+  const email = settings?.email_support ?? "support@uplink-it.ru";
+  const address = settings?.address ?? "Саратов, Россия";
   const scrollTo = (id: string) => {
     document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
   };
@@ -115,10 +121,10 @@ export default function Footer({ onContactClick }: FooterProps) {
                   className="text-cyan-400 mt-0.5 flex-shrink-0"
                 />
                 <a
-                  href="tel:+78007079303"
+                  href={phoneHref}
                   className="text-gray-400 hover:text-cyan-400 text-sm transition-colors"
                 >
-                  8 (986) 986-01-36
+                  {phone}
                 </a>
               </li>
               <li className="flex items-start gap-2">
@@ -128,10 +134,10 @@ export default function Footer({ onContactClick }: FooterProps) {
                   className="text-cyan-400 mt-0.5 flex-shrink-0"
                 />
                 <a
-                  href="mailto:info@uplink-it.ru"
+                  href={`mailto:${email}`}
                   className="text-gray-400 hover:text-cyan-400 text-sm transition-colors"
                 >
-                  support@uplink-it.ru
+                  {email}
                 </a>
               </li>
               <li className="flex items-start gap-2">
@@ -140,7 +146,7 @@ export default function Footer({ onContactClick }: FooterProps) {
                   size={15}
                   className="text-cyan-400 mt-0.5 flex-shrink-0"
                 />
-                <span className="text-gray-400 text-sm">Саратов, Россия</span>
+                <span className="text-gray-400 text-sm">{address}</span>
               </li>
               <li className="flex items-start gap-2">
                 <Icon

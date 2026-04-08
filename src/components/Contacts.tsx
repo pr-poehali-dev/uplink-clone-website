@@ -1,8 +1,10 @@
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
+import { CmsSettings } from "@/hooks/useCmsContent";
 
 interface ContactsProps {
   onContactClick: () => void;
+  settings?: CmsSettings;
 }
 
 const contactItems = [
@@ -66,7 +68,12 @@ function ContactCard({
   );
 }
 
-export default function Contacts({ onContactClick }: ContactsProps) {
+export default function Contacts({ onContactClick, settings }: ContactsProps) {
+  const contactItems = [
+    { icon: "Phone", title: "Телефон", lines: [settings?.phone ?? "8 (986) 986-01-36"], link: settings?.phone_href ?? "tel:+79869860136", accent: "from-cyan-400 to-blue-500" },
+    { icon: "Mail", title: "Email", lines: [settings?.email_support ?? "support@uplink-it.ru", "Отвечаем в течение часа"], link: `mailto:${settings?.email_info ?? "info@uplink-it.ru"}`, accent: "from-purple-400 to-cyan-400" },
+    { icon: "MapPin", title: "Адрес", lines: [settings?.address ?? "Саратов, Россия", "Выезд по всему Саратову и СО"], link: null, accent: "from-green-400 to-cyan-400" },
+  ];
   const { ref, isVisible } = useScrollAnimation();
 
   return (
@@ -117,7 +124,7 @@ export default function Contacts({ onContactClick }: ContactsProps) {
                 Оставить заявку
               </button>
               <a
-                href="tel:+79869860136"
+                href={settings?.phone_href ?? "tel:+79869860136"}
                 className="btn-outline-neon px-8 py-4 rounded-xl font-semibold flex items-center gap-2 justify-center"
               >
                 <Icon name="Phone" size={18} />

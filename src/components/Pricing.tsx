@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
+import { CmsPlan } from "@/hooks/useCmsContent";
 
 const SEND_EMAIL_URL = "https://functions.poehali.dev/97638ab8-62ea-4ada-8078-f5aa05a3f044";
 
 interface PricingProps {
   onContactClick: () => void;
+  plans?: CmsPlan[];
 }
 
 const plans = [
@@ -67,7 +69,7 @@ const plans = [
 ];
 
 interface PlanOrderModalProps {
-  plan: (typeof plans)[0] | null;
+  plan: PlanDisplay | null;
   onClose: () => void;
 }
 
@@ -224,12 +226,14 @@ function PlanOrderModal({ plan, onClose }: PlanOrderModalProps) {
   );
 }
 
+type PlanDisplay = { name: string; price: string; badge?: string | null; desc?: string; description?: string; features: (string | { feature_text: string })[]; color: string; border?: string; border_class?: string; btnClass?: string; btn_class?: string; highlight?: boolean; is_highlighted?: boolean };
+
 function PricingCard({
   plan,
   index,
   onSelect,
 }: {
-  plan: (typeof plans)[0];
+  plan: PlanDisplay;
   index: number;
   onSelect: () => void;
 }) {
@@ -237,8 +241,8 @@ function PricingCard({
   return (
     <div
       ref={ref}
-      className={`relative flex flex-col rounded-2xl p-8 border transition-[opacity,transform] duration-700 ${plan.border} ${
-        plan.highlight
+      className={`relative flex flex-col rounded-2xl p-8 border transition-[opacity,transform] duration-700 ${plan.border ?? plan.border_class ?? "border-gray-700/50"} ${
+        (plan.highlight ?? plan.is_highlighted)
           ? "bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 scale-105"
           : "glass-card"
       } ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
@@ -254,18 +258,22 @@ function PricingCard({
       </div>
       <h3 className="text-2xl font-bold text-white font-['Oswald'] mb-1">{plan.name}</h3>
       <div className="text-3xl font-bold gradient-text font-['Oswald'] mb-3">{plan.price}</div>
-      <p className="text-gray-400 text-sm mb-6 leading-relaxed">{plan.desc}</p>
+      <p className="text-gray-400 text-sm mb-6 leading-relaxed">{plan.description ?? plan.desc}</p>
       <ul className="space-y-2.5 flex-1 mb-8">
-        {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
-            <Icon name="Check" size={16} className="text-cyan-400 mt-0.5 flex-shrink-0" />
-            {f}
-          </li>
-        ))}
+        {plan.features.map((f, idx) => {
+          const text = typeof f === "string" ? f : f.feature_text;
+          if (text === "[удалено]") return null;
+          return (
+            <li key={idx} className="flex items-start gap-2 text-sm text-gray-300">
+              <Icon name="Check" size={16} className="text-cyan-400 mt-0.5 flex-shrink-0" />
+              {text}
+            </li>
+          );
+        })}
       </ul>
       <button
         onClick={onSelect}
-        className={`${plan.btnClass} w-full py-3 rounded-xl font-semibold text-sm`}
+        className={`${plan.btnClass ?? plan.btn_class ?? "btn-outline-neon"} w-full py-3 rounded-xl font-semibold text-sm`}
       >
         Выбрать тариф
       </button>
@@ -273,9 +281,14 @@ function PricingCard({
   );
 }
 
-export default function Pricing({ onContactClick }: PricingProps) {
+const defaultPlans: PlanDisplay[] = plans.map(p => ({ ...p, description: p.desc }));
+
+export default function Pricing({ onContactClick, plans: cmsPlans }: PricingProps) {
   const { ref, isVisible } = useScrollAnimation();
-  const [selectedPlan, setSelectedPlan] = useState<(typeof plans)[0] | null>(null);
+  const displayPlans: PlanDisplay[] = (cmsPlans && cmsPlans.length > 0)
+    ? cmsPlans.filter(p => p.is_active)
+    : defaultPlans;
+  const [selectedPlan, setSelectedPlan] = useState<PlanDisplay | null>(null);
 
   return (
     <section id="pricing" className="py-24 relative overflow-hidden">
@@ -301,7 +314,7 @@ export default function Pricing({ onContactClick }: PricingProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-          {plans.map((p, i) => (
+          {displayPlans.map((p, i) => (
             <PricingCard key={p.name} plan={p} index={i} onSelect={() => setSelectedPlan(p)} />
           ))}
         </div>

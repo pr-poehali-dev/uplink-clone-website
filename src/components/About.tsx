@@ -1,5 +1,6 @@
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
+import { CmsTeamMember } from "@/hooks/useCmsContent";
 
 const timeline = [
   {
@@ -151,7 +152,10 @@ function TeamCard({
   );
 }
 
-export default function About() {
+export default function About({ team: cmsTeam }: { team?: CmsTeamMember[] }) {
+  const displayTeam = (cmsTeam && cmsTeam.length > 0)
+    ? cmsTeam.filter(m => m.is_active).map(m => ({ name: m.name, role: m.position, exp: m.experience ?? "" }))
+    : team;
   const { ref, isVisible } = useScrollAnimation();
   const { ref: teamRef, isVisible: teamVisible } = useScrollAnimation();
 
@@ -211,7 +215,7 @@ export default function About() {
             Наша команда
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {team.map((member, i) => (
+            {displayTeam.map((member, i) => (
               <TeamCard key={member.name} member={member} index={i} />
             ))}
           </div>

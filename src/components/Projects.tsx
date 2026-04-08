@@ -1,5 +1,6 @@
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
+import { CmsProject } from "@/hooks/useCmsContent";
 
 const projects = [
   {
@@ -46,7 +47,9 @@ const projects = [
   },
 ];
 
-function ProjectCard({ p, index }: { p: (typeof projects)[0]; index: number }) {
+type ProjectDisplay = { category: string; client?: string; title?: string; desc?: string; description?: string; metrics: { label: string; value: string }[]; tags?: string[]; icon?: string; accent: string; result?: string | null };
+
+function ProjectCard({ p, index }: { p: ProjectDisplay; index: number }) {
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div
@@ -73,11 +76,11 @@ function ProjectCard({ p, index }: { p: (typeof projects)[0]; index: number }) {
               {p.category}
             </div>
             <h3 className="text-lg font-bold text-white font-['Oswald'] leading-tight">
-              {p.title}
+              {p.client ?? p.title}
             </h3>
           </div>
         </div>
-        <p className="text-gray-400 text-sm leading-relaxed flex-1">{p.desc}</p>
+        <p className="text-gray-400 text-sm leading-relaxed flex-1">{p.description ?? p.desc}</p>
         <div className="grid grid-cols-3 gap-2">
           {p.metrics.map((m) => (
             <div
@@ -95,7 +98,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[0]; index: number }) {
         </div>
         <div className="flex items-center justify-between">
           <div className="flex gap-1.5 flex-wrap">
-            {p.tags.map((t) => (
+            {(p.tags ?? [p.category]).map((t) => (
               <span
                 key={t}
                 className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 text-xs border border-cyan-500/20"
@@ -104,17 +107,22 @@ function ProjectCard({ p, index }: { p: (typeof projects)[0]; index: number }) {
               </span>
             ))}
           </div>
-          <div className="flex items-center gap-1 text-green-400 text-xs font-medium flex-shrink-0">
-            <Icon name="TrendingUp" size={12} />
-            {p.result}
-          </div>
+          {p.result && (
+            <div className="flex items-center gap-1 text-green-400 text-xs font-medium flex-shrink-0">
+              <Icon name="TrendingUp" size={12} />
+              {p.result}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-export default function Projects() {
+export default function Projects({ projects: cmsProjects }: { projects?: CmsProject[] }) {
+  const displayProjects = (cmsProjects && cmsProjects.length > 0)
+    ? cmsProjects.filter(p => p.is_active).map(p => ({ ...p, description: p.description, metrics: p.metrics }))
+    : projects;
   const { ref, isVisible } = useScrollAnimation();
 
   return (
@@ -142,8 +150,8 @@ export default function Projects() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((p, i) => (
-            <ProjectCard key={p.title} p={p} index={i} />
+          {displayProjects.map((p, i) => (
+            <ProjectCard key={p.client ?? (p as { title?: string }).title ?? i} p={p} index={i} />
           ))}
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
+import { CmsSettings } from "@/hooks/useCmsContent";
 
 const advantages = [
   {
@@ -94,8 +95,14 @@ function AdvCard({ a, index }: { a: (typeof advantages)[0]; index: number }) {
   );
 }
 
-export default function WhyUs() {
+export default function WhyUs({ settings }: { settings?: CmsSettings }) {
   const { ref, isVisible } = useScrollAnimation();
+  const stats = [
+    { num: settings?.whyus_stat_1_num ?? statsData[0].num, label: settings?.whyus_stat_1_label ?? statsData[0].label },
+    { num: settings?.whyus_stat_2_num ?? statsData[1].num, label: settings?.whyus_stat_2_label ?? statsData[1].label },
+    { num: settings?.whyus_stat_3_num ?? statsData[2].num, label: settings?.whyus_stat_3_label ?? statsData[2].label },
+    { num: settings?.whyus_stat_4_num ?? statsData[3].num, label: settings?.whyus_stat_4_label ?? statsData[3].label },
+  ];
 
   return (
     <section className="py-24 relative overflow-hidden bg-[#0a0f1a]">
