@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
+// useScrollAnimation используется только в FaqItem, не в основном компоненте
 import { CmsFaqItem } from "@/hooks/useCmsContent";
 
 function FaqItem({ item, index }: { item: CmsFaqItem; index: number }) {
@@ -64,7 +65,6 @@ interface FaqProps {
 }
 
 export default function Faq({ items }: FaqProps) {
-  const { ref, isVisible } = useScrollAnimation();
   const activeItems = (items ?? []).filter((i) => i.is_active);
 
   if (activeItems.length === 0) return null;
@@ -86,11 +86,8 @@ export default function Faq({ items }: FaqProps) {
 
       <div className="container mx-auto px-4 relative z-10">
 
-        {/* Заголовок */}
-        <div
-          ref={ref}
-          className={`text-center mb-12 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-        >
+        {/* Заголовок — без анимации, всегда виден */}
+        <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-5">
             <Icon name="HelpCircle" size={14} />
             Частые вопросы
