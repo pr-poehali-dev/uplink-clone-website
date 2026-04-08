@@ -6,7 +6,6 @@ import Pricing from "@/components/Pricing";
 import WhyUs from "@/components/WhyUs";
 import QuickOrder from "@/components/QuickOrder";
 import Projects from "@/components/Projects";
-import About from "@/components/About";
 import Contacts from "@/components/Contacts";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
@@ -51,7 +50,6 @@ export default function Index() {
 
       {order.map((id) => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
 
-      <div className="hidden"><About team={content?.team} /></div>
       <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} />
 
       <ContactModal

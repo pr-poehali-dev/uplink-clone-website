@@ -39,7 +39,6 @@ export function SettingsTab({ content, save, saving }: { content: CmsContent; pa
                 whyus_stat_1_num: "Цифра 1", whyus_stat_1_label: "Подпись 1", whyus_stat_2_num: "Цифра 2", whyus_stat_2_label: "Подпись 2",
                 whyus_stat_3_num: "Цифра 3", whyus_stat_3_label: "Подпись 3", whyus_stat_4_num: "Цифра 4", whyus_stat_4_label: "Подпись 4",
               };
-              void label;
               return (
                 <div key={key}>
                   <label className="block text-gray-400 text-xs mb-1">{settingsMeta[key] || key}</label>
