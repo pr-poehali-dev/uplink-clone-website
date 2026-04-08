@@ -159,8 +159,37 @@ def handler(event: dict, context) -> dict:
                         cur.execute("INSERT INTO cms_service_items (service_id, sort_order, item_text) VALUES (%s, %s, '%s')" % (int(sid), i + 1, text))
                 for eid in existing_ids:
                     cur.execute("UPDATE cms_service_items SET item_text='[удалено]' WHERE id=%s" % int(eid))
+            for item in body.get("order", []):
+                oid = item.get("id")
+                osort = item.get("sort_order")
+                if oid and osort and int(oid) != int(sid or 0):
+                    cur.execute("UPDATE cms_services SET sort_order=%s WHERE id=%s" % (int(osort), int(oid)))
             conn.commit()
             cur.close()
+            return ok({"ok": True})
+
+        # --- add_service ---
+        if action == "add_service":
+            cur = conn.cursor()
+            cur.execute("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cms_services")
+            next_order = cur.fetchone()[0]
+            cur.execute(
+                "INSERT INTO cms_services (icon, title, description, accent, is_active, sort_order) VALUES ('Settings', 'Новая услуга', 'Описание услуги', 'cyan', true, %s) RETURNING id" % int(next_order)
+            )
+            new_id = cur.fetchone()[0]
+            conn.commit()
+            cur.close()
+            return ok({"ok": True, "id": new_id})
+
+        # --- delete_service ---
+        if action == "delete_service":
+            did = body.get("id")
+            if did:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM cms_service_items WHERE service_id=%s" % int(did))
+                cur.execute("DELETE FROM cms_services WHERE id=%s" % int(did))
+                conn.commit()
+                cur.close()
             return ok({"ok": True})
 
         # --- save_plan ---
@@ -235,8 +264,37 @@ def handler(event: dict, context) -> dict:
                         cur.execute("INSERT INTO cms_project_metrics (project_id, sort_order, label, value) VALUES (%s, %s, '%s', '%s')" % (int(prid), i + 1, lbl, val))
                 for eid in existing_ids:
                     cur.execute("UPDATE cms_project_metrics SET label='[удалено]' WHERE id=%s" % int(eid))
+            for item in body.get("order", []):
+                oid = item.get("id")
+                osort = item.get("sort_order")
+                if oid and osort and int(oid) != int(prid or 0):
+                    cur.execute("UPDATE cms_projects SET sort_order=%s WHERE id=%s" % (int(osort), int(oid)))
             conn.commit()
             cur.close()
+            return ok({"ok": True})
+
+        # --- add_project ---
+        if action == "add_project":
+            cur = conn.cursor()
+            cur.execute("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cms_projects")
+            next_order = cur.fetchone()[0]
+            cur.execute(
+                "INSERT INTO cms_projects (client, category, description, result, accent, is_active, sort_order) VALUES ('Новый клиент', 'Категория', 'Описание проекта', NULL, 'cyan', true, %s) RETURNING id" % int(next_order)
+            )
+            new_id = cur.fetchone()[0]
+            conn.commit()
+            cur.close()
+            return ok({"ok": True, "id": new_id})
+
+        # --- delete_project ---
+        if action == "delete_project":
+            did = body.get("id")
+            if did:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM cms_project_metrics WHERE project_id=%s" % int(did))
+                cur.execute("DELETE FROM cms_projects WHERE id=%s" % int(did))
+                conn.commit()
+                cur.close()
             return ok({"ok": True})
 
         # --- save_team ---

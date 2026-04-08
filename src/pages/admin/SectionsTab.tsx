@@ -56,6 +56,7 @@ function SortableItem({ id, isOn, onToggle }: SortableItemProps) {
   };
 
   const meta = SECTIONS_META[id];
+  if (!meta) return null;
 
   return (
     <div
