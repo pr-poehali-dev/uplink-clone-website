@@ -34,8 +34,7 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
               </div>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed mb-5">
-              Комплексное обслуживание IT-инфраструктуры с 2024 года. Работаем
-              по всему Саратову и Саратовской области.
+              IT-аутсорсинг и обслуживание IT-инфраструктуры в Саратове с 2015 года. Работаем по всему Саратову и Саратовской области.
             </p>
             <div className="flex gap-3">
               {["MessageCircle", "Send", "Phone"].map((icon) => (
@@ -55,11 +54,11 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
             </h4>
             <ul className="space-y-2.5">
               {[
-                "IT-аутсорсинг",
+                "IT-аутсорсинг для бизнеса",
+                "Системный администратор",
                 "Администрирование серверов",
                 "Монтаж ЛВС / СКС",
-                "Видеонаблюдение",
-                "IT-аудит",
+                "Видеонаблюдение под ключ",
                 "IP-телефония (FreePBX, ВАТС)",
               ].map((s) => (
                 <li key={s}>
