@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 
 const COOKIE_KEY = "cookie_consent_accepted";
@@ -32,9 +31,9 @@ export default function CookieBanner() {
           <p className="text-gray-300 text-sm leading-relaxed">
             Мы используем файлы{" "}
             <span className="text-white font-medium">cookie</span>, чтобы сайт работал корректно и загружался быстрее при повторных визитах.{" "}
-            <Link to="/privacy" className="text-cyan-400 hover:underline">
+            <a href="/privacy" className="text-cyan-400 hover:underline">
               Политика конфиденциальности
-            </Link>
+            </a>
           </p>
         </div>
         <button
