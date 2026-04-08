@@ -111,7 +111,7 @@ def handler(event: dict, context) -> dict:
                 if key == "admin_password":
                     continue
                 cur.execute(
-                    "INSERT INTO cms_settings (key, value, updated_at) VALUES ('%s', '%s', NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()" % (
+                    "INSERT INTO cms_settings (key, value, label, updated_at) VALUES ('%s', '%s', '', NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()" % (
                         key.replace("'", "''"), str(value).replace("'", "''"))
                 )
             conn.commit()
@@ -258,6 +258,11 @@ def handler(event: dict, context) -> dict:
                         int(mid)
                     )
                 )
+            for item in body.get("order", []):
+                oid = item.get("id")
+                osort = item.get("sort_order")
+                if oid and osort and int(oid) != int(mid or 0):
+                    cur.execute("UPDATE cms_team SET sort_order=%s WHERE id=%s" % (int(osort), int(oid)))
             conn.commit()
             cur.close()
             return ok({"ok": True})
