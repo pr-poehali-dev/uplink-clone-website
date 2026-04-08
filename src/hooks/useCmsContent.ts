@@ -93,9 +93,6 @@ export interface CmsContent {
 const CACHE_KEY = "cms_content_cache_v2";
 const CACHE_TTL = 10 * 60 * 1000; // 10 минут
 
-// Сбрасываем старые версии кэша
-["cms_content_cache"].forEach((k) => localStorage.removeItem(k));
-
 function getCached(): CmsContent | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
@@ -121,6 +118,9 @@ export function useCmsContent() {
   const [loading, setLoading] = useState(() => getCached() === null);
 
   useEffect(() => {
+    // Очищаем старые версии кэша
+    try { localStorage.removeItem("cms_content_cache"); } catch (e) { /* игнорируем */ }
+
     const cached = getCached();
     if (cached) {
       setContent(cached);
