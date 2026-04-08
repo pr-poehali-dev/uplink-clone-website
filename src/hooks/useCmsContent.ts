@@ -90,8 +90,11 @@ export interface CmsContent {
   faq: CmsFaqItem[];
 }
 
-const CACHE_KEY = "cms_content_cache";
+const CACHE_KEY = "cms_content_cache_v2";
 const CACHE_TTL = 10 * 60 * 1000; // 10 минут
+
+// Сбрасываем старые версии кэша
+["cms_content_cache"].forEach((k) => localStorage.removeItem(k));
 
 function getCached(): CmsContent | null {
   try {
