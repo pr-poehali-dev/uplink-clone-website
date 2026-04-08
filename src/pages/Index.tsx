@@ -22,18 +22,21 @@ export default function Index() {
     setModalOpen(true);
   };
 
+  const s = content?.settings;
+  const show = (key: string) => !s || s[key] !== "false";
+
   return (
     <div className="min-h-screen bg-[#080c14]">
-      <Header onContactClick={() => openModal("Шапка сайта")} settings={content?.settings} />
-      <Hero onContactClick={() => openModal("Главный экран (Hero)")} settings={content?.settings} />
-      <Services onContactClick={() => openModal("Блок услуг")} services={content?.services} />
-      <WhyUs settings={content?.settings} />
-      <Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} />
-      <QuickOrder />
-      <Projects projects={content?.projects} />
+      <Header onContactClick={() => openModal("Шапка сайта")} settings={s} />
+      {show("section_hero_visible")       && <Hero onContactClick={() => openModal("Главный экран (Hero)")} settings={s} />}
+      {show("section_services_visible")   && <Services onContactClick={() => openModal("Блок услуг")} services={content?.services} />}
+      {show("section_whyus_visible")      && <WhyUs settings={s} />}
+      {show("section_pricing_visible")    && <Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} />}
+      {show("section_quickorder_visible") && <QuickOrder />}
+      {show("section_projects_visible")   && <Projects projects={content?.projects} />}
       <div className="hidden"><About team={content?.team} /></div>
-      <Contacts onContactClick={() => openModal("Блок контактов")} settings={content?.settings} />
-      <Footer onContactClick={() => openModal("Подвал сайта")} settings={content?.settings} />
+      {show("section_contacts_visible")   && <Contacts onContactClick={() => openModal("Блок контактов")} settings={s} />}
+      <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} />
       <ContactModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

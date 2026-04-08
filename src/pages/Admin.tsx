@@ -3,8 +3,9 @@ import { CMS_API_URL, CmsContent } from "@/hooks/useCmsContent";
 import Icon from "@/components/ui/icon";
 import { SettingsTab, ServicesTab, PlansTab } from "./admin/AdminTabs";
 import { ProjectsTab, TeamTab, PasswordTab } from "./admin/AdminTabs2";
+import { SectionsTab } from "./admin/SectionsTab";
 
-type Tab = "settings" | "services" | "plans" | "projects" | "team" | "password";
+type Tab = "settings" | "sections" | "services" | "plans" | "projects" | "team" | "password";
 
 export default function Admin() {
   const [password, setPassword] = useState("");
@@ -109,6 +110,7 @@ export default function Admin() {
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: "settings", label: "Настройки", icon: "Settings" },
+    { id: "sections", label: "Секции", icon: "LayoutDashboard" },
     { id: "services", label: "Услуги", icon: "Briefcase" },
     { id: "plans", label: "Тарифы", icon: "CreditCard" },
     { id: "projects", label: "Проекты", icon: "FolderOpen" },
@@ -170,6 +172,7 @@ export default function Admin() {
           {/* Content */}
           <div className="flex-1 min-w-0">
             {tab === "settings" && <SettingsTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "sections" && <SectionsTab content={content} password={password} save={save} saving={saving} />}
             {tab === "services" && <ServicesTab content={content} password={password} save={save} saving={saving} />}
             {tab === "plans" && <PlansTab content={content} password={password} save={save} saving={saving} />}
             {tab === "projects" && <ProjectsTab content={content} password={password} save={save} saving={saving} />}
