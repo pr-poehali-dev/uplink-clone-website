@@ -61,8 +61,11 @@ def get_all_content(conn):
     cur.execute("SELECT id, sort_order, name, position, experience, photo_url, is_active FROM cms_team ORDER BY sort_order")
     team = [{"id": r[0], "sort_order": r[1], "name": r[2], "position": r[3], "experience": r[4], "photo_url": r[5], "is_active": r[6]} for r in cur.fetchall()]
 
+    cur.execute("SELECT id, sort_order, question, answer, is_active FROM cms_faq ORDER BY sort_order")
+    faq = [{"id": r[0], "sort_order": r[1], "question": r[2], "answer": r[3], "is_active": r[4]} for r in cur.fetchall()]
+
     cur.close()
-    return {"settings": settings, "services": services, "plans": plans, "projects": projects, "team": team}
+    return {"settings": settings, "services": services, "plans": plans, "projects": projects, "team": team, "faq": faq}
 
 
 def check_auth(body, conn):
@@ -344,6 +347,53 @@ def handler(event: dict, context) -> dict:
             if mid:
                 cur = conn.cursor()
                 cur.execute("DELETE FROM cms_team WHERE id=%s" % int(mid))
+                conn.commit()
+                cur.close()
+            return ok({"ok": True})
+
+        # --- save_faq ---
+        if action == "save_faq":
+            item = body.get("item", {})
+            fid = item.get("id")
+            cur = conn.cursor()
+            if fid:
+                cur.execute(
+                    "UPDATE cms_faq SET question='%s', answer='%s', is_active=%s, sort_order=%s, updated_at=NOW() WHERE id=%s" % (
+                        item.get("question", "").replace("'", "''"),
+                        item.get("answer", "").replace("'", "''"),
+                        "true" if item.get("is_active", True) else "false",
+                        int(item.get("sort_order", 0)),
+                        int(fid)
+                    )
+                )
+            for o in body.get("order", []):
+                oid = o.get("id")
+                osort = o.get("sort_order")
+                if oid and osort and int(oid) != int(fid or 0):
+                    cur.execute("UPDATE cms_faq SET sort_order=%s WHERE id=%s" % (int(osort), int(oid)))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # --- add_faq ---
+        if action == "add_faq":
+            cur = conn.cursor()
+            cur.execute("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cms_faq")
+            next_order = cur.fetchone()[0]
+            cur.execute(
+                "INSERT INTO cms_faq (question, answer, is_active, sort_order) VALUES ('Новый вопрос', 'Ответ на вопрос', true, %s) RETURNING id" % int(next_order)
+            )
+            new_id = cur.fetchone()[0]
+            conn.commit()
+            cur.close()
+            return ok({"ok": True, "id": new_id})
+
+        # --- delete_faq ---
+        if action == "delete_faq":
+            fid = body.get("id")
+            if fid:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM cms_faq WHERE id=%s" % int(fid))
                 conn.commit()
                 cur.close()
             return ok({"ok": True})

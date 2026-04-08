@@ -69,6 +69,14 @@ export interface CmsTeamMember {
   is_active: boolean;
 }
 
+export interface CmsFaqItem {
+  id: number;
+  sort_order: number;
+  question: string;
+  answer: string;
+  is_active: boolean;
+}
+
 export interface CmsSettings {
   [key: string]: string;
 }
@@ -79,6 +87,7 @@ export interface CmsContent {
   plans: CmsPlan[];
   projects: CmsProject[];
   team: CmsTeamMember[];
+  faq: CmsFaqItem[];
 }
 
 export function useCmsContent() {

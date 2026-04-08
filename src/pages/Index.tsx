@@ -12,13 +12,12 @@ import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
 import { useCmsContent } from "@/hooks/useCmsContent";
-
-const DEFAULT_ORDER = ["hero", "services", "whyus", "pricing", "quickorder", "projects", "team", "contacts"];
+import { SECTIONS_ORDER } from "@/config/sections.config";
 
 function parseOrder(raw: string | undefined): string[] {
-  if (!raw) return DEFAULT_ORDER;
-  const parsed = raw.split(",").map((s) => s.trim()).filter((s) => DEFAULT_ORDER.includes(s));
-  const missing = DEFAULT_ORDER.filter((s) => !parsed.includes(s));
+  if (!raw) return SECTIONS_ORDER;
+  const parsed = raw.split(",").map((s) => s.trim()).filter((s) => SECTIONS_ORDER.includes(s));
+  const missing = SECTIONS_ORDER.filter((s) => !parsed.includes(s));
   return [...parsed, ...missing];
 }
 
@@ -53,7 +52,7 @@ export default function Index() {
 
       {order.map((id) => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
 
-      <Faq />
+      <Faq items={content?.faq} />
 
       <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} />
 

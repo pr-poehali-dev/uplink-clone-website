@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { CmsContent } from "@/hooks/useCmsContent";
 import { SaveButton, SaveFn } from "./AdminShared";
 import Icon from "@/components/ui/icon";
+import { SECTIONS_META, SECTIONS_ORDER } from "@/config/sections.config";
 import {
   DndContext,
   closestCenter,
@@ -18,18 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const SECTIONS_META: Record<string, { label: string; desc: string }> = {
-  hero:       { label: "Главный экран",  desc: "Заголовок, описание, кнопки CTA" },
-  services:   { label: "Услуги",         desc: "Карточки с перечнем услуг" },
-  whyus:      { label: "Почему мы",      desc: "Преимущества и статистика" },
-  pricing:    { label: "Тарифы",         desc: "Тарифные планы с ценами" },
-  quickorder: { label: "Быстрый заказ",  desc: "Аккордеон с шагами заказа" },
-  projects:   { label: "Проекты",        desc: "Кейсы и реализованные проекты" },
-  team:       { label: "Наша команда",   desc: "История компании, подход и состав команды" },
-  contacts:   { label: "Контакты",       desc: "Телефон, email, адрес" },
-};
-
-const DEFAULT_ORDER = ["hero", "services", "whyus", "pricing", "quickorder", "projects", "team", "contacts"];
+const DEFAULT_ORDER = SECTIONS_ORDER;
 
 function parseOrder(raw: string | undefined): string[] {
   if (!raw) return DEFAULT_ORDER;

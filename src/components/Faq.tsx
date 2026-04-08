@@ -1,35 +1,9 @@
 import { useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
+import { CmsFaqItem } from "@/hooks/useCmsContent";
 
-const faqs = [
-  {
-    q: "Сколько стоит IT-аутсорсинг в Саратове?",
-    a: "Стоимость начинается от 7 000 ₽/мес — это абонентское обслуживание с фиксированной ценой. Точная сумма зависит от количества рабочих мест и набора услуг. Это до 40% дешевле, чем держать штатного системного администратора.",
-  },
-  {
-    q: "Как быстро приедет системный администратор?",
-    a: "Реагирование на критические инциденты — выезд от 30 минут, удалённое подключение за 15 минут. Заявки принимаем 24/7 по телефону 8 (986) 986-01-36.",
-  },
-  {
-    q: "Вы делаете монтаж видеонаблюдения под ключ?",
-    a: "Да. Берём на себя весь цикл: проектирование, поставка оборудования, монтаж IP и аналоговых камер для офиса, склада или магазина, настройка удалённого доступа и архива.",
-  },
-  {
-    q: "Выполняете монтаж локальной сети (ЛВС/СКС)?",
-    a: "Да, выполняем полный цикл: проектирование, прокладка кабеля, монтаж коммутационного оборудования Mikrotik и Cisco, настройка корпоративной сети, тестирование и сертификация.",
-  },
-  {
-    q: "Можно подключить IP-телефонию для бизнеса в Саратове?",
-    a: "Конечно. Настраиваем IP-АТС и виртуальные АТС (ВАТС), подключаем IP-телефоны, интегрируем с CRM-системами, администрируем Asterisk и FreePBX.",
-  },
-  {
-    q: "Работаете ли вы с малым бизнесом?",
-    a: "Да, малый и средний бизнес — наша основная аудитория. IT-аутсорсинг особенно выгоден небольшим компаниям: не нужен штатный сотрудник, платите только за реальный объём работ.",
-  },
-];
-
-function FaqItem({ item, index }: { item: (typeof faqs)[0]; index: number }) {
+function FaqItem({ item, index }: { item: CmsFaqItem; index: number }) {
   const [open, setOpen] = useState(false);
   const { ref, isVisible } = useScrollAnimation();
 
@@ -46,10 +20,15 @@ function FaqItem({ item, index }: { item: (typeof faqs)[0]; index: number }) {
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-5 text-left gap-4 group"
       >
-        <span className="text-white font-medium text-sm leading-snug group-hover:text-cyan-400 transition-colors" itemProp="name">
-          {item.q}
+        <span
+          className="text-white font-medium text-sm leading-snug group-hover:text-cyan-400 transition-colors"
+          itemProp="name"
+        >
+          {item.question}
         </span>
-        <div className={`flex-shrink-0 w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center transition-all duration-300 ${open ? "bg-cyan-500/20 rotate-45" : ""}`}>
+        <div
+          className={`flex-shrink-0 w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center transition-all duration-300 ${open ? "bg-cyan-500/20 rotate-45" : ""}`}
+        >
           <Icon name="Plus" size={14} className="text-cyan-400" />
         </div>
       </button>
@@ -60,15 +39,22 @@ function FaqItem({ item, index }: { item: (typeof faqs)[0]; index: number }) {
           itemProp="acceptedAnswer"
           itemType="https://schema.org/Answer"
         >
-          <p className="pt-4" itemProp="text">{item.a}</p>
+          <p className="pt-4" itemProp="text">{item.answer}</p>
         </div>
       )}
     </div>
   );
 }
 
-export default function Faq() {
+interface FaqProps {
+  items?: CmsFaqItem[];
+}
+
+export default function Faq({ items }: FaqProps) {
   const { ref, isVisible } = useScrollAnimation();
+  const activeItems = (items ?? []).filter((i) => i.is_active);
+
+  if (activeItems.length === 0) return null;
 
   return (
     <section
@@ -95,8 +81,8 @@ export default function Faq() {
         </div>
 
         <div className="max-w-3xl mx-auto space-y-3">
-          {faqs.map((item, i) => (
-            <FaqItem key={i} item={item} index={i} />
+          {activeItems.map((item, i) => (
+            <FaqItem key={item.id} item={item} index={i} />
           ))}
         </div>
       </div>
