@@ -12,6 +12,15 @@ import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
 import { useCmsContent } from "@/hooks/useCmsContent";
 
+const DEFAULT_ORDER = ["hero", "services", "whyus", "pricing", "quickorder", "projects", "contacts"];
+
+function parseOrder(raw: string | undefined): string[] {
+  if (!raw) return DEFAULT_ORDER;
+  const parsed = raw.split(",").map((s) => s.trim()).filter((s) => DEFAULT_ORDER.includes(s));
+  const missing = DEFAULT_ORDER.filter((s) => !parsed.includes(s));
+  return [...parsed, ...missing];
+}
+
 export default function Index() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSource, setModalSource] = useState("Не указан");
@@ -23,20 +32,28 @@ export default function Index() {
   };
 
   const s = content?.settings;
-  const show = (key: string) => !s || s[key] !== "false";
+  const show = (id: string) => !s || s[`section_${id}_visible`] !== "false";
+  const order = parseOrder(s?.section_order);
+
+  const sectionMap: Record<string, JSX.Element | null> = {
+    hero:       <Hero onContactClick={() => openModal("Главный экран (Hero)")} settings={s} />,
+    services:   <Services onContactClick={() => openModal("Блок услуг")} services={content?.services} />,
+    whyus:      <WhyUs settings={s} />,
+    pricing:    <Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} />,
+    quickorder: <QuickOrder />,
+    projects:   <Projects projects={content?.projects} />,
+    contacts:   <Contacts onContactClick={() => openModal("Блок контактов")} settings={s} />,
+  };
 
   return (
     <div className="min-h-screen bg-[#080c14]">
       <Header onContactClick={() => openModal("Шапка сайта")} settings={s} />
-      {show("section_hero_visible")       && <Hero onContactClick={() => openModal("Главный экран (Hero)")} settings={s} />}
-      {show("section_services_visible")   && <Services onContactClick={() => openModal("Блок услуг")} services={content?.services} />}
-      {show("section_whyus_visible")      && <WhyUs settings={s} />}
-      {show("section_pricing_visible")    && <Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} />}
-      {show("section_quickorder_visible") && <QuickOrder />}
-      {show("section_projects_visible")   && <Projects projects={content?.projects} />}
+
+      {order.map((id) => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
+
       <div className="hidden"><About team={content?.team} /></div>
-      {show("section_contacts_visible")   && <Contacts onContactClick={() => openModal("Блок контактов")} settings={s} />}
       <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} />
+
       <ContactModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
