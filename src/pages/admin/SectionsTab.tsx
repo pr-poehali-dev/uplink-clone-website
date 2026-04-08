@@ -139,7 +139,7 @@ export function SectionsTab({ content, save, saving }: { content: CmsContent; pa
     DEFAULT_ORDER.forEach((id) => {
       updates[`section_${id}_visible`] = visible[id] ? "true" : "false";
     });
-    save("/save/settings", { updates });
+    save("save_settings", { updates });
   };
 
   const visibleCount = DEFAULT_ORDER.filter((id) => visible[id]).length;

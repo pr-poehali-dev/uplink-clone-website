@@ -34,16 +34,20 @@ export default function Admin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
-    const r = await fetch(CMS_API_URL + "/save/settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password, updates: {} }),
-    });
-    if (r.ok) {
-      setAuthed(true);
-      loadContent(password);
-    } else {
-      setAuthError("Неверный пароль");
+    try {
+      const r = await fetch(CMS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "save_settings", password, updates: {} }),
+      });
+      if (r.ok) {
+        setAuthed(true);
+        loadContent(password);
+      } else {
+        setAuthError("Неверный пароль");
+      }
+    } catch {
+      setAuthError("Ошибка соединения, попробуйте ещё раз");
     }
   };
 
@@ -52,19 +56,24 @@ export default function Admin() {
     setTimeout(() => setSaveMsg(""), 3000);
   };
 
-  const save = async (path: string, body: object) => {
+  const save = async (action: string, body: object) => {
     setSaving(true);
-    const r = await fetch(CMS_API_URL + path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password, ...body }),
-    });
-    setSaving(false);
-    if (r.ok) {
-      showMsg("Сохранено!");
-      loadContent(password);
-    } else {
-      showMsg("Ошибка сохранения");
+    try {
+      const r = await fetch(CMS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, password, ...body }),
+      });
+      if (r.ok) {
+        showMsg("Сохранено!");
+        loadContent(password);
+      } else {
+        showMsg("Ошибка сохранения");
+      }
+    } catch {
+      showMsg("Ошибка соединения");
+    } finally {
+      setSaving(false);
     }
   };
 

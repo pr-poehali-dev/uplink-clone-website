@@ -14,7 +14,7 @@ export function SettingsTab({ content, save, saving }: { content: CmsContent; pa
     setVals(filtered);
   }, [content.settings]);
 
-  const handleSave = () => save("/save/settings", { updates: vals });
+  const handleSave = () => save("save_settings", { updates: vals });
 
   const groups: { label: string; keys: string[] }[] = [
     { label: "Контакты", keys: ["phone", "phone_href", "email_support", "email_info", "address", "work_hours", "response_time"] },
@@ -76,7 +76,7 @@ export function ServicesTab({ content, save, saving }: { content: CmsContent; pa
     if (content.services.length && !selected) setSelected(content.services[0]);
   }, [content.services]);
 
-  const handleSave = () => selected && save("/save/service", { service: selected });
+  const handleSave = () => selected && save("save_service", { service: selected });
 
   if (!selected) return null;
 
@@ -138,7 +138,7 @@ export function PlansTab({ content, save, saving }: { content: CmsContent; passw
     if (content.plans.length && !selected) setSelected(content.plans[0]);
   }, [content.plans]);
 
-  const handleSave = () => selected && save("/save/plan", { plan: selected });
+  const handleSave = () => selected && save("save_plan", { plan: selected });
 
   if (!selected) return null;
 

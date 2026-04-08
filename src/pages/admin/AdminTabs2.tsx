@@ -10,7 +10,7 @@ export function ProjectsTab({ content, save, saving }: { content: CmsContent; pa
     if (content.projects.length && !selected) setSelected(content.projects[0]);
   }, [content.projects]);
 
-  const handleSave = () => selected && save("/save/project", { project: selected });
+  const handleSave = () => selected && save("save_project", { project: selected });
 
   if (!selected) return null;
 
@@ -85,7 +85,7 @@ export function TeamTab({ content, save, saving }: { content: CmsContent; passwo
     if (content.team.length && !selected) setSelected(content.team[0]);
   }, [content.team]);
 
-  const handleSave = () => selected && save("/save/team", { member: selected });
+  const handleSave = () => selected && save("save_team", { member: selected });
 
   if (!selected) return null;
 
@@ -137,7 +137,7 @@ export function PasswordTab({ password, setPassword, save, saving }: { password:
     if (newPwd.length < 6) { setError("Минимум 6 символов"); return; }
     if (newPwd !== confirmPwd) { setError("Пароли не совпадают"); return; }
     setError("");
-    save("/save/password", { new_password: newPwd });
+    save("save_password", { new_password: newPwd });
     setPassword(newPwd);
     setNewPwd("");
     setConfirmPwd("");

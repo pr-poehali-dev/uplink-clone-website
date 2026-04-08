@@ -13,4 +13,6 @@ export function SaveButton({ onClick, saving }: { onClick: () => void; saving: b
   );
 }
 
-export type SaveFn = (path: string, body: object) => void;
+// action — строка вида "save_settings", "save_service" и т.д.
+// body — данные без поля action и password (они добавляются в Admin.tsx)
+export type SaveFn = (action: string, body: object) => void;
