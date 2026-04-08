@@ -25,10 +25,11 @@ const SECTIONS_META: Record<string, { label: string; desc: string }> = {
   pricing:    { label: "Тарифы",         desc: "Тарифные планы с ценами" },
   quickorder: { label: "Быстрый заказ",  desc: "Аккордеон с шагами заказа" },
   projects:   { label: "Проекты",        desc: "Кейсы и реализованные проекты" },
+  team:       { label: "Наша команда",   desc: "История компании, подход и состав команды" },
   contacts:   { label: "Контакты",       desc: "Телефон, email, адрес" },
 };
 
-const DEFAULT_ORDER = ["hero", "services", "whyus", "pricing", "quickorder", "projects", "contacts"];
+const DEFAULT_ORDER = ["hero", "services", "whyus", "pricing", "quickorder", "projects", "team", "contacts"];
 
 function parseOrder(raw: string | undefined): string[] {
   if (!raw) return DEFAULT_ORDER;

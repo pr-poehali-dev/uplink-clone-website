@@ -6,12 +6,13 @@ import Pricing from "@/components/Pricing";
 import WhyUs from "@/components/WhyUs";
 import QuickOrder from "@/components/QuickOrder";
 import Projects from "@/components/Projects";
+import About from "@/components/About";
 import Contacts from "@/components/Contacts";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
 import { useCmsContent } from "@/hooks/useCmsContent";
 
-const DEFAULT_ORDER = ["hero", "services", "whyus", "pricing", "quickorder", "projects", "contacts"];
+const DEFAULT_ORDER = ["hero", "services", "whyus", "pricing", "quickorder", "projects", "team", "contacts"];
 
 function parseOrder(raw: string | undefined): string[] {
   if (!raw) return DEFAULT_ORDER;
@@ -41,6 +42,7 @@ export default function Index() {
     pricing:    <Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} />,
     quickorder: <QuickOrder />,
     projects:   <Projects projects={content?.projects} />,
+    team:       <About team={content?.team} />,
     contacts:   <Contacts onContactClick={() => openModal("Блок контактов")} settings={s} />,
   };
 
