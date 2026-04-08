@@ -35,10 +35,8 @@
     --radius: 0.75rem;
 
     --neon-blue: #00d4ff;
-    --neon-green: #00ff88;
     --dark-bg: #080c14;
     --card-bg: #0d1421;
-    --card-border: rgba(0, 212, 255, 0.15);
   }
 }
 
@@ -63,16 +61,6 @@
 }
 
 @layer utilities {
-  .neon-text {
-    color: var(--neon-blue);
-    text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-  }
-
-  .neon-green-text {
-    color: var(--neon-green);
-    text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-  }
-
   .neon-border {
     border: 1px solid rgba(0, 212, 255, 0.3);
     box-shadow:
@@ -182,36 +170,6 @@
   }
 }
 
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fade-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.7s ease-out forwards;
-}
-
-.animate-fade-left {
-  animation: fade-in-left 0.7s ease-out forwards;
-}
-
 .delay-100 {
   animation-delay: 0.1s;
 }
@@ -224,10 +182,6 @@
 .delay-400 {
   animation-delay: 0.4s;
 }
-.delay-500 {
-  animation-delay: 0.5s;
-}
-
 /* Neon hover — вне @layer, transition задан через все нужные свойства сразу.
    opacity/transform: 700ms (анимация появления при скролле)
    border-color/box-shadow: 150ms (hover свечение) */
