@@ -8,6 +8,28 @@ export interface CmsServiceItem {
   item_text: string;
 }
 
+export interface CmsServiceBenefit {
+  id: number;
+  sort_order: number;
+  icon: string;
+  title: string;
+  description: string | null;
+}
+
+export interface CmsServiceStep {
+  id: number;
+  sort_order: number;
+  step_title: string;
+  step_description: string | null;
+}
+
+export interface CmsServiceFaq {
+  id: number;
+  sort_order: number;
+  question: string;
+  answer: string;
+}
+
 export interface CmsService {
   id: number;
   sort_order: number;
@@ -16,7 +38,30 @@ export interface CmsService {
   description: string;
   accent: string;
   is_active: boolean;
+  slug?: string | null;
+  short_desc?: string | null;
+  hero_title?: string | null;
+  hero_subtitle?: string | null;
+  full_description?: string | null;
+  price_from?: string | null;
+  for_whom?: string | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
   items: CmsServiceItem[];
+  benefits?: CmsServiceBenefit[];
+  steps?: CmsServiceStep[];
+  faq?: CmsServiceFaq[];
+}
+
+export interface CmsCalcOption {
+  id: number;
+  sort_order: number;
+  key: string;
+  label: string;
+  description: string | null;
+  price: number;
+  icon: string;
+  is_active: boolean;
 }
 
 export interface CmsPlanFeature {
@@ -88,9 +133,11 @@ export interface CmsContent {
   projects: CmsProject[];
   team: CmsTeamMember[];
   faq: CmsFaqItem[];
+  calc_settings?: Record<string, string>;
+  calc_options?: CmsCalcOption[];
 }
 
-const CACHE_KEY = "cms_content_cache_v2";
+const CACHE_KEY = "cms_content_cache_v3";
 const CACHE_TTL = 10 * 60 * 1000; // 10 минут
 
 function getCached(): CmsContent | null {
@@ -119,7 +166,10 @@ export function useCmsContent() {
 
   useEffect(() => {
     // Очищаем старые версии кэша
-    try { localStorage.removeItem("cms_content_cache"); } catch (e) { /* игнорируем */ }
+    try {
+      localStorage.removeItem("cms_content_cache");
+      localStorage.removeItem("cms_content_cache_v2");
+    } catch (e) { /* игнорируем */ }
 
     const cached = getCached();
     if (cached) {

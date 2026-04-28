@@ -34,13 +34,25 @@ def get_all_content(conn):
     cur.execute("SELECT key, value FROM cms_settings ORDER BY id")
     settings = {row[0]: row[1] for row in cur.fetchall()}
 
-    cur.execute("SELECT id, sort_order, icon, title, description, accent, is_active FROM cms_services ORDER BY sort_order")
+    cur.execute("SELECT id, sort_order, icon, title, description, accent, is_active, slug, short_desc, hero_title, hero_subtitle, full_description, price_from, for_whom, seo_title, seo_description FROM cms_services ORDER BY sort_order")
     services_rows = cur.fetchall()
     services = []
     for s in services_rows:
         cur.execute("SELECT id, sort_order, item_text FROM cms_service_items WHERE service_id = %s ORDER BY sort_order" % s[0])
         items = [{"id": r[0], "sort_order": r[1], "item_text": r[2]} for r in cur.fetchall()]
-        services.append({"id": s[0], "sort_order": s[1], "icon": s[2], "title": s[3], "description": s[4], "accent": s[5], "is_active": s[6], "items": items})
+        cur.execute("SELECT id, sort_order, icon, title, description FROM cms_service_benefits WHERE service_id = %s ORDER BY sort_order" % s[0])
+        benefits = [{"id": r[0], "sort_order": r[1], "icon": r[2], "title": r[3], "description": r[4]} for r in cur.fetchall()]
+        cur.execute("SELECT id, sort_order, step_title, step_description FROM cms_service_steps WHERE service_id = %s ORDER BY sort_order" % s[0])
+        steps = [{"id": r[0], "sort_order": r[1], "step_title": r[2], "step_description": r[3]} for r in cur.fetchall()]
+        cur.execute("SELECT id, sort_order, question, answer FROM cms_service_faq WHERE service_id = %s ORDER BY sort_order" % s[0])
+        sfaq = [{"id": r[0], "sort_order": r[1], "question": r[2], "answer": r[3]} for r in cur.fetchall()]
+        services.append({
+            "id": s[0], "sort_order": s[1], "icon": s[2], "title": s[3], "description": s[4],
+            "accent": s[5], "is_active": s[6], "slug": s[7], "short_desc": s[8],
+            "hero_title": s[9], "hero_subtitle": s[10], "full_description": s[11],
+            "price_from": s[12], "for_whom": s[13], "seo_title": s[14], "seo_description": s[15],
+            "items": items, "benefits": benefits, "steps": steps, "faq": sfaq
+        })
 
     cur.execute("SELECT id, sort_order, name, price, badge, description, color, border_class, btn_class, is_highlighted, is_active FROM cms_plans ORDER BY sort_order")
     plans_rows = cur.fetchall()
@@ -64,8 +76,14 @@ def get_all_content(conn):
     cur.execute("SELECT id, sort_order, question, answer, is_active FROM cms_faq ORDER BY sort_order")
     faq = [{"id": r[0], "sort_order": r[1], "question": r[2], "answer": r[3], "is_active": r[4]} for r in cur.fetchall()]
 
+    cur.execute("SELECT key, value, label FROM cms_calc_settings ORDER BY id")
+    calc_settings = {r[0]: r[1] for r in cur.fetchall()}
+
+    cur.execute("SELECT id, sort_order, key, label, description, price, icon, is_active FROM cms_calc_options ORDER BY sort_order")
+    calc_options = [{"id": r[0], "sort_order": r[1], "key": r[2], "label": r[3], "description": r[4], "price": r[5], "icon": r[6], "is_active": r[7]} for r in cur.fetchall()]
+
     cur.close()
-    return {"settings": settings, "services": services, "plans": plans, "projects": projects, "team": team, "faq": faq}
+    return {"settings": settings, "services": services, "plans": plans, "projects": projects, "team": team, "faq": faq, "calc_settings": calc_settings, "calc_options": calc_options}
 
 
 def check_auth(body, conn):
@@ -138,14 +156,26 @@ def handler(event: dict, context) -> dict:
             sid = service.get("id")
             cur = conn.cursor()
             if sid:
+                def esc(v):
+                    return str(v or "").replace("'", "''")
+                slug_val = "NULL" if not service.get("slug") else "'%s'" % esc(service.get("slug"))
                 cur.execute(
-                    "UPDATE cms_services SET icon='%s', title='%s', description='%s', accent='%s', is_active=%s, sort_order=%s, updated_at=NOW() WHERE id=%s" % (
-                        service.get("icon", "").replace("'", "''"),
-                        service.get("title", "").replace("'", "''"),
-                        service.get("description", "").replace("'", "''"),
-                        service.get("accent", "").replace("'", "''"),
+                    "UPDATE cms_services SET icon='%s', title='%s', description='%s', accent='%s', is_active=%s, sort_order=%s, slug=%s, short_desc='%s', hero_title='%s', hero_subtitle='%s', full_description='%s', price_from='%s', for_whom='%s', seo_title='%s', seo_description='%s', updated_at=NOW() WHERE id=%s" % (
+                        esc(service.get("icon")),
+                        esc(service.get("title")),
+                        esc(service.get("description")),
+                        esc(service.get("accent")),
                         "true" if service.get("is_active", True) else "false",
                         int(service.get("sort_order", 0)),
+                        slug_val,
+                        esc(service.get("short_desc")),
+                        esc(service.get("hero_title")),
+                        esc(service.get("hero_subtitle")),
+                        esc(service.get("full_description")),
+                        esc(service.get("price_from")),
+                        esc(service.get("for_whom")),
+                        esc(service.get("seo_title")),
+                        esc(service.get("seo_description")),
                         int(sid)
                     )
                 )
@@ -396,6 +426,115 @@ def handler(event: dict, context) -> dict:
                 cur.execute("DELETE FROM cms_faq WHERE id=%s" % int(fid))
                 conn.commit()
                 cur.close()
+            return ok({"ok": True})
+
+        # --- save_service_extras: benefits, steps, faq для услуги ---
+        if action == "save_service_extras":
+            sid = int(body.get("service_id", 0))
+            if not sid:
+                return err("service_id required")
+            cur = conn.cursor()
+            def esc(v):
+                return str(v or "").replace("'", "''")
+
+            kind = body.get("kind")  # benefits | steps | faq
+            items = body.get("items", [])
+
+            if kind == "benefits":
+                cur.execute("SELECT id FROM cms_service_benefits WHERE service_id=%s" % sid)
+                existing = [r[0] for r in cur.fetchall()]
+                kept = []
+                for i, it in enumerate(items):
+                    iid = it.get("id")
+                    if iid and iid in existing:
+                        cur.execute("UPDATE cms_service_benefits SET sort_order=%s, icon='%s', title='%s', description='%s' WHERE id=%s" % (
+                            i + 1, esc(it.get("icon", "Check")), esc(it.get("title")), esc(it.get("description")), int(iid)))
+                        kept.append(iid)
+                    else:
+                        cur.execute("INSERT INTO cms_service_benefits (service_id, sort_order, icon, title, description) VALUES (%s, %s, '%s', '%s', '%s')" % (
+                            sid, i + 1, esc(it.get("icon", "Check")), esc(it.get("title")), esc(it.get("description"))))
+                for eid in existing:
+                    if eid not in kept:
+                        cur.execute("UPDATE cms_service_benefits SET title='[удалено]' WHERE id=%s" % int(eid))
+
+            elif kind == "steps":
+                cur.execute("SELECT id FROM cms_service_steps WHERE service_id=%s" % sid)
+                existing = [r[0] for r in cur.fetchall()]
+                kept = []
+                for i, it in enumerate(items):
+                    iid = it.get("id")
+                    if iid and iid in existing:
+                        cur.execute("UPDATE cms_service_steps SET sort_order=%s, step_title='%s', step_description='%s' WHERE id=%s" % (
+                            i + 1, esc(it.get("step_title")), esc(it.get("step_description")), int(iid)))
+                        kept.append(iid)
+                    else:
+                        cur.execute("INSERT INTO cms_service_steps (service_id, sort_order, step_title, step_description) VALUES (%s, %s, '%s', '%s')" % (
+                            sid, i + 1, esc(it.get("step_title")), esc(it.get("step_description"))))
+                for eid in existing:
+                    if eid not in kept:
+                        cur.execute("UPDATE cms_service_steps SET step_title='[удалено]' WHERE id=%s" % int(eid))
+
+            elif kind == "faq":
+                cur.execute("SELECT id FROM cms_service_faq WHERE service_id=%s" % sid)
+                existing = [r[0] for r in cur.fetchall()]
+                kept = []
+                for i, it in enumerate(items):
+                    iid = it.get("id")
+                    if iid and iid in existing:
+                        cur.execute("UPDATE cms_service_faq SET sort_order=%s, question='%s', answer='%s' WHERE id=%s" % (
+                            i + 1, esc(it.get("question")), esc(it.get("answer")), int(iid)))
+                        kept.append(iid)
+                    else:
+                        cur.execute("INSERT INTO cms_service_faq (service_id, sort_order, question, answer) VALUES (%s, %s, '%s', '%s')" % (
+                            sid, i + 1, esc(it.get("question")), esc(it.get("answer"))))
+                for eid in existing:
+                    if eid not in kept:
+                        cur.execute("UPDATE cms_service_faq SET question='[удалено]' WHERE id=%s" % int(eid))
+
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # --- save_calc_settings ---
+        if action == "save_calc_settings":
+            updates = body.get("updates", {})
+            cur = conn.cursor()
+            for key, value in updates.items():
+                cur.execute(
+                    "INSERT INTO cms_calc_settings (key, value, label, updated_at) VALUES ('%s', '%s', '', NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()" % (
+                        key.replace("'", "''"), str(value).replace("'", "''"))
+                )
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # --- save_calc_options ---
+        if action == "save_calc_options":
+            options = body.get("options", [])
+            cur = conn.cursor()
+            def esc(v):
+                return str(v or "").replace("'", "''")
+            cur.execute("SELECT id FROM cms_calc_options")
+            existing = [r[0] for r in cur.fetchall()]
+            kept = []
+            for i, o in enumerate(options):
+                oid = o.get("id")
+                if oid and oid in existing:
+                    cur.execute("UPDATE cms_calc_options SET sort_order=%s, key='%s', label='%s', description='%s', price=%s, icon='%s', is_active=%s WHERE id=%s" % (
+                        i + 1, esc(o.get("key")), esc(o.get("label")), esc(o.get("description")),
+                        int(o.get("price", 0)), esc(o.get("icon", "Check")),
+                        "true" if o.get("is_active", True) else "false", int(oid)))
+                    kept.append(oid)
+                else:
+                    cur.execute("INSERT INTO cms_calc_options (sort_order, key, label, description, price, icon, is_active) VALUES (%s, '%s', '%s', '%s', %s, '%s', %s) ON CONFLICT (key) DO UPDATE SET label=EXCLUDED.label, description=EXCLUDED.description, price=EXCLUDED.price, icon=EXCLUDED.icon, sort_order=EXCLUDED.sort_order" % (
+                        i + 1, esc(o.get("key", "opt_" + str(i))), esc(o.get("label")), esc(o.get("description")),
+                        int(o.get("price", 0)), esc(o.get("icon", "Check")),
+                        "true" if o.get("is_active", True) else "false"))
+            for eid in existing:
+                if eid not in kept:
+                    cur.execute("UPDATE cms_calc_options SET is_active=false, label='[удалено]' WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
             return ok({"ok": True})
 
         return err("Unknown action", 404)

@@ -49,7 +49,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-[#080c14]">
-      <Header onContactClick={() => openModal("Шапка сайта")} settings={s} />
+      <Header onContactClick={() => openModal("Шапка сайта")} settings={s} services={content?.services} />
 
       {order.map((id) => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
 

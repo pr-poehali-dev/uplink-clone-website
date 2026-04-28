@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Icon from "@/components/ui/icon";
 
 const SEND_EMAIL_URL = "https://functions.poehali.dev/97638ab8-62ea-4ada-8078-f5aa05a3f044";
@@ -7,6 +7,8 @@ interface ContactModalProps {
   open: boolean;
   onClose: () => void;
   source?: string;
+  prefillMessage?: string;
+  prefillService?: string;
 }
 
 const services = [
@@ -20,14 +22,24 @@ const services = [
   "Другое",
 ];
 
-export default function ContactModal({ open, onClose, source = "Не указан" }: ContactModalProps) {
+export default function ContactModal({ open, onClose, source = "Не указан", prefillMessage, prefillService }: ContactModalProps) {
   const [form, setForm] = useState({
     name: "",
     phone: "",
     email: "",
-    service: "",
-    message: "",
+    service: prefillService || "",
+    message: prefillMessage || "",
   });
+
+  useEffect(() => {
+    if (open) {
+      setForm((p) => ({
+        ...p,
+        message: prefillMessage ?? p.message,
+        service: prefillService ?? p.service,
+      }));
+    }
+  }, [open, prefillMessage, prefillService]);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

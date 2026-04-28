@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
 import { CmsService } from "@/hooks/useCmsContent";
@@ -88,8 +89,9 @@ const services = [
   },
 ];
 
-function ServiceCard({ s, index }: { s: { icon: string; title: string; description: string; accent: string; items: { item_text: string }[] }; index: number }) {
+function ServiceCard({ s, index }: { s: { icon: string; title: string; description: string; accent: string; items: { item_text: string }[]; slug?: string | null }; index: number }) {
   const { ref, isVisible } = useScrollAnimation();
+  const hasPage = !!s.slug;
   return (
     <div
       ref={ref}
@@ -109,8 +111,8 @@ function ServiceCard({ s, index }: { s: { icon: string; title: string; descripti
         </h3>
         <p className="text-gray-400 text-sm leading-relaxed">{s.description}</p>
       </div>
-      <ul className="space-y-1.5">
-        {s.items.map((item) => (
+      <ul className="space-y-1.5 flex-1">
+        {s.items.slice(0, 5).map((item) => (
           <li
             key={item.item_text}
             className="flex items-start gap-2 text-sm text-gray-300"
@@ -124,6 +126,15 @@ function ServiceCard({ s, index }: { s: { icon: string; title: string; descripti
           </li>
         ))}
       </ul>
+      {hasPage && (
+        <Link
+          to={`/services/${s.slug}`}
+          className="inline-flex items-center gap-1.5 text-cyan-400 text-sm font-semibold hover:gap-2 transition-all mt-1 group"
+        >
+          Подробнее об услуге
+          <Icon name="ArrowRight" size={14} className="group-hover:translate-x-1 transition-transform" />
+        </Link>
+      )}
     </div>
   );
 }
@@ -164,7 +175,14 @@ export default function Services({ onContactClick, services: cmsServices }: Serv
           ))}
         </div>
 
-        <div className="flex justify-center">
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link
+            to="/services"
+            className="btn-outline-neon px-8 py-4 rounded-xl text-base font-semibold flex items-center gap-3"
+          >
+            <Icon name="LayoutGrid" size={20} />
+            Все услуги
+          </Link>
           <button
             onClick={onContactClick}
             className="btn-neon px-10 py-4 rounded-xl text-base font-semibold flex items-center gap-3 animate-glow"

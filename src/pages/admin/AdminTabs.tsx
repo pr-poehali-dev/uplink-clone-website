@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { CmsContent, CmsService, CmsPlan } from "@/hooks/useCmsContent";
 import { SaveButton, SaveFn } from "./AdminShared";
+import { ServicePageEditor } from "./ServicePageEditor";
 import Icon from "@/components/ui/icon";
 import {
   DndContext,
@@ -250,6 +251,13 @@ export function ServicesTab({ content, save, saving }: { content: CmsContent; pa
               <label htmlFor="svc_active" className="text-gray-400 text-sm">Показывать на сайте</label>
             </div>
             <SaveButton onClick={handleSave} saving={saving} />
+
+            <ServicePageEditor
+              key={selected.id}
+              service={selected}
+              save={save}
+              saving={saving}
+            />
           </>
         )}
       </div>
