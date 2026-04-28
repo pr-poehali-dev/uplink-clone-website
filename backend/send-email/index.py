@@ -8,8 +8,23 @@ import smtplib
 import ssl
 import urllib.request
 import urllib.parse
+import psycopg2
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+
+def get_db_secrets() -> dict:
+    """Загружает все секреты из таблицы app_secrets в БД."""
+    try:
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
+        cur = conn.cursor()
+        cur.execute("SELECT key, value FROM app_secrets WHERE value != ''")
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return {r[0]: r[1] for r in rows}
+    except Exception:
+        return {}
 
 
 def send_telegram(token: str, chat_id: str, text: str, thread_id: str = ""):
@@ -90,13 +105,19 @@ def handler(event: dict, context) -> dict:
 
     results = {"email": False, "telegram": False, "maax": False}
 
+    # Загружаем секреты из БД (приоритет над env)
+    db_secrets = get_db_secrets()
+
+    def secret(key: str) -> str:
+        return db_secrets.get(key) or os.environ.get(key, "")
+
     # ── EMAIL ──────────────────────────────────────────────────────────
     try:
         smtp_host = os.environ["SMTP_HOST"]
         smtp_port = int(os.environ["SMTP_PORT"])
         smtp_user = os.environ["SMTP_USER"]
         smtp_password = os.environ["SMTP_PASSWORD"]
-        recipient = os.environ["RECIPIENT_EMAIL"]
+        recipient = secret("RECIPIENT_EMAIL") or os.environ["RECIPIENT_EMAIL"]
 
         email_row = f"""<tr>
             <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666; font-size: 14px;">✉️ Email</td>
@@ -162,9 +183,9 @@ def handler(event: dict, context) -> dict:
         results["email_error"] = str(e)
 
     # ── TELEGRAM ───────────────────────────────────────────────────────
-    tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-    tg_chat = os.environ.get("TELEGRAM_CHAT_ID", "")
-    tg_thread = os.environ.get("TELEGRAM_THREAD_ID", "")
+    tg_token = secret("TELEGRAM_BOT_TOKEN")
+    tg_chat = secret("TELEGRAM_CHAT_ID")
+    tg_thread = secret("TELEGRAM_THREAD_ID")
     if tg_token and tg_chat:
         lines = [
             "📩 <b>Новая заявка с сайта</b>",
@@ -184,8 +205,8 @@ def handler(event: dict, context) -> dict:
         results["telegram"] = send_telegram(tg_token, tg_chat, tg_text, tg_thread)
 
     # ── MAAX (MAX) ─────────────────────────────────────────────────────
-    maax_key = os.environ.get("MAAX_API_KEY", "")
-    maax_chat = os.environ.get("MAAX_CHAT_ID", "")
+    maax_key = secret("MAAX_API_KEY")
+    maax_chat = secret("MAAX_CHAT_ID")
     if maax_key and maax_chat:
         lines = [
             "📩 Новая заявка с сайта ИТК Аплинк-IT",

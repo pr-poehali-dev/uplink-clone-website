@@ -6,9 +6,10 @@ import { ProjectsTab, TeamTab, PasswordTab } from "./admin/AdminTabs2";
 import { SectionsTab } from "./admin/SectionsTab";
 import { FaqTab } from "./admin/FaqTab";
 import { CalculatorTab } from "./admin/CalculatorTab";
+import { SecretsTab } from "./admin/SecretsTab";
 import { PreviewPanel } from "./admin/PreviewPanel";
 
-type Tab = "settings" | "sections" | "services" | "plans" | "calculator" | "projects" | "team" | "faq" | "password";
+type Tab = "settings" | "sections" | "services" | "plans" | "calculator" | "projects" | "team" | "faq" | "secrets" | "password";
 
 export default function Admin() {
   const [password, setPassword] = useState("");
@@ -130,6 +131,7 @@ export default function Admin() {
     { id: "projects", label: "Проекты", icon: "FolderOpen" },
     { id: "team", label: "Команда", icon: "Users" },
     { id: "faq", label: "FAQ", icon: "HelpCircle" },
+    { id: "secrets", label: "Секреты", icon: "KeyRound" },
     { id: "password", label: "Пароль", icon: "Lock" },
   ];
 
@@ -203,6 +205,7 @@ export default function Admin() {
             {tab === "projects" && <ProjectsTab content={content} password={password} save={save} saving={saving} />}
             {tab === "team" && <TeamTab content={content} password={password} save={save} saving={saving} />}
             {tab === "faq" && <FaqTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "secrets" && <SecretsTab password={password} />}
             {tab === "password" && <PasswordTab password={password} setPassword={setPassword} save={save} saving={saving} />}
           </div>
         </div>
