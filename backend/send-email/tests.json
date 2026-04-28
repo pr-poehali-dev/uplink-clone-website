@@ -11,7 +11,8 @@
       "method": "POST",
       "path": "/",
       "body": {"email": "test@test.ru"},
-      "expectedStatus": 400
+      "expectedStatus": 400,
+      "bodyMatcher": "partial"
     }
   ]
 }

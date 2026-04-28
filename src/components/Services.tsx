@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+// Link оставлен для карточек услуг с переходом на страницу
 import Icon from "@/components/ui/icon";
 import { CmsService } from "@/hooks/useCmsContent";
 
@@ -176,13 +177,6 @@ export default function Services({ onContactClick, services: cmsServices }: Serv
         </div>
 
         <div className="flex flex-wrap justify-center gap-3">
-          <Link
-            to="/services"
-            className="btn-outline-neon px-8 py-4 rounded-xl text-base font-semibold flex items-center gap-3"
-          >
-            <Icon name="LayoutGrid" size={20} />
-            Все услуги
-          </Link>
           <button
             onClick={onContactClick}
             className="btn-neon px-10 py-4 rounded-xl text-base font-semibold flex items-center gap-3 animate-glow"

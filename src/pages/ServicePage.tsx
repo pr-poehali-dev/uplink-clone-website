@@ -55,8 +55,8 @@ export default function ServicePage() {
           <Icon name="AlertCircle" size={48} className="text-cyan-400 mx-auto mb-4" />
           <h1 className="text-3xl font-bold font-['Oswald'] mb-3">Услуга не найдена</h1>
           <p className="text-gray-400 mb-6">Возможно, услуга была переименована или временно скрыта.</p>
-          <button onClick={() => navigate("/services")} className="btn-neon px-6 py-3 rounded-xl font-semibold">
-            Все услуги
+          <button onClick={() => navigate("/")} className="btn-neon px-6 py-3 rounded-xl font-semibold">
+            На главную
           </button>
         </div>
         <Footer onContactClick={() => openModal("Подвал")} settings={content?.settings} />
@@ -91,7 +91,12 @@ export default function ServicePage() {
           <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 animate-fade-in">
             <Link to="/" className="hover:text-cyan-400 transition-colors">Главная</Link>
             <Icon name="ChevronRight" size={14} />
-            <Link to="/services" className="hover:text-cyan-400 transition-colors">Услуги</Link>
+            <button
+              onClick={() => { navigate("/"); setTimeout(() => { document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }, 80); }}
+              className="hover:text-cyan-400 transition-colors"
+            >
+              Услуги
+            </button>
             <Icon name="ChevronRight" size={14} />
             <span className="text-gray-300 truncate">{service.title}</span>
           </nav>

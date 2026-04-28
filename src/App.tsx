@@ -9,8 +9,8 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ServicePage from "./pages/ServicePage";
-import ServicesIndex from "./pages/ServicesIndex";
 import CookieBanner from "@/components/CookieBanner";
+import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/hooks/useTheme";
 
 const queryClient = new QueryClient();
@@ -23,9 +23,9 @@ const App = () => (
         <Sonner />
         <CookieBanner />
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/services" element={<ServicesIndex />} />
             <Route path="/services/:slug" element={<ServicePage />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

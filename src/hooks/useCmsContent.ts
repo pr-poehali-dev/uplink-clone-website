@@ -137,7 +137,7 @@ export interface CmsContent {
   calc_options?: CmsCalcOption[];
 }
 
-const CACHE_KEY = "cms_content_cache_v4";
+const CACHE_KEY = "cms_content_cache_v5";
 const CACHE_TTL = 10 * 60 * 1000; // 10 минут
 
 function getCached(): CmsContent | null {
@@ -170,6 +170,7 @@ export function useCmsContent() {
       localStorage.removeItem("cms_content_cache");
       localStorage.removeItem("cms_content_cache_v2");
       localStorage.removeItem("cms_content_cache_v3");
+      localStorage.removeItem("cms_content_cache_v4");
     } catch (e) { /* игнорируем */ }
 
     const cached = getCached();
