@@ -47,8 +47,15 @@ def send_telegram(token: str, chat_id: str, text: str, thread_id: str = ""):
     )
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
+            resp_body = resp.read().decode("utf-8")
+            print(f"[TG] status={resp.status} body={resp_body}")
             return resp.status == 200
-    except Exception:
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8")
+        print(f"[TG] HTTPError {e.code}: {err_body}")
+        return False
+    except Exception as e:
+        print(f"[TG] Exception: {e}")
         return False
 
 
