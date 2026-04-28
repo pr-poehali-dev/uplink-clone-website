@@ -37,51 +37,63 @@
     --neon-blue: #00d4ff;
     --dark-bg: #080c14;
     --section-bg: #080c14;
+    --section-bg-alt: #0a0f1a;
+    --footer-bg: #060a12;
     --text-primary: #ffffff;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
     --card-bg: rgba(13, 20, 33, 0.8);
     --card-border: rgba(0, 212, 255, 0.15);
     --glass-bg: rgba(13, 20, 33, 0.8);
     --grid-line: rgba(0, 212, 255, 0.05);
+    --range-track: rgba(255, 255, 255, 0.1);
+    --range-thumb: #00d4ff;
+    --faq-grad-start: #0a0f1a;
+    --faq-grad-end: #080c14;
   }
 
   .light {
     --background: 0 0% 100%;
-    --foreground: 220 20% 10%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 195 100% 40%;
+    --primary: 199 89% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 20% 10%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 40%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 158 84% 39%;
+    --accent: 162 73% 46%;
     --accent-foreground: 0 0% 100%;
 
-    --border: 220 13% 88%;
-    --input: 220 14% 96%;
-    --ring: 195 100% 40%;
+    --border: 214 32% 91%;
+    --input: 210 40% 96%;
+    --ring: 199 89% 48%;
 
-    --neon-blue: #0099cc;
+    --neon-blue: #0284c7;
     --dark-bg: #f8fafc;
     --section-bg: #f8fafc;
+    --section-bg-alt: #eff6ff;
+    --footer-bg: #0f172a;
     --text-primary: #0f172a;
-    --text-secondary: #475569;
+    --text-secondary: #334155;
     --text-muted: #64748b;
     --card-bg: rgba(255, 255, 255, 0.95);
-    --card-border: rgba(0, 153, 204, 0.2);
-    --glass-bg: rgba(255, 255, 255, 0.85);
-    --grid-line: rgba(0, 153, 204, 0.06);
+    --card-border: rgba(2, 132, 199, 0.18);
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --grid-line: rgba(2, 132, 199, 0.07);
+    --range-track: rgba(15, 23, 42, 0.1);
+    --range-thumb: #0284c7;
+    --faq-grad-start: #eff6ff;
+    --faq-grad-end: #f8fafc;
   }
 }
 
@@ -94,7 +106,11 @@
     @apply bg-background text-foreground;
     font-family: "Golos Text", sans-serif;
     background-color: var(--dark-bg);
+    color: var(--text-primary);
     overflow-x: hidden;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
   }
 
   h1,
@@ -114,7 +130,7 @@
   }
 
   .light .neon-border {
-    box-shadow: 0 4px 20px rgba(0, 153, 204, 0.08);
+    box-shadow: 0 4px 24px rgba(2, 132, 199, 0.08);
   }
 
   .glass-card {
@@ -123,21 +139,20 @@
     border: 1px solid var(--card-border);
   }
 
-  .theme-bg {
-    background-color: var(--section-bg);
-  }
-  .theme-text {
-    color: var(--text-primary);
-  }
-  .theme-text-secondary {
-    color: var(--text-secondary);
-  }
-  .theme-text-muted {
-    color: var(--text-muted);
+  .light .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
   }
 
   .gradient-text {
     background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .light .gradient-text {
+    background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #14b8a6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -158,6 +173,16 @@
     box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
   }
 
+  .light .btn-neon {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 24px rgba(2, 132, 199, 0.3);
+  }
+
+  .light .btn-neon:hover {
+    box-shadow: 0 10px 32px rgba(2, 132, 199, 0.45);
+  }
+
   .btn-outline-neon {
     background: transparent;
     color: var(--neon-blue);
@@ -174,6 +199,17 @@
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
   }
 
+  .light .btn-outline-neon {
+    color: #0284c7;
+    border-color: rgba(2, 132, 199, 0.4);
+  }
+
+  .light .btn-outline-neon:hover {
+    background: rgba(2, 132, 199, 0.08);
+    border-color: #0284c7;
+    box-shadow: 0 4px 16px rgba(2, 132, 199, 0.18);
+  }
+
   .grid-bg {
     background-image:
       linear-gradient(var(--grid-line) 1px, transparent 1px),
@@ -188,19 +224,43 @@
     letter-spacing: -0.02em;
   }
 
+  .faq-bg {
+    background: linear-gradient(
+      180deg,
+      var(--faq-grad-start) 0%,
+      var(--faq-grad-end) 100%
+    );
+  }
+
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
-
   .animate-pulse-slow {
     animation: pulse-slow 3s ease-in-out infinite;
   }
-
   .animate-glow {
     animation: glow 2s ease-in-out infinite alternate;
   }
+
+  /* === Дополнительные анимации для страниц услуг === */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out both;
+  }
+  .animate-slide-in-right {
+    animation: slideInRight 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  .animate-blob {
+    animation: blob 18s ease-in-out infinite;
+  }
 }
 
+/* === KEYFRAMES === */
 @keyframes float {
   0%,
   100% {
@@ -210,7 +270,6 @@
     transform: translateY(-20px);
   }
 }
-
 @keyframes pulse-slow {
   0%,
   100% {
@@ -220,7 +279,6 @@
     opacity: 1;
   }
 }
-
 @keyframes glow {
   from {
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
@@ -229,6 +287,56 @@
     box-shadow:
       0 0 50px rgba(0, 212, 255, 0.6),
       0 0 80px rgba(0, 212, 255, 0.2);
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -40px) scale(1.05);
+  }
+  66% {
+    transform: translate(-25px, 30px) scale(0.95);
   }
 }
 
@@ -244,9 +352,11 @@
 .delay-400 {
   animation-delay: 0.4s;
 }
-/* Neon hover — вне @layer, transition задан через все нужные свойства сразу.
-   opacity/transform: 700ms (анимация появления при скролле)
-   border-color/box-shadow: 150ms (hover свечение) */
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+/* Neon hover */
 .neon-hover {
   transition:
     opacity 700ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -262,7 +372,11 @@
     inset 0 0 30px rgba(0, 212, 255, 0.05);
 }
 
-/* CSS scale property (отдельно от transform) для быстрого hover */
+.light .neon-hover:hover {
+  border-color: rgba(2, 132, 199, 0.5);
+  box-shadow: 0 12px 32px rgba(2, 132, 199, 0.16);
+}
+
 .neon-scale {
   transition:
     opacity 700ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -271,7 +385,6 @@
     border-color 150ms ease,
     box-shadow 150ms ease;
 }
-
 .neon-scale:hover {
   scale: 1.02;
 }
@@ -284,7 +397,6 @@
     border-color 150ms ease,
     box-shadow 150ms ease;
 }
-
 .neon-scale-sm:hover {
   scale: 1.05;
 }
@@ -304,64 +416,259 @@
   background: rgba(0, 212, 255, 0.6);
 }
 
-/* === Светлая тема: переопределения для существующих классов === */
-.light body {
-  background-color: var(--dark-bg) !important;
-  color: var(--text-primary);
+.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
 }
+.light ::-webkit-scrollbar-thumb {
+  background: rgba(2, 132, 199, 0.35);
+}
+.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(2, 132, 199, 0.55);
+}
+
+/* === RANGE INPUT === */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--range-track);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--range-thumb);
+  border: 3px solid #ffffff;
+  box-shadow:
+    0 0 0 2px var(--range-thumb),
+    0 4px 12px rgba(0, 212, 255, 0.5);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--range-thumb);
+  border: 3px solid #ffffff;
+  box-shadow:
+    0 0 0 2px var(--range-thumb),
+    0 4px 12px rgba(0, 212, 255, 0.5);
+  cursor: pointer;
+}
+.light input[type="range"]::-webkit-slider-thumb {
+  border-color: #f8fafc;
+  box-shadow:
+    0 0 0 2px #0284c7,
+    0 4px 12px rgba(2, 132, 199, 0.4);
+}
+.light input[type="range"]::-moz-range-thumb {
+  border-color: #f8fafc;
+  box-shadow:
+    0 0 0 2px #0284c7,
+    0 4px 12px rgba(2, 132, 199, 0.4);
+}
+
+/* === Светлая тема: переопределения для tailwind-классов === */
 .light .text-white {
   color: var(--text-primary) !important;
 }
 .light .text-gray-300 {
-  color: #475569 !important;
+  color: #334155 !important;
 }
 .light .text-gray-400 {
-  color: #64748b !important;
+  color: #475569 !important;
 }
 .light .text-gray-500 {
-  color: #94a3b8 !important;
+  color: #64748b !important;
 }
 .light .text-gray-600 {
+  color: #94a3b8 !important;
+}
+.light .text-gray-700 {
   color: #cbd5e1 !important;
 }
+
 .light .bg-\[\#080c14\] {
   background-color: var(--section-bg) !important;
 }
 .light .bg-\[\#080c14\]\/95 {
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  background-color: rgba(255, 255, 255, 0.92) !important;
 }
 .light .bg-\[\#080c14\]\/98 {
   background-color: rgba(255, 255, 255, 0.98) !important;
 }
 .light .bg-\[\#0a0f1a\] {
-  background-color: #f1f5f9 !important;
+  background-color: var(--section-bg-alt) !important;
 }
+.light .bg-\[\#060a12\] {
+  background-color: #0f172a !important;
+} /* footer остаётся тёмным для контраста */
+.light .bg-\[\#0d1421\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Бордеры */
 .light .border-cyan-500\/10 {
-  border-color: rgba(0, 153, 204, 0.15) !important;
+  border-color: rgba(2, 132, 199, 0.15) !important;
+}
+.light .border-cyan-500\/20 {
+  border-color: rgba(2, 132, 199, 0.25) !important;
+}
+.light .border-cyan-500\/30 {
+  border-color: rgba(2, 132, 199, 0.4) !important;
 }
 .light .border-white\/10 {
   border-color: rgba(15, 23, 42, 0.1) !important;
 }
-.light .bg-white\/5 {
-  background-color: rgba(15, 23, 42, 0.04) !important;
+.light .border-white\/8 {
+  border-color: rgba(15, 23, 42, 0.08) !important;
 }
-.light .bg-white\/10 {
-  background-color: rgba(15, 23, 42, 0.06) !important;
+.light .border-white\/15 {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+.light .border-white\/5 {
+  border-color: rgba(15, 23, 42, 0.06) !important;
 }
 .light .border-gray-800\/50 {
   border-color: rgba(15, 23, 42, 0.08) !important;
 }
 
-.light .gradient-text {
-  background: linear-gradient(135deg, #0099cc 0%, #00aa66 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Полупрозрачные фоны */
+.light .bg-white\/3 {
+  background-color: rgba(15, 23, 42, 0.025) !important;
+}
+.light .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+.light .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.07) !important;
+}
+.light .hover\:bg-white\/5:hover {
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+.light .hover\:bg-white\/10:hover {
+  background-color: rgba(15, 23, 42, 0.08) !important;
 }
 
-.light ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+/* Cyan фоны */
+.light .bg-cyan-500\/5 {
+  background-color: rgba(2, 132, 199, 0.06) !important;
 }
-.light ::-webkit-scrollbar-thumb {
-  background: rgba(0, 153, 204, 0.3);
+.light .bg-cyan-500\/10 {
+  background-color: rgba(2, 132, 199, 0.1) !important;
+}
+.light .bg-cyan-500\/20 {
+  background-color: rgba(2, 132, 199, 0.18) !important;
+}
+.light .bg-cyan-500\/30 {
+  background-color: rgba(2, 132, 199, 0.25) !important;
+}
+.light .hover\:bg-cyan-500\/5:hover {
+  background-color: rgba(2, 132, 199, 0.06) !important;
+}
+.light .hover\:bg-cyan-500\/10:hover {
+  background-color: rgba(2, 132, 199, 0.1) !important;
+}
+.light .hover\:bg-cyan-500\/20:hover {
+  background-color: rgba(2, 132, 199, 0.16) !important;
+}
+
+/* Cyan текст и border */
+.light .text-cyan-400 {
+  color: #0284c7 !important;
+}
+.light .text-cyan-300 {
+  color: #0ea5e9 !important;
+}
+.light .hover\:text-cyan-400:hover {
+  color: #0284c7 !important;
+}
+.light .border-cyan-500\/40 {
+  border-color: rgba(2, 132, 199, 0.45) !important;
+}
+.light .border-cyan-500\/50 {
+  border-color: rgba(2, 132, 199, 0.55) !important;
+}
+.light .focus\:border-cyan-500\/50:focus {
+  border-color: rgba(2, 132, 199, 0.55) !important;
+}
+
+/* Цветные акценты — оставим, но подкорректируем для контраста */
+.light .from-cyan-400 {
+  --tw-gradient-from: #0ea5e9 var(--tw-gradient-from-position) !important;
+}
+.light .to-blue-500 {
+  --tw-gradient-to: #2563eb var(--tw-gradient-to-position) !important;
+}
+.light .to-cyan-400 {
+  --tw-gradient-to: #0ea5e9 var(--tw-gradient-to-position) !important;
+}
+.light .from-cyan-500 {
+  --tw-gradient-from: #0284c7 var(--tw-gradient-from-position) !important;
+}
+.light .to-cyan-600 {
+  --tw-gradient-to: #0369a1 var(--tw-gradient-to-position) !important;
+}
+
+/* Фиксы для placeholder в инпутах */
+.light .placeholder-gray-600::placeholder {
+  color: #cbd5e1 !important;
+}
+.light input[type="text"],
+.light input[type="email"],
+.light input[type="tel"],
+.light input[type="password"],
+.light textarea,
+.light select {
+  color: #0f172a;
+}
+.light .text-\[\#080c14\] {
+  color: #ffffff !important;
+} /* для иконок поверх неон-кнопок */
+
+/* Glow на cards в светлой теме приглушим */
+.light .shadow-cyan-500\/30 {
+  --tw-shadow-color: rgba(2, 132, 199, 0.2) !important;
+}
+.light .shadow-cyan-500\/50 {
+  --tw-shadow-color: rgba(2, 132, 199, 0.3) !important;
+}
+.light .shadow-cyan-500\/10 {
+  --tw-shadow-color: rgba(2, 132, 199, 0.08) !important;
+}
+.light .shadow-cyan-500\/20 {
+  --tw-shadow-color: rgba(2, 132, 199, 0.14) !important;
+}
+
+/* Glow-анимация в светлой теме мягче */
+.light .animate-glow {
+  animation: glow-light 2s ease-in-out infinite alternate;
+}
+@keyframes glow-light {
+  from {
+    box-shadow: 0 0 16px rgba(2, 132, 199, 0.25);
+  }
+  to {
+    box-shadow:
+      0 0 32px rgba(2, 132, 199, 0.4),
+      0 0 48px rgba(2, 132, 199, 0.15);
+  }
+}
+
+/* Footer всегда тёмный для контраста, но текст подстраивается */
+.light footer .text-white,
+.light .bg-\[\#060a12\] .text-white {
+  color: #f8fafc !important;
 }

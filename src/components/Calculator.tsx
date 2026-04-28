@@ -287,7 +287,7 @@ function SliderRow({
         max={max}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 rounded-full appearance-none bg-white/5 accent-cyan-400 cursor-pointer"
+        className="w-full"
       />
       <div className="flex justify-between text-xs text-gray-600 mt-1">
         <span>{min}</span>

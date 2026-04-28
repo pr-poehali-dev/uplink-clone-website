@@ -13,7 +13,6 @@ interface HeaderProps {
 interface NavLink {
   label: string;
   href: string;
-  external?: boolean;
 }
 
 const navLinks: NavLink[] = [
@@ -31,7 +30,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
   const [menuOpen, setMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -45,30 +44,44 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // hover-логика с задержкой закрытия для удобства
+  const openServices = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setServicesOpen(true);
+  };
+  const closeServicesDelayed = () => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = setTimeout(() => setServicesOpen(false), 180);
+  };
+
+  // Скролл к якорю при изменении hash (для перехода с других страниц)
   useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setServicesOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, []);
+    if (location.hash) {
+      const id = location.hash.slice(1);
+      const tryScroll = () => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+      // даём странице отрендериться
+      setTimeout(tryScroll, 80);
+    }
+  }, [location.pathname, location.hash]);
 
   const handleNav = (href: string) => {
     setMenuOpen(false);
     setMobileServicesOpen(false);
+    setServicesOpen(false);
+
     if (href.startsWith("/#")) {
       const anchor = href.slice(2);
       if (location.pathname !== "/") {
-        navigate("/");
-        setTimeout(() => {
-          const el = document.getElementById(anchor);
-          if (el) el.scrollIntoView({ behavior: "smooth" });
-        }, 50);
+        navigate(href);
       } else {
         const el = document.getElementById(anchor);
-        if (el) el.scrollIntoView({ behavior: "smooth" });
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     } else if (href === "/") {
       if (location.pathname === "/") {
@@ -121,8 +134,12 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
             Главная
           </button>
 
-          {/* Услуги — выпадающее меню */}
-          <div ref={dropdownRef} className="relative">
+          {/* Услуги — выпадающее меню по hover */}
+          <div
+            className="relative"
+            onMouseEnter={openServices}
+            onMouseLeave={closeServicesDelayed}
+          >
             <button
               onClick={() => setServicesOpen((p) => !p)}
               className={`px-4 py-2 text-sm transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium flex items-center gap-1 ${
@@ -135,37 +152,37 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
               <Icon
                 name="ChevronDown"
                 size={14}
-                className={`transition-transform duration-200 ${servicesOpen ? "rotate-180" : ""}`}
+                className={`transition-transform duration-300 ${servicesOpen ? "rotate-180" : ""}`}
               />
             </button>
-            {servicesOpen && (
-              <div className="absolute top-full left-0 mt-2 w-80 glass-card neon-border rounded-2xl p-2 shadow-2xl shadow-cyan-500/10 z-50">
-                <Link
-                  to="/services"
-                  onClick={() => setServicesOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-cyan-500/10 transition-colors group border-b border-cyan-500/10 mb-1"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0">
-                    <Icon name="LayoutGrid" size={16} className="text-[#080c14]" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors">
-                      Все услуги
-                    </div>
-                    <div className="text-xs text-gray-500">Полный каталог направлений</div>
-                  </div>
-                </Link>
-                {activeServices.map((s) => (
+
+            {/* Невидимый мост для удержания hover */}
+            <div
+              className={`absolute top-full left-0 h-3 w-full ${servicesOpen ? "" : "pointer-events-none"}`}
+            />
+
+            <div
+              className={`absolute top-[calc(100%+8px)] left-0 w-80 origin-top transition-all duration-300 ${
+                servicesOpen
+                  ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+                  : "opacity-0 -translate-y-3 scale-95 pointer-events-none"
+              }`}
+            >
+              <div className="glass-card neon-border rounded-2xl p-2 shadow-2xl shadow-cyan-500/10">
+                {activeServices.map((s, i) => (
                   <Link
                     key={s.id}
                     to={`/services/${s.slug}`}
                     onClick={() => setServicesOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cyan-500/10 transition-colors group"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cyan-500/10 transition-all group"
+                    style={{
+                      animation: servicesOpen ? `fadeInUp 0.3s ${i * 40}ms both` : "none",
+                    }}
                   >
-                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.accent || "from-cyan-400 to-blue-500"} flex items-center justify-center flex-shrink-0`}>
+                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.accent || "from-cyan-400 to-blue-500"} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
                       <Icon name={s.icon as "Monitor"} size={16} className="text-[#080c14]" fallback="Settings" />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors truncate">
                         {s.title}
                       </div>
@@ -173,10 +190,11 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
                         <div className="text-xs text-gray-500 truncate">{s.short_desc}</div>
                       )}
                     </div>
+                    <Icon name="ChevronRight" size={14} className="text-gray-600 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
                   </Link>
                 ))}
               </div>
-            )}
+            </div>
           </div>
 
           {navLinks.slice(1).map((l) => (
@@ -243,7 +261,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
       </div>
 
       {menuOpen && (
-        <div className="lg:hidden bg-[#080c14]/98 backdrop-blur-md border-t border-cyan-500/10 px-4 py-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
+        <div className="lg:hidden bg-[#080c14]/98 backdrop-blur-md border-t border-cyan-500/10 px-4 py-4 max-h-[calc(100vh-5rem)] overflow-y-auto animate-fade-in">
           <button
             onClick={() => handleNav("/")}
             className="block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
@@ -261,14 +279,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
               <Icon name="ChevronDown" size={16} className={`transition-transform ${mobileServicesOpen ? "rotate-180" : ""}`} />
             </button>
             {mobileServicesOpen && (
-              <div className="pb-2 pl-3 space-y-1">
-                <Link
-                  to="/services"
-                  onClick={() => setMenuOpen(false)}
-                  className="block py-2 text-sm text-cyan-400 font-semibold"
-                >
-                  → Все услуги
-                </Link>
+              <div className="pb-2 pl-3 space-y-1 animate-fade-in">
                 {activeServices.map((s) => (
                   <Link
                     key={s.id}
