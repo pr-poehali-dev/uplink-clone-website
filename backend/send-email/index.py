@@ -60,21 +60,15 @@ def send_telegram(token: str, chat_id: str, text: str, thread_id: str = ""):
 
 
 def send_maax(api_key: str, chat_id: str, text: str):
-    """Отправка сообщения через Maax (Max) Bot API."""
-    url = "https://botapi.max.ru/messages"
-    payload = json.dumps({
-        "recipient": {"chat_id": int(chat_id)},
-        "type": "bot_action",
-        "payload": {
-            "text": text,
-        },
-    }).encode("utf-8")
+    """Отправка сообщения через Max Bot API (platform-api.max.ru)."""
+    url = f"https://platform-api.max.ru/messages?chat_id={chat_id}"
+    payload = json.dumps({"text": text}).encode("utf-8")
     req = urllib.request.Request(
         url,
         data=payload,
         headers={
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}",
+            "Authorization": api_key,
         },
         method="POST",
     )
