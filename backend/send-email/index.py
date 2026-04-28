@@ -62,24 +62,33 @@ def send_telegram(token: str, chat_id: str, text: str, thread_id: str = ""):
 def send_maax(api_key: str, chat_id: str, text: str):
     """Отправка сообщения через Maax (Max) Bot API."""
     url = "https://botapi.max.ru/messages"
-    params = urllib.parse.urlencode({"access_token": api_key})
     payload = json.dumps({
-        "recipient": {"chat_id": chat_id},
+        "recipient": {"chat_id": int(chat_id)},
         "type": "bot_action",
         "payload": {
             "text": text,
         },
     }).encode("utf-8")
     req = urllib.request.Request(
-        f"{url}?{params}",
+        url,
         data=payload,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
         method="POST",
     )
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
+            resp_body = resp.read().decode("utf-8")
+            print(f"[MAAX] status={resp.status} body={resp_body}")
             return resp.status == 200
-    except Exception:
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8")
+        print(f"[MAAX] HTTPError {e.code}: {err_body}")
+        return False
+    except Exception as e:
+        print(f"[MAAX] Exception: {e}")
         return False
 
 
