@@ -12,15 +12,18 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 
-def send_telegram(token: str, chat_id: str, text: str):
+def send_telegram(token: str, chat_id: str, text: str, thread_id: str = ""):
     """Отправка сообщения в Telegram через Bot API."""
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = json.dumps({
+    data = {
         "chat_id": chat_id,
         "text": text,
         "parse_mode": "HTML",
         "disable_web_page_preview": True,
-    }).encode("utf-8")
+    }
+    if thread_id:
+        data["message_thread_id"] = int(thread_id)
+    payload = json.dumps(data).encode("utf-8")
     req = urllib.request.Request(
         url,
         data=payload,
@@ -161,6 +164,7 @@ def handler(event: dict, context) -> dict:
     # ── TELEGRAM ───────────────────────────────────────────────────────
     tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
     tg_chat = os.environ.get("TELEGRAM_CHAT_ID", "")
+    tg_thread = os.environ.get("TELEGRAM_THREAD_ID", "")
     if tg_token and tg_chat:
         lines = [
             "📩 <b>Новая заявка с сайта</b>",
@@ -177,7 +181,7 @@ def handler(event: dict, context) -> dict:
             lines.append(f"💬 Комментарий: {message}")
         lines.append(f"\n<a href='tel:{phone}'>📞 Позвонить клиенту</a>")
         tg_text = "\n".join(lines)
-        results["telegram"] = send_telegram(tg_token, tg_chat, tg_text)
+        results["telegram"] = send_telegram(tg_token, tg_chat, tg_text, tg_thread)
 
     # ── MAAX (MAX) ─────────────────────────────────────────────────────
     maax_key = os.environ.get("MAAX_API_KEY", "")
