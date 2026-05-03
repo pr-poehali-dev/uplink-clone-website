@@ -1,8 +1,12 @@
 import { useMemo, useState } from "react";
 import Icon from "@/components/ui/icon";
+import { CmsVideoCameraType, CmsVideoEquipment, CmsSettings } from "@/hooks/useCmsContent";
 
 interface VideoSurveillanceCalculatorProps {
   onContactClick: (source: string, payload?: string) => void;
+  videoCameras?: CmsVideoCameraType[];
+  videoEquipment?: CmsVideoEquipment[];
+  settings?: CmsSettings;
 }
 
 const formatRub = (n: number) =>
@@ -51,32 +55,47 @@ function SliderRow({
   );
 }
 
-export default function VideoSurveillanceCalculator({ onContactClick }: VideoSurveillanceCalculatorProps) {
-  const [cameraType, setCameraType] = useState("indoor");
+export default function VideoSurveillanceCalculator({ onContactClick, videoCameras, videoEquipment, settings }: VideoSurveillanceCalculatorProps) {
+  const cameraTypes = (videoCameras?.filter(c => c.is_active) ?? []).length > 0
+    ? (videoCameras!.filter(c => c.is_active).map((c, i) => ({ key: String(c.id), label: c.label, price: c.price, icon: c.icon })))
+    : CAMERA_TYPES;
+  const equipmentItems = (videoEquipment?.filter(e => e.is_active) ?? []).length > 0
+    ? (videoEquipment!.filter(e => e.is_active).map(e => ({ key: String(e.id), label: e.label, price: e.price, icon: e.icon, defaultChecked: e.default_checked })))
+    : EQUIPMENT_ITEMS.map(e => ({ ...e, defaultChecked: e.key === "dvr" }));
+
+  const installPerCamera = Number(settings?.video_calc_install_per_camera ?? 1500);
+  const cablePricePerM = Number(settings?.video_calc_cable_per_meter ?? 150);
+  const minCameras = Number(settings?.video_calc_min_cameras ?? 1);
+  const maxCameras = Number(settings?.video_calc_max_cameras ?? 32);
+  const minCable = Number(settings?.video_calc_min_cable ?? 10);
+  const maxCable = Number(settings?.video_calc_max_cable ?? 500);
+
+  const defaultEquipment: Record<string, boolean> = {};
+  equipmentItems.forEach(e => { if ("defaultChecked" in e && e.defaultChecked) defaultEquipment[e.key] = true; });
+
+  const [cameraType, setCameraType] = useState<string>(cameraTypes[0]?.key ?? "indoor");
   const [cameraCount, setCameraCount] = useState(4);
   const [cableLength, setCableLength] = useState(50);
-  const [selectedEquipment, setSelectedEquipment] = useState<Record<string, boolean>>({ dvr: true });
+  const [selectedEquipment, setSelectedEquipment] = useState<Record<string, boolean>>(defaultEquipment);
 
   const toggleEquipment = (key: string) => {
     setSelectedEquipment((p) => ({ ...p, [key]: !p[key] }));
   };
 
   const result = useMemo(() => {
-    const camera = CAMERA_TYPES.find((c) => c.key === cameraType)!;
-    const camerasTotal = camera.price * cameraCount;
-    const installPerCamera = 1500;
-    const installCameras = installPerCamera * cameraCount;
-    const cableTotal = CABLE_PRICE_PER_M * cableLength;
-    const equipmentTotal = EQUIPMENT_ITEMS.reduce(
+    const camera = cameraTypes.find((c) => c.key === cameraType) ?? cameraTypes[0];
+    const camerasTotal = (camera?.price ?? 0) * cameraCount;
+    const cableTotal = cablePricePerM * cableLength;
+    const equipmentTotal = equipmentItems.reduce(
       (acc, eq) => acc + (selectedEquipment[eq.key] ? eq.price : 0), 0
     );
     const total = camerasTotal + installCameras + cableTotal + equipmentTotal;
     return { camerasTotal, installCameras, cableTotal, equipmentTotal, total };
-  }, [cameraType, cameraCount, cableLength, selectedEquipment]);
+  }, [cameraType, cameraCount, cableLength, selectedEquipment, cameraTypes, equipmentItems, installPerCamera, cablePricePerM]);
 
   const handleOrder = () => {
-    const eqList = EQUIPMENT_ITEMS.filter((e) => selectedEquipment[e.key]).map((e) => e.label).join(", ");
-    const camType = CAMERA_TYPES.find((c) => c.key === cameraType)!.label;
+    const eqList = equipmentItems.filter((e) => selectedEquipment[e.key]).map((e) => e.label).join(", ");
+    const camType = cameraTypes.find((c) => c.key === cameraType)?.label ?? "";
     const payload = [
       `Тип камер: ${camType}`,
       `Количество камер: ${cameraCount} шт.`,
@@ -87,7 +106,7 @@ export default function VideoSurveillanceCalculator({ onContactClick }: VideoSur
     onContactClick("Калькулятор видеонаблюдения", payload);
   };
 
-  const camera = CAMERA_TYPES.find((c) => c.key === cameraType)!;
+  const camera = cameraTypes.find((c) => c.key === cameraType) ?? cameraTypes[0];
 
   return (
     <section id="video-calculator" className="py-14 relative overflow-hidden">
@@ -115,7 +134,7 @@ export default function VideoSurveillanceCalculator({ onContactClick }: VideoSur
                 Тип камер
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {CAMERA_TYPES.map((ct) => (
+                {cameraTypes.map((ct) => (
                   <button
                     key={ct.key}
                     onClick={() => setCameraType(ct.key)}
@@ -125,7 +144,7 @@ export default function VideoSurveillanceCalculator({ onContactClick }: VideoSur
                         : "bg-white/5 border-white/10 text-[var(--text-secondary)] hover:border-cyan-500/30"
                     }`}
                   >
-                    <Icon name={ct.icon as "Camera"} size={20} className={cameraType === ct.key ? "text-cyan-400 mb-2" : "text-gray-400 mb-2"} />
+                    <Icon name={ct.icon as "Camera"} size={20} className={cameraType === ct.key ? "text-cyan-400 mb-2" : "text-gray-400 mb-2"} fallback="Camera" />
                     <div className="text-sm font-semibold">{ct.label}</div>
                     <div className="text-xs text-gray-500 mt-1">от {formatRub(ct.price)}/шт.</div>
                   </button>
@@ -143,13 +162,13 @@ export default function VideoSurveillanceCalculator({ onContactClick }: VideoSur
                 label="Количество камер"
                 value={cameraCount}
                 onChange={setCameraCount}
-                min={1} max={32} suffix="шт."
+                min={minCameras} max={maxCameras} suffix="шт."
               />
               <SliderRow
                 label="Длина кабельной трассы"
                 value={cableLength}
                 onChange={setCableLength}
-                min={10} max={500} suffix="м"
+                min={minCable} max={maxCable} suffix="м"
               />
             </div>
 
@@ -160,7 +179,7 @@ export default function VideoSurveillanceCalculator({ onContactClick }: VideoSur
                 Дополнительное оборудование
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {EQUIPMENT_ITEMS.map((eq) => {
+                {equipmentItems.map((eq) => {
                   const checked = !!selectedEquipment[eq.key];
                   return (
                     <button

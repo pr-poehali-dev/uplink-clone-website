@@ -126,6 +126,88 @@ export interface CmsSettings {
   [key: string]: string;
 }
 
+export interface CmsWhyusCard {
+  id: number;
+  sort_order: number;
+  icon: string;
+  title: string;
+  description: string;
+  is_active: boolean;
+}
+
+export interface CmsQuickorderStep {
+  id: number;
+  sort_order: number;
+  icon: string;
+  title: string;
+  description: string;
+  is_active: boolean;
+}
+
+export interface CmsPricingItem {
+  id: number;
+  category_slug: string;
+  category_title: string;
+  category_icon: string;
+  name: string;
+  price: string;
+  description: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface CmsNavItem {
+  id: number;
+  label: string;
+  href: string;
+  type: string;
+  sort_order: number;
+  is_visible: boolean;
+}
+
+export interface CmsVideoCameraType {
+  id: number;
+  label: string;
+  price: number;
+  icon: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface CmsVideoEquipment {
+  id: number;
+  label: string;
+  price: number;
+  icon: string;
+  default_checked: boolean;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface CmsPage {
+  id: number;
+  route: string;
+  title: string;
+  seo_title: string;
+  seo_description: string;
+  og_title: string;
+  og_description: string;
+  og_image_url: string;
+  is_active: boolean;
+}
+
+export interface CmsLead {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  service: string;
+  message: string;
+  source: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 export interface CmsContent {
   settings: CmsSettings;
   services: CmsService[];
@@ -135,9 +217,16 @@ export interface CmsContent {
   faq: CmsFaqItem[];
   calc_settings?: Record<string, string>;
   calc_options?: CmsCalcOption[];
+  whyus_cards?: CmsWhyusCard[];
+  quickorder_steps?: CmsQuickorderStep[];
+  pricing_items?: CmsPricingItem[];
+  nav_items?: CmsNavItem[];
+  video_cameras?: CmsVideoCameraType[];
+  video_equipment?: CmsVideoEquipment[];
+  pages?: CmsPage[];
 }
 
-const CACHE_KEY = "cms_content_cache_v5";
+const CACHE_KEY = "cms_content_cache_v6";
 const CACHE_TTL = 10 * 60 * 1000; // 10 минут
 
 function getCached(): CmsContent | null {
@@ -171,6 +260,7 @@ export function useCmsContent() {
       localStorage.removeItem("cms_content_cache_v2");
       localStorage.removeItem("cms_content_cache_v3");
       localStorage.removeItem("cms_content_cache_v4");
+      localStorage.removeItem("cms_content_cache_v5");
     } catch (e) { /* игнорируем */ }
 
     const cached = getCached();

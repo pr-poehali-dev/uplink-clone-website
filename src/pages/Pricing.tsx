@@ -101,12 +101,35 @@ const PRICING_DATA = [
   },
 ];
 
+const CAT_ACCENTS: Record<string, string> = {
+  "it-outsourcing": "from-cyan-400 to-blue-500",
+  "server-administration": "from-violet-400 to-purple-500",
+  "it-infrastructure": "from-blue-400 to-indigo-500",
+  "video-surveillance": "from-green-400 to-emerald-500",
+  "lan-installation": "from-orange-400 to-amber-500",
+  "ip-telephony": "from-pink-400 to-rose-500",
+};
+
 export default function PricingPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("it-outsourcing");
   const { content } = useCmsContent();
 
-  const activeData = PRICING_DATA.find((d) => d.id === activeCategory)!;
+  // Получаем категории из CMS или fallback к хардкоду
+  const cmsItems = content?.pricing_items?.filter(i => i.is_active) ?? [];
+  const cmsCategories = Array.from(new Map(cmsItems.map(i => [i.category_slug, {
+    id: i.category_slug, title: i.category_title, icon: i.category_icon,
+    accent: CAT_ACCENTS[i.category_slug] || "from-cyan-400 to-blue-500",
+    slug: i.category_slug,
+  }])).values());
+
+  const categories = cmsCategories.length > 0 ? cmsCategories : PRICING_DATA.map(d => ({ id: d.id, title: d.title, icon: d.icon, accent: d.accent, slug: d.slug }));
+
+  const activeCat = categories.find(c => c.id === activeCategory) ?? categories[0];
+  const activeCmsItems = cmsItems.filter(i => i.category_slug === activeCategory);
+  const activeFallback = PRICING_DATA.find(d => d.id === activeCategory);
+  const activeItems = activeCmsItems.length > 0 ? activeCmsItems.map(i => ({ name: i.name, price: i.price, desc: i.description }))
+    : (activeFallback?.items ?? []);
 
   return (
     <div className="min-h-screen" style={{ background: "var(--dark-bg)", color: "var(--text-primary)" }}>
@@ -146,7 +169,7 @@ export default function PricingPage() {
             {/* Левая панель — категории */}
             <div className="lg:sticky lg:top-24 h-fit">
               <div className="glass-card neon-border rounded-2xl p-3 space-y-1">
-                {PRICING_DATA.map((cat) => (
+                {categories.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
@@ -180,19 +203,19 @@ export default function PricingPage() {
             {/* Правая панель — позиции прайса */}
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${activeData.accent} flex items-center justify-center`}>
-                  <Icon name={activeData.icon as "Server"} size={20} className="text-white" fallback="Settings" />
+                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${activeCat?.accent || "from-cyan-400 to-blue-500"} flex items-center justify-center`}>
+                  <Icon name={(activeCat?.icon || "Server") as "Server"} size={20} className="text-white" fallback="Settings" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold font-['Oswald'] text-[var(--text-primary)]">{activeData.title}</h2>
-                  <Link to={`/services/${activeData.slug}`} className="text-sm text-cyan-500 hover:underline flex items-center gap-1">
+                  <h2 className="text-2xl font-bold font-['Oswald'] text-[var(--text-primary)]">{activeCat?.title}</h2>
+                  <Link to={`/services/${activeCat?.slug}`} className="text-sm text-cyan-500 hover:underline flex items-center gap-1">
                     Подробнее об услуге <Icon name="ArrowRight" size={12} />
                   </Link>
                 </div>
               </div>
 
               <div className="space-y-3">
-                {activeData.items.map((item, i) => (
+                {activeItems.map((item, i) => (
                   <div key={i} className="glass-card neon-border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-3 group hover:border-cyan-500/30 transition-all">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-[var(--text-primary)] mb-1">{item.name}</h3>

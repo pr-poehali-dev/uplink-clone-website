@@ -82,8 +82,41 @@ def get_all_content(conn):
     cur.execute("SELECT id, sort_order, key, label, description, price, icon, is_active FROM cms_calc_options ORDER BY sort_order")
     calc_options = [{"id": r[0], "sort_order": r[1], "key": r[2], "label": r[3], "description": r[4], "price": r[5], "icon": r[6], "is_active": r[7]} for r in cur.fetchall()]
 
+    cur.execute("SELECT id, sort_order, icon, title, description, is_active FROM cms_whyus_cards ORDER BY sort_order")
+    whyus_cards = [{"id": r[0], "sort_order": r[1], "icon": r[2], "title": r[3], "description": r[4], "is_active": r[5]} for r in cur.fetchall()]
+
+    cur.execute("SELECT id, sort_order, icon, title, description, is_active FROM cms_quickorder_steps ORDER BY sort_order")
+    quickorder_steps = [{"id": r[0], "sort_order": r[1], "icon": r[2], "title": r[3], "description": r[4], "is_active": r[5]} for r in cur.fetchall()]
+
+    cur.execute("SELECT id, category_slug, category_title, category_icon, name, price, description, sort_order, is_active FROM cms_pricing_items ORDER BY category_slug, sort_order")
+    pricing_items = [{"id": r[0], "category_slug": r[1], "category_title": r[2], "category_icon": r[3], "name": r[4], "price": r[5], "description": r[6], "sort_order": r[7], "is_active": r[8]} for r in cur.fetchall()]
+
+    cur.execute("SELECT id, label, href, type, sort_order, is_visible FROM cms_nav_items ORDER BY sort_order")
+    nav_items = [{"id": r[0], "label": r[1], "href": r[2], "type": r[3], "sort_order": r[4], "is_visible": r[5]} for r in cur.fetchall()]
+
+    cur.execute("SELECT id, label, price, icon, sort_order, is_active FROM cms_video_camera_types ORDER BY sort_order")
+    video_cameras = [{"id": r[0], "label": r[1], "price": r[2], "icon": r[3], "sort_order": r[4], "is_active": r[5]} for r in cur.fetchall()]
+
+    cur.execute("SELECT id, label, price, icon, default_checked, sort_order, is_active FROM cms_video_equipment ORDER BY sort_order")
+    video_equipment = [{"id": r[0], "label": r[1], "price": r[2], "icon": r[3], "default_checked": r[4], "sort_order": r[5], "is_active": r[6]} for r in cur.fetchall()]
+
+    cur.execute("SELECT id, route, title, seo_title, seo_description, og_title, og_description, og_image_url, is_active FROM cms_pages ORDER BY id")
+    pages = [{"id": r[0], "route": r[1], "title": r[2], "seo_title": r[3], "seo_description": r[4], "og_title": r[5], "og_description": r[6], "og_image_url": r[7], "is_active": r[8]} for r in cur.fetchall()]
+
     cur.close()
-    return {"settings": settings, "services": services, "plans": plans, "projects": projects, "team": team, "faq": faq, "calc_settings": calc_settings, "calc_options": calc_options}
+    return {
+        "settings": settings, "services": services, "plans": plans,
+        "projects": projects, "team": team, "faq": faq,
+        "calc_settings": calc_settings, "calc_options": calc_options,
+        "whyus_cards": whyus_cards, "quickorder_steps": quickorder_steps,
+        "pricing_items": pricing_items, "nav_items": nav_items,
+        "video_cameras": video_cameras, "video_equipment": video_equipment,
+        "pages": pages,
+    }
+
+
+def esc(v):
+    return str(v or "").replace("'", "''")
 
 
 def check_auth(body, conn):
@@ -156,8 +189,6 @@ def handler(event: dict, context) -> dict:
             sid = service.get("id")
             cur = conn.cursor()
             if sid:
-                def esc(v):
-                    return str(v or "").replace("'", "''")
                 slug_val = "NULL" if not service.get("slug") else "'%s'" % esc(service.get("slug"))
                 cur.execute(
                     "UPDATE cms_services SET icon='%s', title='%s', description='%s', accent='%s', is_active=%s, sort_order=%s, slug=%s, short_desc='%s', hero_title='%s', hero_subtitle='%s', full_description='%s', price_from='%s', for_whom='%s', seo_title='%s', seo_description='%s', updated_at=NOW() WHERE id=%s" % (
@@ -434,9 +465,6 @@ def handler(event: dict, context) -> dict:
             if not sid:
                 return err("service_id required")
             cur = conn.cursor()
-            def esc(v):
-                return str(v or "").replace("'", "''")
-
             kind = body.get("kind")  # benefits | steps | faq
             items = body.get("items", [])
 
@@ -512,8 +540,6 @@ def handler(event: dict, context) -> dict:
         if action == "save_calc_options":
             options = body.get("options", [])
             cur = conn.cursor()
-            def esc(v):
-                return str(v or "").replace("'", "''")
             cur.execute("SELECT id FROM cms_calc_options")
             existing = [r[0] for r in cur.fetchall()]
             kept = []
@@ -533,6 +559,220 @@ def handler(event: dict, context) -> dict:
             for eid in existing:
                 if eid not in kept:
                     cur.execute("UPDATE cms_calc_options SET is_active=false, label='[удалено]' WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # ---- LEADS ----
+        if action == "save_lead":
+            lead = body.get("lead", {})
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO cms_leads (name, phone, email, service, message, source) VALUES ('%s','%s','%s','%s','%s','%s') RETURNING id" % (
+                    esc(lead.get("name")), esc(lead.get("phone")), esc(lead.get("email")),
+                    esc(lead.get("service")), esc(lead.get("message")), esc(lead.get("source")))
+            )
+            new_id = cur.fetchone()[0]
+            conn.commit()
+            cur.close()
+            return ok({"ok": True, "id": new_id})
+
+        if action == "get_leads":
+            cur = conn.cursor()
+            cur.execute("SELECT id, name, phone, email, service, message, source, is_read, created_at FROM cms_leads ORDER BY created_at DESC LIMIT 500")
+            leads = [{"id": r[0], "name": r[1], "phone": r[2], "email": r[3], "service": r[4], "message": r[5], "source": r[6], "is_read": r[7], "created_at": r[8].isoformat() if r[8] else ""} for r in cur.fetchall()]
+            cur.close()
+            return ok({"leads": leads})
+
+        if action == "mark_lead_read":
+            lid = body.get("id")
+            if lid:
+                cur = conn.cursor()
+                cur.execute("UPDATE cms_leads SET is_read = true WHERE id = %s" % int(lid))
+                conn.commit()
+                cur.close()
+            return ok({"ok": True})
+
+        if action == "delete_lead":
+            lid = body.get("id")
+            if lid:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM cms_leads WHERE id = %s" % int(lid))
+                conn.commit()
+                cur.close()
+            return ok({"ok": True})
+
+        # ---- WHYUS CARDS ----
+        if action == "save_whyus_cards":
+            items = body.get("items", [])
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM cms_whyus_cards")
+            existing = [r[0] for r in cur.fetchall()]
+            kept = []
+            for i, it in enumerate(items):
+                iid = it.get("id")
+                if iid and iid in existing:
+                    cur.execute("UPDATE cms_whyus_cards SET sort_order=%s, icon='%s', title='%s', description='%s', is_active=%s, updated_at=NOW() WHERE id=%s" % (
+                        i+1, esc(it.get("icon","Check")), esc(it.get("title")), esc(it.get("description")),
+                        "true" if it.get("is_active", True) else "false", int(iid)))
+                    kept.append(iid)
+                else:
+                    cur.execute("INSERT INTO cms_whyus_cards (sort_order, icon, title, description, is_active) VALUES (%s,'%s','%s','%s',%s) RETURNING id" % (
+                        i+1, esc(it.get("icon","Check")), esc(it.get("title")), esc(it.get("description")),
+                        "true" if it.get("is_active", True) else "false"))
+                    kept.append(cur.fetchone()[0])
+            for eid in existing:
+                if eid not in kept:
+                    cur.execute("DELETE FROM cms_whyus_cards WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # ---- QUICKORDER STEPS ----
+        if action == "save_quickorder_steps":
+            items = body.get("items", [])
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM cms_quickorder_steps")
+            existing = [r[0] for r in cur.fetchall()]
+            kept = []
+            for i, it in enumerate(items):
+                iid = it.get("id")
+                if iid and iid in existing:
+                    cur.execute("UPDATE cms_quickorder_steps SET sort_order=%s, icon='%s', title='%s', description='%s', is_active=%s, updated_at=NOW() WHERE id=%s" % (
+                        i+1, esc(it.get("icon","CheckCircle")), esc(it.get("title")), esc(it.get("description")),
+                        "true" if it.get("is_active", True) else "false", int(iid)))
+                    kept.append(iid)
+                else:
+                    cur.execute("INSERT INTO cms_quickorder_steps (sort_order, icon, title, description, is_active) VALUES (%s,'%s','%s','%s',%s) RETURNING id" % (
+                        i+1, esc(it.get("icon","CheckCircle")), esc(it.get("title")), esc(it.get("description")),
+                        "true" if it.get("is_active", True) else "false"))
+                    kept.append(cur.fetchone()[0])
+            for eid in existing:
+                if eid not in kept:
+                    cur.execute("DELETE FROM cms_quickorder_steps WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # ---- PRICING ITEMS ----
+        if action == "save_pricing_items":
+            items = body.get("items", [])
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM cms_pricing_items")
+            existing = [r[0] for r in cur.fetchall()]
+            kept = []
+            for i, it in enumerate(items):
+                iid = it.get("id")
+                if iid and iid in existing:
+                    cur.execute("UPDATE cms_pricing_items SET category_slug='%s', category_title='%s', category_icon='%s', name='%s', price='%s', description='%s', sort_order=%s, is_active=%s, updated_at=NOW() WHERE id=%s" % (
+                        esc(it.get("category_slug")), esc(it.get("category_title")), esc(it.get("category_icon","Briefcase")),
+                        esc(it.get("name")), esc(it.get("price")), esc(it.get("description")),
+                        int(it.get("sort_order", i+1)), "true" if it.get("is_active", True) else "false", int(iid)))
+                    kept.append(iid)
+                else:
+                    cur.execute("INSERT INTO cms_pricing_items (category_slug, category_title, category_icon, name, price, description, sort_order, is_active) VALUES ('%s','%s','%s','%s','%s','%s',%s,%s) RETURNING id" % (
+                        esc(it.get("category_slug")), esc(it.get("category_title")), esc(it.get("category_icon","Briefcase")),
+                        esc(it.get("name")), esc(it.get("price")), esc(it.get("description")),
+                        int(it.get("sort_order", i+1)), "true" if it.get("is_active", True) else "false"))
+                    kept.append(cur.fetchone()[0])
+            for eid in existing:
+                if eid not in kept:
+                    cur.execute("DELETE FROM cms_pricing_items WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # ---- NAV ITEMS ----
+        if action == "save_nav_items":
+            items = body.get("items", [])
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM cms_nav_items")
+            existing = [r[0] for r in cur.fetchall()]
+            kept = []
+            for i, it in enumerate(items):
+                iid = it.get("id")
+                if iid and iid in existing:
+                    cur.execute("UPDATE cms_nav_items SET label='%s', href='%s', type='%s', sort_order=%s, is_visible=%s, updated_at=NOW() WHERE id=%s" % (
+                        esc(it.get("label")), esc(it.get("href")), esc(it.get("type","anchor")),
+                        i+1, "true" if it.get("is_visible", True) else "false", int(iid)))
+                    kept.append(iid)
+                else:
+                    cur.execute("INSERT INTO cms_nav_items (label, href, type, sort_order, is_visible) VALUES ('%s','%s','%s',%s,%s) RETURNING id" % (
+                        esc(it.get("label")), esc(it.get("href")), esc(it.get("type","anchor")),
+                        i+1, "true" if it.get("is_visible", True) else "false"))
+                    kept.append(cur.fetchone()[0])
+            for eid in existing:
+                if eid not in kept:
+                    cur.execute("DELETE FROM cms_nav_items WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # ---- VIDEO CALCULATOR ----
+        if action == "save_video_cameras":
+            items = body.get("items", [])
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM cms_video_camera_types")
+            existing = [r[0] for r in cur.fetchall()]
+            kept = []
+            for i, it in enumerate(items):
+                iid = it.get("id")
+                if iid and iid in existing:
+                    cur.execute("UPDATE cms_video_camera_types SET label='%s', price=%s, icon='%s', sort_order=%s, is_active=%s WHERE id=%s" % (
+                        esc(it.get("label")), int(it.get("price",0)), esc(it.get("icon","Camera")),
+                        i+1, "true" if it.get("is_active", True) else "false", int(iid)))
+                    kept.append(iid)
+                else:
+                    cur.execute("INSERT INTO cms_video_camera_types (label, price, icon, sort_order, is_active) VALUES ('%s',%s,'%s',%s,%s) RETURNING id" % (
+                        esc(it.get("label")), int(it.get("price",0)), esc(it.get("icon","Camera")),
+                        i+1, "true" if it.get("is_active", True) else "false"))
+                    kept.append(cur.fetchone()[0])
+            for eid in existing:
+                if eid not in kept:
+                    cur.execute("DELETE FROM cms_video_camera_types WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        if action == "save_video_equipment":
+            items = body.get("items", [])
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM cms_video_equipment")
+            existing = [r[0] for r in cur.fetchall()]
+            kept = []
+            for i, it in enumerate(items):
+                iid = it.get("id")
+                if iid and iid in existing:
+                    cur.execute("UPDATE cms_video_equipment SET label='%s', price=%s, icon='%s', default_checked=%s, sort_order=%s, is_active=%s WHERE id=%s" % (
+                        esc(it.get("label")), int(it.get("price",0)), esc(it.get("icon","Box")),
+                        "true" if it.get("default_checked") else "false",
+                        i+1, "true" if it.get("is_active", True) else "false", int(iid)))
+                    kept.append(iid)
+                else:
+                    cur.execute("INSERT INTO cms_video_equipment (label, price, icon, default_checked, sort_order, is_active) VALUES ('%s',%s,'%s',%s,%s,%s) RETURNING id" % (
+                        esc(it.get("label")), int(it.get("price",0)), esc(it.get("icon","Box")),
+                        "true" if it.get("default_checked") else "false",
+                        i+1, "true" if it.get("is_active", True) else "false"))
+                    kept.append(cur.fetchone()[0])
+            for eid in existing:
+                if eid not in kept:
+                    cur.execute("DELETE FROM cms_video_equipment WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # ---- PAGES SEO ----
+        if action == "save_pages":
+            items = body.get("items", [])
+            def esc(v): return str(v or "").replace("'", "''")
+            cur = conn.cursor()
+            for it in items:
+                pid = it.get("id")
+                if pid:
+                    cur.execute("UPDATE cms_pages SET title='%s', seo_title='%s', seo_description='%s', og_title='%s', og_description='%s', og_image_url='%s', is_active=%s, updated_at=NOW() WHERE id=%s" % (
+                        esc(it.get("title")), esc(it.get("seo_title")), esc(it.get("seo_description")),
+                        esc(it.get("og_title")), esc(it.get("og_description")), esc(it.get("og_image_url")),
+                        "true" if it.get("is_active", True) else "false", int(pid)))
             conn.commit()
             cur.close()
             return ok({"ok": True})

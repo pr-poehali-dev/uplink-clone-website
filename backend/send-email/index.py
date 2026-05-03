@@ -234,6 +234,22 @@ def handler(event: dict, context) -> dict:
         maax_text = "\n".join(lines)
         results["maax"] = send_maax(maax_key, maax_chat, maax_text)
 
+    # ── СОХРАНЕНИЕ ЗАЯВКИ В БД ─────────────────────────────────────────
+    try:
+        def esc(v): return str(v or "").replace("'", "''")
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO cms_leads (name, phone, email, service, message, source) VALUES ('%s','%s','%s','%s','%s','%s')" % (
+                esc(name), esc(phone), esc(email), esc(service), esc(message), esc(source))
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        results["lead_saved"] = True
+    except Exception as e:
+        results["lead_error"] = str(e)
+
     return {
         "statusCode": 200,
         "headers": cors_headers,

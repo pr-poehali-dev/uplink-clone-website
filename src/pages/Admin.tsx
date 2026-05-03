@@ -8,8 +8,15 @@ import { FaqTab } from "./admin/FaqTab";
 import { CalculatorTab } from "./admin/CalculatorTab";
 import { SecretsTab } from "./admin/SecretsTab";
 import { PreviewPanel } from "./admin/PreviewPanel";
+import { LeadsTab } from "./admin/LeadsTab";
+import { WhyUsTab } from "./admin/WhyUsTab";
+import { QuickOrderTab } from "./admin/QuickOrderTab";
+import { PricingTab } from "./admin/PricingTab";
+import { NavTab } from "./admin/NavTab";
+import { VideoCalcTab } from "./admin/VideoCalcTab";
+import { PagesTab } from "./admin/PagesTab";
 
-type Tab = "settings" | "sections" | "services" | "plans" | "calculator" | "projects" | "team" | "faq" | "secrets" | "password";
+type Tab = "settings" | "sections" | "services" | "plans" | "calculator" | "projects" | "team" | "faq" | "secrets" | "password" | "leads" | "whyus" | "quickorder" | "pricing" | "nav" | "videocalc" | "pages";
 
 export default function Admin() {
   const [password, setPassword] = useState("");
@@ -122,18 +129,28 @@ export default function Admin() {
     );
   }
 
-  const tabs: { id: Tab; label: string; icon: string }[] = [
+  const unreadLeads = (content as CmsContent & { _leads_count?: number })._leads_count ?? 0;
+
+  const tabs: { id: Tab; label: string; icon: string; badge?: number }[] = [
+    { id: "leads", label: "Заявки", icon: "Inbox" },
     { id: "settings", label: "Настройки", icon: "Settings" },
     { id: "sections", label: "Секции", icon: "LayoutDashboard" },
+    { id: "nav", label: "Навигация", icon: "Menu" },
     { id: "services", label: "Услуги", icon: "Briefcase" },
     { id: "plans", label: "Тарифы", icon: "CreditCard" },
+    { id: "pricing", label: "Прайс", icon: "Receipt" },
     { id: "calculator", label: "Калькулятор", icon: "Calculator" },
+    { id: "videocalc", label: "Видеонаблюд.", icon: "Camera" },
+    { id: "whyus", label: "Почему мы", icon: "Star" },
+    { id: "quickorder", label: "Быстр. заказ", icon: "Zap" },
     { id: "projects", label: "Проекты", icon: "FolderOpen" },
     { id: "team", label: "Команда", icon: "Users" },
     { id: "faq", label: "FAQ", icon: "HelpCircle" },
+    { id: "pages", label: "SEO страниц", icon: "Search" },
     { id: "secrets", label: "Секреты", icon: "KeyRound" },
     { id: "password", label: "Пароль", icon: "Lock" },
   ];
+  void unreadLeads;
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
@@ -197,14 +214,21 @@ export default function Admin() {
 
           {/* Content */}
           <div className="flex-1 min-w-0">
+            {tab === "leads" && <LeadsTab password={password} cmsApiUrl={CMS_API_URL} />}
             {tab === "settings" && <SettingsTab content={content} password={password} save={save} saving={saving} />}
             {tab === "sections" && <SectionsTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "nav" && <NavTab content={content} password={password} save={save} saving={saving} />}
             {tab === "services" && <ServicesTab content={content} password={password} save={save} saving={saving} />}
             {tab === "plans" && <PlansTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "pricing" && <PricingTab content={content} password={password} save={save} saving={saving} />}
             {tab === "calculator" && <CalculatorTab content={content} save={save} saving={saving} />}
+            {tab === "videocalc" && <VideoCalcTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "whyus" && <WhyUsTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "quickorder" && <QuickOrderTab content={content} password={password} save={save} saving={saving} />}
             {tab === "projects" && <ProjectsTab content={content} password={password} save={save} saving={saving} />}
             {tab === "team" && <TeamTab content={content} password={password} save={save} saving={saving} />}
             {tab === "faq" && <FaqTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "pages" && <PagesTab content={content} password={password} save={save} saving={saving} />}
             {tab === "secrets" && <SecretsTab password={password} />}
             {tab === "password" && <PasswordTab password={password} setPassword={setPassword} save={save} saving={saving} />}
           </div>

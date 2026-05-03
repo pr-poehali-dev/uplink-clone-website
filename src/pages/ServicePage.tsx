@@ -103,15 +103,20 @@ export default function ServicePage() {
       {/* Калькулятор IT-аутсорсинга */}
       {isOutsourcing && (
         <Calculator
-          calcSettings={content?.calcSettings}
-          calcOptions={content?.calcOptions}
+          calcSettings={content?.calc_settings}
+          calcOptions={content?.calc_options}
           onContactClick={openModal}
         />
       )}
 
       {/* Калькулятор видеонаблюдения */}
       {isVideoSurveillance && (
-        <VideoSurveillanceCalculator onContactClick={openModal} />
+        <VideoSurveillanceCalculator
+          onContactClick={openModal}
+          videoCameras={content?.video_cameras}
+          videoEquipment={content?.video_equipment}
+          settings={content?.settings}
+        />
       )}
 
       <Footer onContactClick={() => openModal("Подвал")} settings={content?.settings} />

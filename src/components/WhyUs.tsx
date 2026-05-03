@@ -1,6 +1,6 @@
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
-import { CmsSettings } from "@/hooks/useCmsContent";
+import { CmsSettings, CmsWhyusCard } from "@/hooks/useCmsContent";
 
 const advantages = [
   {
@@ -72,8 +72,21 @@ function StatItem({
   );
 }
 
-function AdvCard({ a, index }: { a: (typeof advantages)[0]; index: number }) {
+const ACCENTS = [
+  "from-cyan-400 to-blue-500",
+  "from-green-400 to-cyan-400",
+  "from-yellow-400 to-orange-400",
+  "from-purple-400 to-pink-400",
+  "from-red-400 to-orange-400",
+  "from-blue-400 to-purple-500",
+];
+
+function AdvCard({ card, index }: { card: CmsWhyusCard | (typeof advantages)[0]; index: number }) {
   const { ref, isVisible } = useScrollAnimation();
+  const icon = "icon" in card ? card.icon : card.icon;
+  const title = "title" in card ? card.title : card.title;
+  const desc = "description" in card ? (card as CmsWhyusCard).description : (card as (typeof advantages)[0]).desc;
+  const accent = "accent" in card ? (card as (typeof advantages)[0]).accent : ACCENTS[index % ACCENTS.length];
   return (
     <div
       ref={ref}
@@ -82,20 +95,16 @@ function AdvCard({ a, index }: { a: (typeof advantages)[0]; index: number }) {
       }`}
       style={{ transitionDelay: isVisible ? '0ms' : `${index * 80}ms` }}
     >
-      <div
-        className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${a.accent} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}
-      >
-        <Icon name={a.icon as "Clock"} size={28} className="text-white" />
+      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${accent} flex items-center justify-center mb-4 shadow-lg transition-transform duration-300`}>
+        <Icon name={icon as "Clock"} size={28} className="text-white" fallback="Check" />
       </div>
-      <h3 className="text-lg font-bold text-white font-['Oswald'] mb-2">
-        {a.title}
-      </h3>
-      <p className="text-gray-400 text-sm leading-relaxed">{a.desc}</p>
+      <h3 className="text-lg font-bold text-white font-['Oswald'] mb-2">{title}</h3>
+      <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
     </div>
   );
 }
 
-export default function WhyUs({ settings }: { settings?: CmsSettings }) {
+export default function WhyUs({ settings, whyusCards }: { settings?: CmsSettings; whyusCards?: CmsWhyusCard[] }) {
   const { ref, isVisible } = useScrollAnimation();
   const stats = [
     { num: settings?.whyus_stat_1_num ?? statsData[0].num, label: settings?.whyus_stat_1_label ?? statsData[0].label },
@@ -103,6 +112,9 @@ export default function WhyUs({ settings }: { settings?: CmsSettings }) {
     { num: settings?.whyus_stat_3_num ?? statsData[2].num, label: settings?.whyus_stat_3_label ?? statsData[2].label },
     { num: settings?.whyus_stat_4_num ?? statsData[3].num, label: settings?.whyus_stat_4_label ?? statsData[3].label },
   ];
+
+  const activeCards = whyusCards?.filter(c => c.is_active) ?? [];
+  const cards = activeCards.length > 0 ? activeCards : advantages;
 
   return (
     <section className="py-14 relative overflow-hidden bg-[#0a0f1a]">
@@ -125,8 +137,8 @@ export default function WhyUs({ settings }: { settings?: CmsSettings }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {advantages.map((a, i) => (
-            <AdvCard key={a.title} a={a} index={i} />
+          {cards.map((card, i) => (
+            <AdvCard key={"id" in card ? card.id : (card as (typeof advantages)[0]).title} card={card} index={i} />
           ))}
         </div>
 

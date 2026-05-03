@@ -38,9 +38,9 @@ export default function Index() {
   const sectionMap: Record<string, JSX.Element | null> = {
     hero:       <Hero onContactClick={() => openModal("Главный экран (Hero)")} settings={s} />,
     services:   <Services onContactClick={() => openModal("Блок услуг")} services={content?.services} />,
-    whyus:      <WhyUs settings={s} />,
+    whyus:      <WhyUs settings={s} whyusCards={content?.whyus_cards} />,
     pricing:    <Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} />,
-    quickorder: <QuickOrder />,
+    quickorder: <QuickOrder steps={content?.quickorder_steps} />,
     projects:   <Projects projects={content?.projects} />,
     team:       <About team={content?.team} />,
     contacts:   <Contacts onContactClick={() => openModal("Блок контактов")} settings={s} />,

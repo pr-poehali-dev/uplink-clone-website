@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import Icon from "@/components/ui/icon";
+import { CmsQuickorderStep } from "@/hooks/useCmsContent";
 
 const services = [
   {
@@ -117,35 +118,61 @@ function ServiceAccordion({ s }: { s: (typeof services)[0] }) {
   );
 }
 
-export default function QuickOrder() {
+function CmsStepCard({ step, index }: { step: CmsQuickorderStep; index: number }) {
   const { ref, isVisible } = useScrollAnimation();
+  return (
+    <div
+      ref={ref}
+      className={`glass-card neon-border rounded-2xl p-6 text-center transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      style={{ transitionDelay: isVisible ? "0ms" : `${index * 100}ms` }}
+    >
+      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-cyan-500/20">
+        <Icon name={step.icon as "Phone"} size={24} className="text-[#080c14]" fallback="CheckCircle" />
+      </div>
+      <div className="text-xs font-bold text-cyan-400 mb-2 font-['Oswald'] tracking-widest">ШАГ {index + 1}</div>
+      <h3 className="text-base font-bold text-white font-['Oswald'] mb-2">{step.title}</h3>
+      <p className="text-gray-400 text-sm leading-relaxed">{step.description}</p>
+    </div>
+  );
+}
+
+export default function QuickOrder({ steps }: { steps?: CmsQuickorderStep[] }) {
+  const { ref, isVisible } = useScrollAnimation();
+  const activeSteps = steps?.filter(s => s.is_active) ?? [];
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-14 relative overflow-hidden">
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-12 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="Zap" size={14} />
-            Быстрый заказ
+            Как мы работаем
           </div>
           <h2 className="section-title text-white mb-4">
-            Как <span className="gradient-text">заказать услугу</span>
+            Начать <span className="gradient-text">сотрудничество</span>
           </h2>
           <p className="text-gray-400 max-w-xl mx-auto">
-            Нажмите на нужную услугу и узнайте, как проходит процесс работы.
-            Всё просто и прозрачно — от заявки до результата.
+            Всё просто и прозрачно — от первой заявки до результата.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
-          {services.map((s) => (
-            <ServiceAccordion key={s.title} s={s} />
-          ))}
-        </div>
+        {activeSteps.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+            {activeSteps.map((step, i) => (
+              <CmsStepCard key={step.id} step={step} index={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
+            {services.map((s) => (
+              <ServiceAccordion key={s.title} s={s} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
