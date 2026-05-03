@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
 import Calculator from "@/components/Calculator";
+import VideoSurveillanceCalculator from "@/components/VideoSurveillanceCalculator";
 import Icon from "@/components/ui/icon";
 import { useCmsContent, CmsService } from "@/hooks/useCmsContent";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
@@ -74,6 +75,7 @@ export default function ServicePage() {
     .slice(0, 3);
 
   const isOutsourcing = slug === "it-outsourcing";
+  const isVideoSurveillance = slug === "video-surveillance";
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
@@ -138,9 +140,9 @@ export default function ServicePage() {
                   <Icon name="PhoneCall" size={18} />
                   Получить консультацию
                 </button>
-                {isOutsourcing && (
+                {(isOutsourcing || isVideoSurveillance) && (
                   <a
-                    href="#calculator"
+                    href={isVideoSurveillance ? "#video-calculator" : "#calculator"}
                     className="btn-outline-neon px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2"
                   >
                     <Icon name="Calculator" size={18} />
@@ -188,7 +190,7 @@ export default function ServicePage() {
 
       {/* Подробное описание */}
       {service.full_description && (
-        <section className="py-20 relative">
+        <section className="py-12 relative">
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="grid lg:grid-cols-3 gap-8">
               <AnimateOnScroll className="lg:col-span-2">
@@ -234,7 +236,7 @@ export default function ServicePage() {
 
       {/* Преимущества */}
       {benefits.length > 0 && (
-        <section className="py-20 relative overflow-hidden">
+        <section className="py-12 relative overflow-hidden">
           <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
           <div className="container mx-auto px-4 relative">
             <AnimateOnScroll className="text-center mb-14">
@@ -265,7 +267,7 @@ export default function ServicePage() {
 
       {/* Этапы работы */}
       {steps.length > 0 && (
-        <section className="py-20 relative overflow-hidden faq-bg">
+        <section className="py-12 relative overflow-hidden faq-bg">
           <div className="container mx-auto px-4 relative">
             <AnimateOnScroll className="text-center mb-14">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
@@ -292,7 +294,7 @@ export default function ServicePage() {
 
       {/* FAQ по услуге */}
       {sFaq.length > 0 && (
-        <section className="py-20 relative">
+        <section className="py-12 relative">
           <div className="container mx-auto px-4 max-w-3xl">
             <AnimateOnScroll className="text-center mb-12">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
@@ -309,7 +311,7 @@ export default function ServicePage() {
       )}
 
       {/* CTA */}
-      <section className="py-20 relative">
+      <section className="py-12 relative">
         <div className="container mx-auto px-4">
           <AnimateOnScroll>
             <div className="glass-card neon-border rounded-3xl p-10 md:p-16 text-center max-w-5xl mx-auto relative overflow-hidden">
@@ -348,9 +350,23 @@ export default function ServicePage() {
         </div>
       </section>
 
+      {/* Калькулятор IT-аутсорсинга */}
+      {isOutsourcing && (
+        <Calculator
+          calcSettings={content?.calcSettings}
+          calcOptions={content?.calcOptions}
+          onContactClick={openModal}
+        />
+      )}
+
+      {/* Калькулятор видеонаблюдения */}
+      {isVideoSurveillance && (
+        <VideoSurveillanceCalculator onContactClick={openModal} />
+      )}
+
       {/* Другие услуги */}
       {otherServices.length > 0 && (
-        <section className="py-20 relative">
+        <section className="py-12 relative">
           <div className="container mx-auto px-4">
             <AnimateOnScroll className="text-center mb-10">
               <h2 className="text-3xl font-bold font-['Oswald'] text-white">

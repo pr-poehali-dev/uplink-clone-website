@@ -161,7 +161,7 @@ export default function About({ team: cmsTeam }: { team?: CmsTeamMember[] }) {
   const { ref: teamRef, isVisible: teamVisible } = useScrollAnimation();
 
   return (
-    <section id="about" className="py-24 relative overflow-hidden">
+    <section id="about" className="py-14 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 right-0 w-96 h-96 bg-cyan-500/4 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 left-0 w-64 h-64 bg-purple-500/4 rounded-full blur-3xl" />

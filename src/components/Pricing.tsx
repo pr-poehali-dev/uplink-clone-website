@@ -291,7 +291,7 @@ export default function Pricing({ onContactClick, plans: cmsPlans }: PricingProp
   const [selectedPlan, setSelectedPlan] = useState<PlanDisplay | null>(null);
 
   return (
-    <section id="pricing" className="py-24 relative overflow-hidden">
+    <section id="pricing" className="py-14 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/3 left-0 w-72 h-72 bg-cyan-500/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />

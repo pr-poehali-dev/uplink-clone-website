@@ -128,7 +128,7 @@ export default function Projects({ projects: cmsProjects }: { projects?: CmsProj
   return (
     <section
       id="projects"
-      className="py-24 bg-[#0a0f1a] relative overflow-hidden"
+      className="py-14 bg-[#0a0f1a] relative overflow-hidden"
     >
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
       <div className="container mx-auto px-4">

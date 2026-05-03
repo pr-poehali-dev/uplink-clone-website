@@ -206,16 +206,27 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
               {l.label}
             </button>
           ))}
+          <Link
+            to="/pricing"
+            className="px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
+          >
+            Прайс
+          </Link>
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
           {themeToggleEnabled && (
             <button
               onClick={toggleTheme}
-              title={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-gray-300 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all border border-transparent hover:border-cyan-500/20"
+              title={theme === "dark" ? "Переключить на светлую тему" : "Переключить на тёмную тему"}
+              className="flex items-center gap-1.5 group"
+              aria-label="Переключить тему"
             >
-              <Icon name={theme === "dark" ? "Sun" : "Moon"} size={18} />
+              <Icon name="Moon" size={14} className={`transition-colors ${theme === "dark" ? "text-cyan-400" : "text-gray-400"}`} />
+              <div className={`relative w-11 h-6 rounded-full border transition-all duration-300 ${theme === "light" ? "bg-cyan-500 border-cyan-500" : "bg-gray-700 border-gray-600"}`}>
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-all duration-300 ${theme === "light" ? "left-5" : "left-0.5"}`} />
+              </div>
+              <Icon name="Sun" size={14} className={`transition-colors ${theme === "light" ? "text-cyan-500" : "text-gray-500"}`} />
             </button>
           )}
           <a
@@ -238,10 +249,14 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
           {themeToggleEnabled && (
             <button
               onClick={toggleTheme}
-              className="text-gray-300 hover:text-cyan-400 transition-colors p-2"
+              className="flex items-center gap-1 p-1"
               title={theme === "dark" ? "Светлая тема" : "Тёмная тема"}
             >
-              <Icon name={theme === "dark" ? "Sun" : "Moon"} size={20} />
+              <Icon name="Moon" size={12} className={theme === "dark" ? "text-cyan-400" : "text-gray-400"} />
+              <div className={`relative w-9 h-5 rounded-full border transition-all duration-300 ${theme === "light" ? "bg-cyan-500 border-cyan-500" : "bg-gray-700 border-gray-600"}`}>
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${theme === "light" ? "left-4" : "left-0.5"}`} />
+              </div>
+              <Icon name="Sun" size={12} className={theme === "light" ? "text-cyan-500" : "text-gray-500"} />
             </button>
           )}
           <a
@@ -303,6 +318,13 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
               {l.label}
             </button>
           ))}
+          <Link
+            to="/pricing"
+            onClick={() => setMenuOpen(false)}
+            className="block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
+          >
+            Прайс
+          </Link>
           <div className="pt-4 flex flex-col gap-2">
             <a
               href={phoneHref}

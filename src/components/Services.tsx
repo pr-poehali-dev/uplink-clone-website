@@ -149,7 +149,7 @@ export default function Services({ onContactClick, services: cmsServices }: Serv
   const { ref: titleRef, isVisible: titleVisible } = useScrollAnimation();
 
   return (
-    <section id="services" className="py-24 relative overflow-hidden">
+    <section id="services" className="py-14 relative overflow-hidden">
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <div className="container mx-auto px-4">
         <div

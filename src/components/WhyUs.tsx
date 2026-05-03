@@ -105,7 +105,7 @@ export default function WhyUs({ settings }: { settings?: CmsSettings }) {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden bg-[#0a0f1a]">
+    <section className="py-14 relative overflow-hidden bg-[#0a0f1a]">
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
       <div className="container mx-auto px-4">
         <div

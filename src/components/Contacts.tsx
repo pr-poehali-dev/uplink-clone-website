@@ -79,7 +79,7 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
   return (
     <section
       id="contacts"
-      className="py-24 bg-[#0a0f1a] relative overflow-hidden"
+      className="py-14 bg-[#0a0f1a] relative overflow-hidden"
       itemScope
       itemType="https://schema.org/LocalBusiness"
     >
