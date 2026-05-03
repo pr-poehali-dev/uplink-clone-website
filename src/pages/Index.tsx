@@ -61,13 +61,15 @@ export default function Index() {
         source={modalSource}
       />
 
-      <button
-        onClick={() => openModal("Плавающая кнопка")}
-        className="fixed bottom-6 right-6 z-40 btn-neon w-14 h-14 rounded-full flex items-center justify-center shadow-2xl shadow-cyan-500/30 animate-glow"
-        title="Получить консультацию"
-      >
-        <span className="text-xl">💬</span>
-      </button>
+      {s?.design_float_btn_visible !== "false" && (
+        <button
+          onClick={() => openModal("Плавающая кнопка")}
+          className="fixed bottom-6 right-6 z-40 btn-neon w-14 h-14 rounded-full flex items-center justify-center shadow-2xl shadow-cyan-500/30 animate-glow"
+          title="Получить консультацию"
+        >
+          <span className="text-xl">{s?.design_float_btn_emoji ?? "💬"}</span>
+        </button>
+      )}
     </div>
   );
 }

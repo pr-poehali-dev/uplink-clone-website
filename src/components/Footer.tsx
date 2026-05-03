@@ -12,6 +12,11 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
   const phoneHref = settings?.phone_href ?? "tel:+79869860136";
   const email = settings?.email_support ?? "support@uplink-it.ru";
   const address = settings?.address ?? "Саратов, Россия";
+  const tgUrl = settings?.footer_tg_url ?? "https://t.me/uplinkit";
+  const copyright = settings?.footer_copyright ?? "© 2025 ИТК Аплинк-IT. Все права защищены.";
+  const description = settings?.footer_description ?? "IT-аутсорсинг и обслуживание IT-инфраструктуры в Саратове с 2015 года. Работаем по всему Саратову и Саратовской области.";
+  const legal = settings?.footer_legal ?? "Лицензионная IT-деятельность · ИНН указан в договоре";
+  const workHours = settings?.footer_work_hours ?? "Пн–Пт 9:00–18:00";
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -63,11 +68,11 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
               </div>
             </button>
             <p className="text-gray-500 text-sm leading-relaxed mb-5">
-              IT-аутсорсинг и обслуживание IT-инфраструктуры в Саратове с 2015 года. Работаем по всему Саратову и Саратовской области.
+              {description}
             </p>
             <div className="flex gap-3">
               <a
-                href="https://t.me/uplinkit"
+                href={tgUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 hover:bg-cyan-500/20 transition-colors"
@@ -147,7 +152,7 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
               </li>
               <li className="flex items-start gap-2">
                 <Icon name="Clock" size={15} className="text-cyan-400 mt-0.5 flex-shrink-0" />
-                <span className="text-gray-400 text-sm">Поддержка 24/7</span>
+                <span className="text-gray-400 text-sm">{workHours}</span>
               </li>
             </ul>
             <button
@@ -161,11 +166,11 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
 
         <div className="border-t border-cyan-500/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-gray-600 text-sm">
-            © 2024 ИТК Аплинк-IT. Все права защищены.
+            {copyright}
           </p>
           <div className="flex items-center gap-4">
             <p className="text-gray-700 text-xs">
-              Лицензионная IT-деятельность · ИНН указан в договоре
+              {legal}
             </p>
             <Link
               to="/privacy"

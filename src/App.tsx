@@ -1,4 +1,4 @@
-
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,8 +13,37 @@ import PricingPage from "./pages/Pricing";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { useCmsContent } from "@/hooks/useCmsContent";
 
 const queryClient = new QueryClient();
+
+function DesignApplicator() {
+  const { content } = useCmsContent();
+  useEffect(() => {
+    if (!content?.settings) return;
+    const s = content.settings;
+    const root = document.documentElement;
+    if (s.design_accent_color) {
+      root.style.setProperty("--neon-blue", s.design_accent_color);
+      root.style.setProperty("--range-thumb", s.design_accent_color);
+    }
+    if (s.design_font_heading) {
+      const link = document.getElementById("gfont-heading") as HTMLLinkElement | null;
+      const family = encodeURIComponent(s.design_font_heading);
+      const href = `https://fonts.googleapis.com/css2?family=${family}:wght@400;600;700&display=swap`;
+      if (link) { link.href = href; }
+      else {
+        const el = document.createElement("link");
+        el.id = "gfont-heading"; el.rel = "stylesheet"; el.href = href;
+        document.head.appendChild(el);
+      }
+      document.querySelectorAll<HTMLElement>("h1,h2,h3,h4,.font-\\[Oswald\\]").forEach(el => {
+        el.style.fontFamily = `'${s.design_font_heading}', sans-serif`;
+      });
+    }
+  }, [content?.settings]);
+  return null;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -23,6 +52,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <CookieBanner />
+        <DesignApplicator />
         <BrowserRouter>
           <ScrollToTop />
           <Routes>

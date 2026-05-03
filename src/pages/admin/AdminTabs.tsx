@@ -79,12 +79,26 @@ export function SettingsTab({ content, save, saving }: { content: CmsContent; pa
 
   const handleSave = () => save("save_settings", { updates: vals });
 
-  const groups: { label: string; keys: string[] }[] = [
+  const groups: { label: string; keys: string[]; textarea?: string[] }[] = [
     { label: "Контакты", keys: ["phone", "phone_href", "email_support", "email_info", "address", "work_hours", "response_time"] },
-    { label: "Главный экран", keys: ["hero_badge", "hero_title_1", "hero_title_2", "hero_description"] },
+    { label: "Главный экран", keys: ["hero_badge", "hero_title_1", "hero_title_2", "hero_description"], textarea: ["hero_description"] },
     { label: "Цифры в шапке", keys: ["hero_stat_1_value", "hero_stat_1_label", "hero_stat_2_value", "hero_stat_2_label", "hero_stat_3_value", "hero_stat_3_label"] },
     { label: "Достижения", keys: ["whyus_stat_1_num", "whyus_stat_1_label", "whyus_stat_2_num", "whyus_stat_2_label", "whyus_stat_3_num", "whyus_stat_3_label", "whyus_stat_4_num", "whyus_stat_4_label"] },
+    { label: "Футер", keys: ["footer_copyright", "footer_description", "footer_legal", "footer_tg_url", "footer_work_hours"], textarea: ["footer_description"] },
+    { label: "Политика конфиденциальности", keys: ["privacy_policy_content"], textarea: ["privacy_policy_content"] },
   ];
+
+  const settingsMeta: Record<string, string> = {
+    phone: "Телефон (отображается)", phone_href: "Телефон (ссылка tel:)", email_support: "Email поддержки", email_info: "Email общий",
+    address: "Адрес", work_hours: "Режим работы", response_time: "Время реагирования",
+    hero_badge: "Подпись над заголовком", hero_title_1: "Заголовок (строка 1)", hero_title_2: "Заголовок (строка 2)", hero_description: "Описание",
+    hero_stat_1_value: "Цифра 1", hero_stat_1_label: "Подпись 1", hero_stat_2_value: "Цифра 2", hero_stat_2_label: "Подпись 2", hero_stat_3_value: "Цифра 3", hero_stat_3_label: "Подпись 3",
+    whyus_stat_1_num: "Цифра 1", whyus_stat_1_label: "Подпись 1", whyus_stat_2_num: "Цифра 2", whyus_stat_2_label: "Подпись 2",
+    whyus_stat_3_num: "Цифра 3", whyus_stat_3_label: "Подпись 3", whyus_stat_4_num: "Цифра 4", whyus_stat_4_label: "Подпись 4",
+    footer_copyright: "Copyright (нижняя строка)", footer_description: "Описание компании", footer_legal: "Юридическая строка",
+    footer_tg_url: "Ссылка на Telegram", footer_work_hours: "Часы работы (в футере)",
+    privacy_policy_content: "Текст политики конфиденциальности",
+  };
 
   return (
     <div className="space-y-6">
@@ -92,28 +106,19 @@ export function SettingsTab({ content, save, saving }: { content: CmsContent; pa
         <div key={g.label} className="glass-card neon-border rounded-2xl p-6">
           <h3 className="text-white font-bold font-['Oswald'] text-lg mb-4">{g.label}</h3>
           <div className="space-y-3">
-            {g.keys.map((key) => {
-              const settingsMeta: Record<string, string> = {
-                phone: "Телефон (отображается)", phone_href: "Телефон (ссылка tel:)", email_support: "Email поддержки", email_info: "Email общий",
-                address: "Адрес", work_hours: "Режим работы", response_time: "Время реагирования",
-                hero_badge: "Подпись над заголовком", hero_title_1: "Заголовок (строка 1)", hero_title_2: "Заголовок (строка 2)", hero_description: "Описание",
-                hero_stat_1_value: "Цифра 1", hero_stat_1_label: "Подпись 1", hero_stat_2_value: "Цифра 2", hero_stat_2_label: "Подпись 2", hero_stat_3_value: "Цифра 3", hero_stat_3_label: "Подпись 3",
-                whyus_stat_1_num: "Цифра 1", whyus_stat_1_label: "Подпись 1", whyus_stat_2_num: "Цифра 2", whyus_stat_2_label: "Подпись 2",
-                whyus_stat_3_num: "Цифра 3", whyus_stat_3_label: "Подпись 3", whyus_stat_4_num: "Цифра 4", whyus_stat_4_label: "Подпись 4",
-              };
-              return (
-                <div key={key}>
-                  <label className="block text-gray-400 text-xs mb-1">{settingsMeta[key] || key}</label>
-                  {key === "hero_description" ? (
-                    <textarea value={vals[key] || ""} onChange={(e) => setVals({ ...vals, [key]: e.target.value })}
-                      rows={3} className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-all resize-none" />
-                  ) : (
-                    <input value={vals[key] || ""} onChange={(e) => setVals({ ...vals, [key]: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-all" />
-                  )}
-                </div>
-              );
-            })}
+            {g.keys.map((key) => (
+              <div key={key}>
+                <label className="block text-gray-400 text-xs mb-1">{settingsMeta[key] || key}</label>
+                {g.textarea?.includes(key) ? (
+                  <textarea value={vals[key] || ""} onChange={(e) => setVals({ ...vals, [key]: e.target.value })}
+                    rows={key === "privacy_policy_content" ? 16 : 3}
+                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-all resize-y font-mono" />
+                ) : (
+                  <input value={vals[key] || ""} onChange={(e) => setVals({ ...vals, [key]: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-all" />
+                )}
+              </div>
+            ))}
           </div>
         </div>
       ))}

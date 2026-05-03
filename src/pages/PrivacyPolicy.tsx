@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
+import { useCmsContent } from "@/hooks/useCmsContent";
 
 const sections = [
   {
@@ -79,6 +80,10 @@ const sections = [
 ];
 
 export default function PrivacyPolicy() {
+  const { content } = useCmsContent();
+  const email = content?.settings?.email_support ?? "support@uplink-it.ru";
+  const cmsText = content?.settings?.privacy_policy_content;
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -124,21 +129,27 @@ export default function PrivacyPolicy() {
         </div>
 
         {/* Разделы */}
-        <div className="space-y-8">
-          {sections.map((section) => (
-            <div
-              key={section.title}
-              className="rounded-2xl border border-white/8 bg-white/2 px-6 py-5"
-            >
-              <h2 className="text-white font-semibold font-['Oswald'] text-lg mb-3">
-                {section.title}
-              </h2>
-              <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">
-                {section.content}
-              </p>
-            </div>
-          ))}
-        </div>
+        {cmsText ? (
+          <div className="rounded-2xl border border-white/8 bg-white/2 px-6 py-5">
+            <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">{cmsText}</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {sections.map((section) => (
+              <div
+                key={section.title}
+                className="rounded-2xl border border-white/8 bg-white/2 px-6 py-5"
+              >
+                <h2 className="text-white font-semibold font-['Oswald'] text-lg mb-3">
+                  {section.title}
+                </h2>
+                <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">
+                  {section.content}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Контакт */}
         <div className="mt-10 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 px-6 py-5 flex items-start gap-4">
@@ -150,10 +161,10 @@ export default function PrivacyPolicy() {
             <p className="text-gray-400 text-sm">
               Напишите нам на{" "}
               <a
-                href="mailto:support@uplink-it.ru"
+                href={`mailto:${email}`}
                 className="text-cyan-400 hover:underline"
               >
-                support@uplink-it.ru
+                {email}
               </a>{" "}
               — ответим в течение рабочего дня.
             </p>

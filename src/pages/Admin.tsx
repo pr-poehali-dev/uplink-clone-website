@@ -15,8 +15,10 @@ import { PricingTab } from "./admin/PricingTab";
 import { NavTab } from "./admin/NavTab";
 import { VideoCalcTab } from "./admin/VideoCalcTab";
 import { PagesTab } from "./admin/PagesTab";
+import { MediaTab } from "./admin/MediaTab";
+import { DesignTab } from "./admin/DesignTab";
 
-type Tab = "settings" | "sections" | "services" | "plans" | "calculator" | "projects" | "team" | "faq" | "secrets" | "password" | "leads" | "whyus" | "quickorder" | "pricing" | "nav" | "videocalc" | "pages";
+type Tab = "settings" | "sections" | "services" | "plans" | "calculator" | "projects" | "team" | "faq" | "secrets" | "password" | "leads" | "whyus" | "quickorder" | "pricing" | "nav" | "videocalc" | "pages" | "media" | "design";
 
 export default function Admin() {
   const [password, setPassword] = useState("");
@@ -147,6 +149,8 @@ export default function Admin() {
     { id: "team", label: "Команда", icon: "Users" },
     { id: "faq", label: "FAQ", icon: "HelpCircle" },
     { id: "pages", label: "SEO страниц", icon: "Search" },
+    { id: "media", label: "Медиа", icon: "Image" },
+    { id: "design", label: "Дизайн", icon: "Palette" },
     { id: "secrets", label: "Секреты", icon: "KeyRound" },
     { id: "password", label: "Пароль", icon: "Lock" },
   ];
@@ -229,6 +233,8 @@ export default function Admin() {
             {tab === "team" && <TeamTab content={content} password={password} save={save} saving={saving} />}
             {tab === "faq" && <FaqTab content={content} password={password} save={save} saving={saving} />}
             {tab === "pages" && <PagesTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "media" && <MediaTab password={password} />}
+            {tab === "design" && <DesignTab content={content} password={password} save={save} saving={saving} />}
             {tab === "secrets" && <SecretsTab password={password} />}
             {tab === "password" && <PasswordTab password={password} setPassword={setPassword} save={save} saving={saving} />}
           </div>
