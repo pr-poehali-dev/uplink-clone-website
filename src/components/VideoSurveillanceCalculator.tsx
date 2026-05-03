@@ -85,6 +85,7 @@ export default function VideoSurveillanceCalculator({ onContactClick, videoCamer
   const result = useMemo(() => {
     const camera = cameraTypes.find((c) => c.key === cameraType) ?? cameraTypes[0];
     const camerasTotal = (camera?.price ?? 0) * cameraCount;
+    const installCameras = installPerCamera * cameraCount;
     const cableTotal = cablePricePerM * cableLength;
     const equipmentTotal = equipmentItems.reduce(
       (acc, eq) => acc + (selectedEquipment[eq.key] ? eq.price : 0), 0
