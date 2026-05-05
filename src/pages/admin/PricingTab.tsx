@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { CmsContent, CmsPricingItem } from "@/hooks/useCmsContent";
 import { SaveButton, SaveFn } from "./AdminShared";
 import Icon from "@/components/ui/icon";
+import { PricingSectionsEditor } from "./PricingSectionsEditor";
 
 interface Props {
   content: CmsContent;
@@ -49,7 +50,7 @@ function getCategories(items: CmsPricingItem[]): Category[] {
   return cats;
 }
 
-type TabId = "items" | "page";
+type TabId = "sections" | "items" | "page";
 
 export function PricingTab({ content, save, saving }: Props) {
   const [tab, setTab] = useState<TabId>("items");
@@ -145,6 +146,7 @@ export function PricingTab({ content, save, saving }: Props) {
   };
 
   const subTabs = [
+    { id: "sections" as TabId, label: "Секции", icon: "Layers" },
     { id: "items" as TabId, label: "Категории и позиции", icon: "List" },
     { id: "page" as TabId, label: "Настройки страницы", icon: "Settings" },
   ];
@@ -166,6 +168,11 @@ export function PricingTab({ content, save, saving }: Props) {
           </button>
         ))}
       </div>
+
+      {/* TAB: Секции */}
+      {tab === "sections" && (
+        <PricingSectionsEditor settings={content.settings ?? {}} save={save} saving={saving} />
+      )}
 
       {/* TAB: Категории и позиции */}
       {tab === "items" && (
