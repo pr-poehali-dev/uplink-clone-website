@@ -19,6 +19,7 @@ import { MediaTab } from "./admin/MediaTab";
 import { DesignTab } from "./admin/DesignTab";
 import { UsersTab } from "./admin/UsersTab";
 import { HistoryTab } from "./admin/HistoryTab";
+import { SeoTab } from "./admin/SeoTab";
 import { AdminLogin } from "./admin/AdminLogin";
 import { AdminHeader } from "./admin/AdminHeader";
 import { AdminSidebar, Tab, NavGroup } from "./admin/AdminSidebar";
@@ -165,6 +166,7 @@ export default function Admin() {
       label: "Страницы",
       items: [
         { id: "pages", label: "Страницы / SEO", icon: "FileText" },
+        { id: "seo", label: "SEO-оптимизация", icon: "TrendingUp" },
         { id: "sections", label: "Секции", icon: "Layers" },
         { id: "nav", label: "Навигация", icon: "Menu" },
       ],
@@ -230,6 +232,7 @@ export default function Admin() {
             )}
             {tab === "leads" && <LeadsTab password={password} cmsApiUrl={CMS_API_URL} />}
             {tab === "history" && <HistoryTab token={auth.token} cmsApiUrl={CMS_API_URL} />}
+            {tab === "seo" && <SeoTab token={auth.token} />}
             {tab === "settings" && <SettingsTab content={content} password={password} save={save} saving={saving} />}
             {tab === "sections" && <SectionsTab content={content} save={save} saving={saving} />}
             {tab === "nav" && <NavTab content={content} password={password} save={save} saving={saving} />}
