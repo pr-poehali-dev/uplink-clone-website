@@ -149,6 +149,7 @@ export interface CmsPricingItem {
   category_slug: string;
   category_title: string;
   category_icon: string;
+  category_accent: string;
   name: string;
   price: string;
   description: string;

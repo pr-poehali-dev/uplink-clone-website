@@ -89,8 +89,8 @@ def get_all_content(conn):
     cur.execute("SELECT id, sort_order, icon, title, description, is_active FROM cms_quickorder_steps ORDER BY sort_order")
     quickorder_steps = [{"id": r[0], "sort_order": r[1], "icon": r[2], "title": r[3], "description": r[4], "is_active": r[5]} for r in cur.fetchall()]
 
-    cur.execute("SELECT id, category_slug, category_title, category_icon, name, price, description, sort_order, is_active FROM cms_pricing_items ORDER BY category_slug, sort_order")
-    pricing_items = [{"id": r[0], "category_slug": r[1], "category_title": r[2], "category_icon": r[3], "name": r[4], "price": r[5], "description": r[6], "sort_order": r[7], "is_active": r[8]} for r in cur.fetchall()]
+    cur.execute("SELECT id, category_slug, category_title, category_icon, category_accent, name, price, description, sort_order, is_active FROM cms_pricing_items ORDER BY category_slug, sort_order")
+    pricing_items = [{"id": r[0], "category_slug": r[1], "category_title": r[2], "category_icon": r[3], "category_accent": r[4], "name": r[5], "price": r[6], "description": r[7], "sort_order": r[8], "is_active": r[9]} for r in cur.fetchall()]
 
     cur.execute("SELECT id, label, href, type, sort_order, is_visible FROM cms_nav_items ORDER BY sort_order")
     nav_items = [{"id": r[0], "label": r[1], "href": r[2], "type": r[3], "sort_order": r[4], "is_visible": r[5]} for r in cur.fetchall()]
@@ -769,16 +769,17 @@ def handler(event: dict, context) -> dict:
             kept = []
             for i, it in enumerate(items):
                 iid = it.get("id")
+                accent = esc(it.get("category_accent", "from-cyan-400 to-blue-500"))
                 if iid and iid in existing:
-                    cur.execute("UPDATE cms_pricing_items SET category_slug='%s', category_title='%s', category_icon='%s', name='%s', price='%s', description='%s', sort_order=%s, is_active=%s, updated_at=NOW() WHERE id=%s" % (
+                    cur.execute("UPDATE cms_pricing_items SET category_slug='%s', category_title='%s', category_icon='%s', category_accent='%s', name='%s', price='%s', description='%s', sort_order=%s, is_active=%s, updated_at=NOW() WHERE id=%s" % (
                         esc(it.get("category_slug")), esc(it.get("category_title")), esc(it.get("category_icon","Briefcase")),
-                        esc(it.get("name")), esc(it.get("price")), esc(it.get("description")),
+                        accent, esc(it.get("name")), esc(it.get("price")), esc(it.get("description")),
                         int(it.get("sort_order", i+1)), "true" if it.get("is_active", True) else "false", int(iid)))
                     kept.append(iid)
                 else:
-                    cur.execute("INSERT INTO cms_pricing_items (category_slug, category_title, category_icon, name, price, description, sort_order, is_active) VALUES ('%s','%s','%s','%s','%s','%s',%s,%s) RETURNING id" % (
+                    cur.execute("INSERT INTO cms_pricing_items (category_slug, category_title, category_icon, category_accent, name, price, description, sort_order, is_active) VALUES ('%s','%s','%s','%s','%s','%s','%s',%s,%s) RETURNING id" % (
                         esc(it.get("category_slug")), esc(it.get("category_title")), esc(it.get("category_icon","Briefcase")),
-                        esc(it.get("name")), esc(it.get("price")), esc(it.get("description")),
+                        accent, esc(it.get("name")), esc(it.get("price")), esc(it.get("description")),
                         int(it.get("sort_order", i+1)), "true" if it.get("is_active", True) else "false"))
                     kept.append(cur.fetchone()[0])
             for eid in existing:
