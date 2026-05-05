@@ -45,14 +45,15 @@ def verify_token(token: str) -> bool:
         return False
 
 
-def call_claude(prompt: str, context: str = "") -> str:
+def call_claude(prompt: str, ctx: str = "") -> str:
+    # Используем встроенный API ключ платформы poehali.dev
     api_key = os.environ.get('ANTHROPIC_API_KEY', '')
     if not api_key:
-        raise ValueError('ANTHROPIC_API_KEY не настроен')
+        raise ValueError('AI недоступен: ключ не настроен в платформе')
 
     user_message = prompt
-    if context:
-        user_message = f"Контекст страницы/раздела:\n{context}\n\nЗадача:\n{prompt}"
+    if ctx:
+        user_message = f"Контекст страницы/раздела:\n{ctx}\n\nЗадача:\n{prompt}"
 
     payload = {
         'model': 'claude-3-5-haiku-20241022',
@@ -131,7 +132,7 @@ def handler(event: dict, context) -> dict:
         return {
             'statusCode': 502,
             'headers': {**CORS_HEADERS, 'Content-Type': 'application/json'},
-            'body': json.dumps({'error': f'Claude API error: {e.code}', 'detail': err_body}, ensure_ascii=False),
+            'body': json.dumps({'error': f'AI API error: {e.code}', 'detail': err_body}, ensure_ascii=False),
         }
     except Exception as e:
         return {
