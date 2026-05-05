@@ -4,6 +4,7 @@ import Icon from "@/components/ui/icon";
 import { SaveFn } from "./AdminShared";
 import { AiAssistantButton } from "@/components/AiAssistant";
 import { getStoredToken } from "@/hooks/useAdminAuth";
+import { QuickAuditBadge } from "./QuickAuditBadge";
 
 interface Props {
   service: CmsService;
@@ -23,7 +24,7 @@ export function ServicePageEditor({ service, save, saving }: Props) {
 
   return (
     <div className="mt-6 pt-6 border-t border-cyan-500/15">
-      <div className="flex items-center gap-2 mb-1">
+      <div className="relative flex items-center gap-2 mb-1">
         <Icon name="LayoutGrid" size={16} className="text-cyan-400" />
         <h4 className="text-white font-bold font-['Oswald']">Страница услуги</h4>
         {service.slug && (
@@ -31,12 +32,13 @@ export function ServicePageEditor({ service, save, saving }: Props) {
             href={`/services/${service.slug}`}
             target="_blank"
             rel="noreferrer"
-            className="ml-auto text-xs text-cyan-400 hover:underline flex items-center gap-1"
+            className="text-xs text-cyan-400 hover:underline flex items-center gap-1"
           >
             <Icon name="ExternalLink" size={12} />
             Открыть страницу
           </a>
         )}
+        <QuickAuditBadge slug={service.slug || ""} token={getStoredToken()} />
       </div>
       {!service.slug && (
         <p className="text-amber-400/80 text-xs mb-3 flex items-start gap-1.5">
