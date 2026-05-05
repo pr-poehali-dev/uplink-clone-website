@@ -111,8 +111,11 @@ export function PagesTab({ content, save, saving }: Props) {
               className="flex-shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <div className="truncate font-medium">
+              <div className="truncate font-medium flex items-center gap-1.5">
                 {ROUTE_LABEL[page.route] ?? page.route}
+                {(page as CmsPage & { is_published?: boolean }).is_published === false && (
+                  <Icon name="EyeOff" size={10} className="text-gray-600 flex-shrink-0" />
+                )}
               </div>
               <div className="text-xs opacity-50 font-mono truncate">{page.route}</div>
             </div>
@@ -141,7 +144,7 @@ export function PagesTab({ content, save, saving }: Props) {
                   className="text-cyan-400"
                 />
               </div>
-              <div>
+              <div className="flex-1">
                 <h3 className="text-white font-bold font-['Oswald'] text-lg leading-tight">
                   {ROUTE_LABEL[selectedPage.route] ?? selectedPage.route}
                 </h3>
@@ -149,6 +152,17 @@ export function PagesTab({ content, save, saving }: Props) {
                   {selectedPage.route}
                 </span>
               </div>
+              <button
+                onClick={() => { const p = selectedPage as CmsPage & { is_published?: boolean }; updatePage(selectedPage.route, { is_published: p.is_published === false ? true : false }); }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  (selectedPage as CmsPage & { is_published?: boolean }).is_published !== false
+                    ? "bg-green-500/15 text-green-400 border-green-500/25"
+                    : "bg-gray-500/15 text-gray-400 border-gray-500/25"
+                }`}
+              >
+                <Icon name={(selectedPage as CmsPage & { is_published?: boolean }).is_published !== false ? "Eye" : "EyeOff"} size={12} />
+                {(selectedPage as CmsPage & { is_published?: boolean }).is_published !== false ? "Опубликована" : "Скрыта"}
+              </button>
             </div>
 
             {/* Fields */}
@@ -192,6 +206,22 @@ export function PagesTab({ content, save, saving }: Props) {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Яндекс.Метрика */}
+            <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <Icon name="BarChart2" size={14} className="text-amber-400" />
+                <span className="text-amber-400 text-sm font-medium">Яндекс.Метрика</span>
+              </div>
+              <label className={cls.label}>Номер счётчика (только цифры)</label>
+              <input
+                value={(selectedPage as CmsPage & { metrika_counter?: string }).metrika_counter ?? ""}
+                onChange={(e) => updatePage(selectedPage.route, { metrika_counter: e.target.value } as Partial<CmsPage>)}
+                placeholder="Например: 12345678"
+                className={cls.input}
+              />
+              <p className="text-gray-600 text-xs">Код счётчика будет автоматически добавлен в &lt;head&gt; этой страницы</p>
             </div>
 
             {/* SEO preview */}

@@ -1,12 +1,13 @@
 """
 CMS API — чтение и запись контента сайта.
-Роутинг через поле action в теле POST-запроса.
 GET / — получить весь контент.
-POST / — action: save_settings | save_password | save_service | save_plan | save_project | save_team
+POST / — action: save_settings | save_password | save_service | ... (см. код)
+Авторизация: password (legacy) или X-Admin-Token header.
 """
 import json
 import os
 import psycopg2
+from datetime import datetime, timezone
 
 
 def get_conn():
@@ -16,7 +17,7 @@ def get_conn():
 CORS = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
 }
 
 
@@ -100,8 +101,8 @@ def get_all_content(conn):
     cur.execute("SELECT id, label, price, icon, default_checked, sort_order, is_active FROM cms_video_equipment ORDER BY sort_order")
     video_equipment = [{"id": r[0], "label": r[1], "price": r[2], "icon": r[3], "default_checked": r[4], "sort_order": r[5], "is_active": r[6]} for r in cur.fetchall()]
 
-    cur.execute("SELECT id, route, title, seo_title, seo_description, og_title, og_description, og_image_url, is_active FROM cms_pages ORDER BY id")
-    pages = [{"id": r[0], "route": r[1], "title": r[2], "seo_title": r[3], "seo_description": r[4], "og_title": r[5], "og_description": r[6], "og_image_url": r[7], "is_active": r[8]} for r in cur.fetchall()]
+    cur.execute("SELECT id, route, title, seo_title, seo_description, og_title, og_description, og_image_url, is_active, is_published, metrika_counter FROM cms_pages ORDER BY id")
+    pages = [{"id": r[0], "route": r[1], "title": r[2], "seo_title": r[3], "seo_description": r[4], "og_title": r[5], "og_description": r[6], "og_image_url": r[7], "is_active": r[8], "is_published": r[9] if r[9] is not None else True, "metrika_counter": r[10]} for r in cur.fetchall()]
 
     cur.close()
     return {
@@ -119,7 +120,25 @@ def esc(v):
     return str(v or "").replace("'", "''")
 
 
-def check_auth(body, conn):
+def check_auth(body, conn, token=None):
+    """Проверка авторизации: по токену сессии (новый способ) или паролю (legacy)"""
+    if token:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT u.id, u.username, u.role, s.expires_at
+            FROM cms_admin_sessions s
+            JOIN cms_admin_users u ON u.id = s.user_id
+            WHERE s.token = %s AND u.is_active = true
+        """, (token,))
+        row = cur.fetchone()
+        cur.close()
+        if not row:
+            return False
+        expires_at = row[3]
+        now = datetime.now(timezone.utc)
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        return expires_at > now
     password = body.get("password", "")
     cur = conn.cursor()
     cur.execute("SELECT value FROM cms_settings WHERE key = 'admin_password'")
@@ -128,7 +147,46 @@ def check_auth(body, conn):
     return row and row[0] == password
 
 
+def get_token_user(conn, token):
+    """Получить username пользователя по токену"""
+    if not token:
+        return None, None
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT u.id, u.username FROM cms_admin_sessions s
+        JOIN cms_admin_users u ON u.id = s.user_id
+        WHERE s.token = %s AND u.is_active = true
+    """, (token,))
+    row = cur.fetchone()
+    cur.close()
+    return (row[0], row[1]) if row else (None, None)
+
+
+def save_history(conn, action, entity_type, entity_id, snapshot, description, user_id=None, username=None):
+    """Сохранить снапшот в историю изменений"""
+    try:
+        cur = conn.cursor()
+        snap_json = json.dumps(snapshot, ensure_ascii=False, default=str)
+        uid_val = str(user_id) if user_id else "NULL"
+        uname_val = ("'%s'" % str(username or "").replace("'", "''")) if username else "NULL"
+        cur.execute(
+            "INSERT INTO cms_history (user_id, username, action, entity_type, entity_id, snapshot, description) "
+            "VALUES (%s, %s, '%s', '%s', '%s', '%s'::jsonb, '%s')" % (
+                uid_val, uname_val,
+                str(action).replace("'", "''"),
+                str(entity_type).replace("'", "''"),
+                str(entity_id or "").replace("'", "''"),
+                snap_json.replace("'", "''"),
+                str(description or "").replace("'", "''"),
+            )
+        )
+        cur.close()
+    except Exception:
+        pass
+
+
 def handler(event: dict, context) -> dict:
+    """CMS API — управление контентом сайта"""
     if event.get("httpMethod") == "OPTIONS":
         return {"statusCode": 200, "headers": CORS, "body": ""}
 
@@ -140,11 +198,52 @@ def handler(event: dict, context) -> dict:
         except Exception:
             return err("Invalid JSON")
 
+    headers = event.get("headers") or {}
+    token = headers.get("X-Admin-Token") or headers.get("x-admin-token") or ""
+
     conn = get_conn()
 
     try:
-        # GET — весь контент
+        # GET — весь контент (публичный, без авторизации)
         if method == "GET":
+            qs = event.get("queryStringParameters") or {}
+            # История изменений
+            if qs.get("action") == "get_history":
+                if not check_auth({}, conn, token):
+                    return err("Unauthorized", 401)
+                cur = conn.cursor()
+                entity_type = qs.get("entity_type", "")
+                entity_id = qs.get("entity_id", "")
+                if entity_type:
+                    cur.execute(
+                        "SELECT id, username, action, entity_type, entity_id, description, created_at "
+                        "FROM cms_history WHERE entity_type='%s' AND entity_id='%s' ORDER BY created_at DESC LIMIT 30" % (
+                            entity_type.replace("'","''"), entity_id.replace("'","''"))
+                    )
+                else:
+                    cur.execute(
+                        "SELECT id, username, action, entity_type, entity_id, description, created_at "
+                        "FROM cms_history ORDER BY created_at DESC LIMIT 50"
+                    )
+                hist = [{"id": r[0], "username": r[1], "action": r[2], "entity_type": r[3], "entity_id": r[4],
+                         "description": r[5], "created_at": r[6].isoformat() if r[6] else ""} for r in cur.fetchall()]
+                cur.close()
+                return ok({"history": hist})
+            # Получить снапшот для отката
+            if qs.get("action") == "get_snapshot":
+                if not check_auth({}, conn, token):
+                    return err("Unauthorized", 401)
+                hist_id = qs.get("id")
+                if not hist_id:
+                    return err("Укажите id")
+                cur = conn.cursor()
+                cur.execute("SELECT snapshot, entity_type, entity_id, action, description, created_at FROM cms_history WHERE id=%s" % int(hist_id))
+                row = cur.fetchone()
+                cur.close()
+                if not row:
+                    return err("Запись не найдена", 404)
+                return ok({"snapshot": row[0], "entity_type": row[1], "entity_id": row[2],
+                           "action": row[3], "description": row[4], "created_at": str(row[5])})
             data = get_all_content(conn)
             return ok(data)
 
@@ -153,14 +252,18 @@ def handler(event: dict, context) -> dict:
 
         action = body.get("action", "")
 
-        # Проверка пароля (для всех POST-действий)
-        if not check_auth(body, conn):
-            return err("Неверный пароль", 401)
+        # Проверка авторизации (токен или legacy пароль)
+        if not check_auth(body, conn, token):
+            return err("Неверный пароль или токен", 401)
+
+        user_id, username = get_token_user(conn, token) if token else (None, body.get("_user", "admin"))
 
         # --- save_settings ---
         if action == "save_settings":
             updates = body.get("updates", {})
             cur = conn.cursor()
+            cur.execute("SELECT key, value FROM cms_settings ORDER BY id")
+            old_settings = {r[0]: r[1] for r in cur.fetchall()}
             for key, value in updates.items():
                 if key == "admin_password":
                     continue
@@ -168,6 +271,9 @@ def handler(event: dict, context) -> dict:
                     "INSERT INTO cms_settings (key, value, label, updated_at) VALUES ('%s', '%s', '', NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()" % (
                         key.replace("'", "''"), str(value).replace("'", "''"))
                 )
+            conn.commit()
+            save_history(conn, "save_settings", "settings", "all", old_settings,
+                         "Изменены настройки: %s" % ", ".join(list(updates.keys())[:5]), user_id, username)
             conn.commit()
             cur.close()
             return ok({"ok": True})
@@ -761,21 +867,54 @@ def handler(event: dict, context) -> dict:
             cur.close()
             return ok({"ok": True})
 
-        # ---- PAGES SEO ----
+        # ---- PAGES SEO + published + metrika ----
         if action == "save_pages":
             items = body.get("items", [])
-            def esc(v): return str(v or "").replace("'", "''")
             cur = conn.cursor()
+            cur.execute("SELECT id, title, seo_title, seo_description, og_title, og_description, og_image_url, is_active, is_published, metrika_counter FROM cms_pages ORDER BY id")
+            old_pages = {r[0]: {"id": r[0], "title": r[1], "seo_title": r[2], "seo_description": r[3],
+                                "og_title": r[4], "og_description": r[5], "og_image_url": r[6],
+                                "is_active": r[7], "is_published": r[8], "metrika_counter": r[9]} for r in cur.fetchall()}
             for it in items:
                 pid = it.get("id")
                 if pid:
-                    cur.execute("UPDATE cms_pages SET title='%s', seo_title='%s', seo_description='%s', og_title='%s', og_description='%s', og_image_url='%s', is_active=%s, updated_at=NOW() WHERE id=%s" % (
+                    metrika_val = ("'%s'" % esc(it.get("metrika_counter", ""))) if it.get("metrika_counter") else "NULL"
+                    cur.execute("UPDATE cms_pages SET title='%s', seo_title='%s', seo_description='%s', og_title='%s', og_description='%s', og_image_url='%s', is_active=%s, is_published=%s, metrika_counter=%s, updated_at=NOW() WHERE id=%s" % (
                         esc(it.get("title")), esc(it.get("seo_title")), esc(it.get("seo_description")),
                         esc(it.get("og_title")), esc(it.get("og_description")), esc(it.get("og_image_url")),
-                        "true" if it.get("is_active", True) else "false", int(pid)))
+                        "true" if it.get("is_active", True) else "false",
+                        "true" if it.get("is_published", True) else "false",
+                        metrika_val, int(pid)))
+            conn.commit()
+            save_history(conn, "save_pages", "pages", "all", list(old_pages.values()), "Обновлены настройки страниц", user_id, username)
             conn.commit()
             cur.close()
             return ok({"ok": True})
+
+        # ---- ROLLBACK ----
+        if action == "rollback":
+            hist_id = body.get("history_id")
+            if not hist_id:
+                return err("Укажите history_id")
+            cur = conn.cursor()
+            cur.execute("SELECT snapshot, entity_type, action FROM cms_history WHERE id=%s" % int(hist_id))
+            row = cur.fetchone()
+            if not row:
+                cur.close()
+                return err("Запись истории не найдена", 404)
+            snapshot, entity_type, hist_action = row
+            cur.close()
+            if entity_type == "settings":
+                cur = conn.cursor()
+                for key, value in snapshot.items():
+                    cur.execute("INSERT INTO cms_settings (key, value, label, updated_at) VALUES ('%s', '%s', '', NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()" % (
+                        esc(key), esc(str(value))))
+                conn.commit()
+                save_history(conn, "rollback", "settings", "all", snapshot, "Откат к версии #%s" % hist_id, user_id, username)
+                conn.commit()
+                cur.close()
+                return ok({"ok": True})
+            return err("Тип '%s' не поддерживает откат через API" % entity_type, 400)
 
         return err("Unknown action", 404)
 

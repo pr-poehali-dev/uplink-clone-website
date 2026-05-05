@@ -1,0 +1,2 @@
+ALTER TABLE t_p79235343_uplink_clone_website.cms_pages ADD COLUMN IF NOT EXISTS is_published BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE t_p79235343_uplink_clone_website.cms_pages ADD COLUMN IF NOT EXISTS metrika_counter TEXT;
