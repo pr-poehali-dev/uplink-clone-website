@@ -1,16 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { CmsContent } from "@/hooks/useCmsContent";
 import { useAdminAuth, AUTH_API_URL, CMS_API_URL } from "@/hooks/useAdminAuth";
-import { SettingsTab, ServicesTab, PlansTab } from "./admin/AdminTabs";
-import { ProjectsTab, TeamTab, PasswordTab } from "./admin/AdminTabs2";
-import { SectionsTab } from "./admin/SectionsTab";
-import { FaqTab } from "./admin/FaqTab";
+import { ServicesTab, PasswordTab } from "./admin/AdminTabs";
+import { ProjectsTab, TeamTab } from "./admin/AdminTabs2";
 import { CalculatorTab } from "./admin/CalculatorTab";
 import { SecretsTab } from "./admin/SecretsTab";
 import { PreviewPanel } from "./admin/PreviewPanel";
 import { LeadsTab } from "./admin/LeadsTab";
-import { WhyUsTab } from "./admin/WhyUsTab";
-import { QuickOrderTab } from "./admin/QuickOrderTab";
 import { PricingTab } from "./admin/PricingTab";
 import { NavTab } from "./admin/NavTab";
 import { VideoCalcTab } from "./admin/VideoCalcTab";
@@ -24,6 +20,8 @@ import { AdminLogin } from "./admin/AdminLogin";
 import { AdminHeader } from "./admin/AdminHeader";
 import { AdminSidebar, Tab, NavGroup } from "./admin/AdminSidebar";
 import { DashboardTab } from "./admin/AdminDashboard";
+import { HomePageTab } from "./admin/HomePageTab";
+import { PrivacyPageTab } from "./admin/PrivacyPageTab";
 
 export default function Admin() {
   const auth = useAdminAuth();
@@ -165,33 +163,24 @@ export default function Admin() {
     {
       label: "Страницы",
       items: [
-        { id: "pages", label: "Страницы / SEO", icon: "FileText" },
-        { id: "seo", label: "SEO-оптимизация", icon: "TrendingUp" },
-        { id: "sections", label: "Секции", icon: "Layers" },
-        { id: "nav", label: "Навигация", icon: "Menu" },
+        { id: "home", label: "Главная", icon: "Home" },
+        { id: "services", label: "Услуги", icon: "Briefcase" },
+        { id: "pricing", label: "Прайс", icon: "Receipt" },
+        { id: "privacy", label: "Конфиденциальность", icon: "ShieldCheck" },
       ],
     },
     {
-      label: "Контент",
+      label: "Оформление",
       items: [
-        { id: "settings", label: "Настройки", icon: "Settings" },
-        { id: "services", label: "Услуги", icon: "Briefcase" },
-        { id: "plans", label: "Тарифы", icon: "CreditCard" },
-        { id: "pricing", label: "Прайс", icon: "Receipt" },
-        { id: "calculator", label: "Калькулятор IT", icon: "Calculator" },
-        { id: "videocalc", label: "Видеонаблюдение", icon: "Camera" },
-        { id: "whyus", label: "Почему мы", icon: "Star" },
-        { id: "quickorder", label: "Быстрый заказ", icon: "Zap" },
-        { id: "projects", label: "Проекты", icon: "FolderOpen" },
-        { id: "team", label: "Команда", icon: "Users" },
-        { id: "faq", label: "FAQ", icon: "HelpCircle" },
+        { id: "design", label: "Дизайн", icon: "Palette" },
+        { id: "media", label: "Медиабиблиотека", icon: "Image" },
+        { id: "nav", label: "Навигация", icon: "Menu" },
       ],
     },
     {
       label: "Система",
       items: [
-        { id: "media", label: "Медиабиблиотека", icon: "Image" },
-        { id: "design", label: "Дизайн", icon: "Palette" },
+        { id: "seo", label: "SEO", icon: "TrendingUp" },
         ...(auth.can("users.manage") ? [{ id: "users" as Tab, label: "Пользователи", icon: "UserCog" }] : []),
         ...(auth.can("secrets.manage") ? [{ id: "secrets" as Tab, label: "Секреты API", icon: "KeyRound" }] : []),
         { id: "password", label: "Мой пароль", icon: "Lock" },
@@ -227,28 +216,23 @@ export default function Admin() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-6 max-w-5xl">
-            {tab === "dashboard" && (
-              <DashboardTab content={content} onNavigate={setTab} />
-            )}
+            {tab === "dashboard" && <DashboardTab content={content} onNavigate={setTab} />}
             {tab === "leads" && <LeadsTab password={password} cmsApiUrl={CMS_API_URL} />}
             {tab === "history" && <HistoryTab token={auth.token} cmsApiUrl={CMS_API_URL} />}
-            {tab === "seo" && <SeoTab token={auth.token} />}
-            {tab === "settings" && <SettingsTab content={content} password={password} save={save} saving={saving} />}
-            {tab === "sections" && <SectionsTab content={content} save={save} saving={saving} />}
-            {tab === "nav" && <NavTab content={content} password={password} save={save} saving={saving} />}
-            {tab === "pages" && <PagesTab content={content} password={password} save={save} saving={saving} />}
+
+            {/* Страницы */}
+            {tab === "home" && <HomePageTab content={content} password={password} save={save} saving={saving} />}
             {tab === "services" && <ServicesTab content={content} password={password} save={save} saving={saving} />}
-            {tab === "plans" && <PlansTab content={content} password={password} save={save} saving={saving} />}
             {tab === "pricing" && <PricingTab content={content} password={password} save={save} saving={saving} />}
-            {tab === "calculator" && <CalculatorTab content={content} save={save} saving={saving} />}
-            {tab === "videocalc" && <VideoCalcTab content={content} password={password} save={save} saving={saving} />}
-            {tab === "whyus" && <WhyUsTab content={content} password={password} save={save} saving={saving} />}
-            {tab === "quickorder" && <QuickOrderTab content={content} password={password} save={save} saving={saving} />}
-            {tab === "projects" && <ProjectsTab content={content} password={password} save={save} saving={saving} />}
-            {tab === "team" && <TeamTab content={content} password={password} save={save} saving={saving} />}
-            {tab === "faq" && <FaqTab content={content} save={save} saving={saving} />}
-            {tab === "media" && <MediaTab password={password} />}
+            {tab === "privacy" && <PrivacyPageTab content={content} password={password} save={save} saving={saving} />}
+
+            {/* Оформление */}
             {tab === "design" && <DesignTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "media" && <MediaTab password={password} />}
+            {tab === "nav" && <NavTab content={content} password={password} save={save} saving={saving} />}
+
+            {/* Система */}
+            {tab === "seo" && <SeoTab token={auth.token} />}
             {tab === "users" && auth.can("users.manage") && (
               <UsersTab token={auth.token} authApiUrl={AUTH_API_URL} currentUser={auth.user!} />
             )}
@@ -261,6 +245,13 @@ export default function Admin() {
                 saving={saving}
               />
             )}
+
+            {/* Устаревшие вкладки — доступны по прямому переходу */}
+            {tab === "pages" && <PagesTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "calculator" && <CalculatorTab content={content} save={save} saving={saving} />}
+            {tab === "videocalc" && <VideoCalcTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "projects" && <ProjectsTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "team" && <TeamTab content={content} password={password} save={save} saving={saving} />}
           </div>
         </main>
       </div>

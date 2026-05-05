@@ -4,7 +4,8 @@ export type Tab =
   | "dashboard" | "leads" | "settings" | "sections" | "services" | "plans"
   | "calculator" | "projects" | "team" | "faq" | "secrets" | "password"
   | "whyus" | "quickorder" | "pricing" | "nav" | "videocalc" | "pages"
-  | "media" | "design" | "users" | "history" | "seo";
+  | "media" | "design" | "users" | "history" | "seo"
+  | "home" | "privacy";
 
 export interface NavGroup {
   label: string;
