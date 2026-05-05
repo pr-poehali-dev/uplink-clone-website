@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "GET sitemap returns XML",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {"body": "<?xml"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
