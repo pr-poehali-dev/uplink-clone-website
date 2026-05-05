@@ -10,6 +10,24 @@ import { useCmsContent, CmsService } from "@/hooks/useCmsContent";
 import ServicePageHero from "./service-page/ServicePageHero";
 import ServicePageSections from "./service-page/ServicePageSections";
 
+const DEFAULT_SECTION_ORDER = ["description", "benefits", "steps", "faq", "cta", "other", "calculator"];
+
+function parseSectionSettings(settings: Record<string, string> | undefined, slug: string) {
+  if (!settings || !slug) return { order: DEFAULT_SECTION_ORDER, visible: {} as Record<string, boolean> };
+  const orderKey = `service_${slug}_section_order`;
+  const raw = settings[orderKey];
+  const order = raw
+    ? raw.split(",").map((s) => s.trim()).filter((s) => DEFAULT_SECTION_ORDER.includes(s))
+    : DEFAULT_SECTION_ORDER;
+  const missing = DEFAULT_SECTION_ORDER.filter((s) => !order.includes(s));
+
+  const visible: Record<string, boolean> = {};
+  for (const id of DEFAULT_SECTION_ORDER) {
+    visible[id] = settings[`service_${slug}_section_${id}_visible`] !== "false";
+  }
+  return { order: [...order, ...missing], visible };
+}
+
 export default function ServicePage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -78,6 +96,11 @@ export default function ServicePage() {
   const isOutsourcing = slug === "it-outsourcing";
   const isVideoSurveillance = slug === "video-surveillance";
 
+  const { order: sectionOrder, visible: sectionVisible } = parseSectionSettings(content?.settings, slug || "");
+
+  // Собираем секции, которые рендерятся вне ServicePageSections — калькулятор
+  const showCalculator = sectionVisible["calculator"] !== false && (isOutsourcing || isVideoSurveillance);
+
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
       <Header onContactClick={() => openModal("Шапка сайта")} settings={content?.settings} services={content?.services} />
@@ -98,25 +121,28 @@ export default function ServicePage() {
         otherServices={otherServices}
         settings={content?.settings}
         onContactClick={openModal}
+        sectionOrder={sectionOrder}
+        sectionVisible={sectionVisible}
       />
 
-      {/* Калькулятор IT-аутсорсинга */}
-      {isOutsourcing && (
-        <Calculator
-          calcSettings={content?.calc_settings}
-          calcOptions={content?.calc_options}
-          onContactClick={openModal}
-        />
-      )}
-
-      {/* Калькулятор видеонаблюдения */}
-      {isVideoSurveillance && (
-        <VideoSurveillanceCalculator
-          onContactClick={openModal}
-          videoCameras={content?.video_cameras}
-          videoEquipment={content?.video_equipment}
-          settings={content?.settings}
-        />
+      {showCalculator && sectionOrder.indexOf("calculator") > sectionOrder.indexOf("faq") && (
+        <>
+          {isOutsourcing && (
+            <Calculator
+              calcSettings={content?.calc_settings}
+              calcOptions={content?.calc_options}
+              onContactClick={openModal}
+            />
+          )}
+          {isVideoSurveillance && (
+            <VideoSurveillanceCalculator
+              onContactClick={openModal}
+              videoCameras={content?.video_cameras}
+              videoEquipment={content?.video_equipment}
+              settings={content?.settings}
+            />
+          )}
+        </>
       )}
 
       <Footer onContactClick={() => openModal("Подвал")} settings={content?.settings} />

@@ -1,21 +1,24 @@
 import { useState } from "react";
-import { CmsService, CmsServiceBenefit, CmsServiceStep, CmsServiceFaq } from "@/hooks/useCmsContent";
+import { CmsService, CmsServiceBenefit, CmsServiceStep, CmsServiceFaq, CmsSettings } from "@/hooks/useCmsContent";
 import Icon from "@/components/ui/icon";
 import { SaveFn } from "./AdminShared";
 import { AiAssistantButton } from "@/components/AiAssistant";
 import { getStoredToken } from "@/hooks/useAdminAuth";
 import { QuickAuditBadge } from "./QuickAuditBadge";
+import { ServiceSectionsEditor } from "./ServiceSectionsEditor";
 
 interface Props {
   service: CmsService;
   save: SaveFn;
   saving: boolean;
+  settings?: CmsSettings;
 }
 
-export function ServicePageEditor({ service, save, saving }: Props) {
-  const [tab, setTab] = useState<"info" | "benefits" | "steps" | "faq">("info");
+export function ServicePageEditor({ service, save, saving, settings }: Props) {
+  const [tab, setTab] = useState<"sections" | "info" | "benefits" | "steps" | "faq">("sections");
 
   const subTabs: { id: typeof tab; label: string; icon: string }[] = [
+    { id: "sections", label: "Секции", icon: "Layers" },
     { id: "info", label: "Контент страницы", icon: "FileText" },
     { id: "benefits", label: "Преимущества", icon: "Sparkles" },
     { id: "steps", label: "Этапы", icon: "Workflow" },
@@ -64,6 +67,7 @@ export function ServicePageEditor({ service, save, saving }: Props) {
         ))}
       </div>
 
+      {tab === "sections" && <ServiceSectionsEditor service={service} settings={settings ?? {}} save={save} saving={saving} />}
       {tab === "info" && <ServiceInfoEditor service={service} save={save} saving={saving} />}
       {tab === "benefits" && <BenefitsEditor service={service} save={save} saving={saving} />}
       {tab === "steps" && <StepsEditor service={service} save={save} saving={saving} />}

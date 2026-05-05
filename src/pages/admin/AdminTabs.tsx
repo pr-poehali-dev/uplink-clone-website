@@ -283,6 +283,7 @@ export function ServicesTab({ content, save, saving }: { content: CmsContent; pa
               service={selected}
               save={save}
               saving={saving}
+              settings={content.settings}
             />
           </>
         )}
