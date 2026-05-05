@@ -47,9 +47,49 @@ export default function ServicePage() {
   }, [slug]);
 
   useEffect(() => {
-    if (service?.seo_title) {
-      document.title = service.seo_title;
-    }
+    if (!service) return;
+
+    if (service.seo_title) document.title = service.seo_title;
+
+    // SEO description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) { metaDesc = document.createElement('meta'); (metaDesc as HTMLMetaElement).name = 'description'; document.head.appendChild(metaDesc); }
+    if (service.seo_description) metaDesc.setAttribute('content', service.seo_description);
+
+    // Canonical
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+    canonical.href = `https://uplink-it.ru/services/${service.slug}`;
+
+    // Schema.org Service + BreadcrumbList
+    const schemaId = 'service-page-schema';
+    document.getElementById(schemaId)?.remove();
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = schemaId;
+    script.text = JSON.stringify([
+      {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": service.title,
+        "description": service.seo_description || service.short_desc || service.description,
+        "provider": { "@type": "LocalBusiness", "name": "ИТК Аплинк-IT", "telephone": "+79869860136", "address": { "@type": "PostalAddress", "addressLocality": "Саратов", "addressCountry": "RU" } },
+        "areaServed": { "@type": "City", "name": "Саратов" },
+        "url": `https://uplink-it.ru/services/${service.slug}`,
+        ...(service.price_from ? { "offers": { "@type": "Offer", "price": service.price_from, "priceCurrency": "RUB" } } : {}),
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://uplink-it.ru/" },
+          { "@type": "ListItem", "position": 2, "name": service.title, "item": `https://uplink-it.ru/services/${service.slug}` }
+        ]
+      }
+    ]);
+    document.head.appendChild(script);
+
+    return () => { document.getElementById(schemaId)?.remove(); };
   }, [service]);
 
   const openModal = (source: string, payload?: string) => {

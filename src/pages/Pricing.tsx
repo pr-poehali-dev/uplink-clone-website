@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -27,6 +27,32 @@ export default function PricingPage() {
   const { content, loading } = useCmsContent();
 
   const s = content?.settings ?? {};
+
+  useEffect(() => {
+    const pricingPage = content?.pages?.find(p => p.route === '/pricing');
+    if (pricingPage?.seo_title) document.title = pricingPage.seo_title;
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) { metaDesc = document.createElement('meta'); (metaDesc as HTMLMetaElement).name = 'description'; document.head.appendChild(metaDesc); }
+    if (pricingPage?.seo_description) metaDesc.setAttribute('content', pricingPage.seo_description);
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+    canonical.href = 'https://uplink-it.ru/pricing';
+    const schemaId = 'pricing-page-schema';
+    document.getElementById(schemaId)?.remove();
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = schemaId;
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Главная", "item": "https://uplink-it.ru/" },
+        { "@type": "ListItem", "position": 2, "name": "Цены на IT-услуги", "item": "https://uplink-it.ru/pricing" }
+      ]
+    });
+    document.head.appendChild(script);
+    return () => { document.getElementById(schemaId)?.remove(); };
+  }, [content?.pages]);
 
   const pageTitle = s.pricing_page_title || "Прайс на IT-услуги";
   const pageCity = s.pricing_page_city || "";
