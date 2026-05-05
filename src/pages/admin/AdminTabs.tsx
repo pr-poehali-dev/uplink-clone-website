@@ -3,6 +3,8 @@ import { CmsContent, CmsService, CmsPlan } from "@/hooks/useCmsContent";
 import { SaveButton, SaveFn } from "./AdminShared";
 import { ServicePageEditor } from "./ServicePageEditor";
 import Icon from "@/components/ui/icon";
+import { AiAssistantButton } from "@/components/AiAssistant";
+import { getStoredToken } from "@/hooks/useAdminAuth";
 import {
   DndContext,
   closestCenter,
@@ -100,6 +102,8 @@ export function SettingsTab({ content, save, saving }: { content: CmsContent; pa
     privacy_policy_content: "Текст политики конфиденциальности",
   };
 
+  const token = getStoredToken();
+
   return (
     <div className="space-y-6">
       {groups.map((g) => (
@@ -108,7 +112,16 @@ export function SettingsTab({ content, save, saving }: { content: CmsContent; pa
           <div className="space-y-3">
             {g.keys.map((key) => (
               <div key={key}>
-                <label className="block text-gray-400 text-xs mb-1">{settingsMeta[key] || key}</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-gray-400 text-xs">{settingsMeta[key] || key}</label>
+                  {g.textarea?.includes(key) && key !== "privacy_policy_content" && token && (
+                    <AiFieldInline
+                      token={token}
+                      fieldHint={settingsMeta[key] || key}
+                      onResult={(text) => setVals({ ...vals, [key]: text })}
+                    />
+                  )}
+                </div>
                 {g.textarea?.includes(key) ? (
                   <textarea value={vals[key] || ""} onChange={(e) => setVals({ ...vals, [key]: e.target.value })}
                     rows={key === "privacy_policy_content" ? 16 : 3}
@@ -212,7 +225,15 @@ export function ServicesTab({ content, save, saving }: { content: CmsContent; pa
                 className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-all" />
             </div>
             <div>
-              <label className="block text-gray-400 text-xs mb-1">Описание</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-gray-400 text-xs">Описание</label>
+                <AiFieldInline
+                  token={getStoredToken()}
+                  fieldHint="краткое описание IT-услуги (2-3 предложения)"
+                  context={`Услуга: ${selected.title}`}
+                  onResult={(text) => setSelected({ ...selected, description: text })}
+                />
+              </div>
               <textarea value={selected.description} onChange={(e) => setSelected({ ...selected, description: e.target.value })}
                 rows={3} className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-all resize-none" />
             </div>
@@ -346,5 +367,25 @@ export function PlansTab({ content, save, saving }: { content: CmsContent; passw
         <SaveButton onClick={handleSave} saving={saving} />
       </div>
     </div>
+  );
+}
+
+// ---- AI FIELD INLINE HELPER ----
+function AiFieldInline({ token, fieldHint, context, onResult }: { token: string; fieldHint?: string; context?: string; onResult: (t: string) => void }) {
+  const [open, setOpen] = useState(false);
+  if (!token) return null;
+  return open ? (
+    <AiAssistantButton
+      token={token}
+      fieldHint={fieldHint}
+      context={context}
+      onResult={(t) => { onResult(t); setOpen(false); }}
+      className="w-full"
+    />
+  ) : (
+    <button type="button" onClick={() => setOpen(true)}
+      className="flex items-center gap-1 text-xs text-gray-600 hover:text-purple-400 transition-colors">
+      <Icon name="Sparkles" size={10} />ИИ
+    </button>
   );
 }

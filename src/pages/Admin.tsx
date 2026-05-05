@@ -34,6 +34,7 @@ interface NavGroup {
 
 export default function Admin() {
   const auth = useAdminAuth();
+  const [loginStep, setLoginStep] = useState<"username" | "password">("username");
   const [loginUsername, setLoginUsername] = useState("owner");
   const [loginPassword, setLoginPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -98,10 +99,18 @@ export default function Admin() {
     }
   };
 
+  const handleUsernameStep = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginUsername.trim()) return;
+    const result = await auth.checkSetup(loginUsername.trim());
+    if (result && "setupRequired" in result && result.setupRequired) return; // покажет экран настройки
+    if (result && "error" in result) return;
+    setLoginStep("password");
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await auth.login(loginUsername, loginPassword);
-    if (result && "error" in result && result.error) return;
+    await auth.login(loginUsername, loginPassword);
   };
 
   const handleSetupPassword = async (e: React.FormEvent) => {
@@ -111,28 +120,40 @@ export default function Admin() {
     if (setupNewPassword !== setupConfirm) { setSetupError("Пароли не совпадают"); return; }
     const result = await auth.setupPassword(setupNewPassword);
     if (result && "error" in result) { setSetupError(result.error || "Ошибка"); return; }
-    showMsg("Пароль установлен! Войдите.");
+    setLoginStep("password");
   };
 
   if (!auth.isAuthed) {
+    const logoBlock = (
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+            <Icon name="Settings" size={16} className="text-[#080c14]" />
+          </div>
+          <span className="text-white font-bold font-['Oswald'] text-xl">Панель управления</span>
+        </div>
+        <p className="text-gray-500 text-sm">ИТК Аплинк-IT</p>
+      </div>
+    );
+
+    // Экран установки пароля (первый вход)
     if (auth.setupRequired) {
       return (
         <div className="min-h-screen bg-[#080c14] flex items-center justify-center p-4">
           <div className="w-full max-w-sm">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-                  <Icon name="KeyRound" size={16} className="text-[#080c14]" />
-                </div>
-                <span className="text-white font-bold font-['Oswald'] text-xl">Первый вход</span>
+            {logoBlock}
+            <div className="glass-card neon-border rounded-2xl p-8 space-y-2 mb-4">
+              <div className="flex items-center gap-2 text-amber-400 mb-3">
+                <Icon name="KeyRound" size={16} />
+                <span className="font-semibold text-sm">Первый вход — установите пароль</span>
               </div>
-              <p className="text-gray-500 text-sm">Установите пароль владельца</p>
+              <p className="text-gray-500 text-xs">Придумайте надёжный пароль для входа в админку</p>
             </div>
             <form onSubmit={handleSetupPassword} className="glass-card neon-border rounded-2xl p-8 space-y-4">
               <div>
                 <label className="block text-gray-400 text-sm mb-1.5">Новый пароль</label>
                 <input
-                  type="password" value={setupNewPassword}
+                  type="password" value={setupNewPassword} autoFocus
                   onChange={(e) => setSetupNewPassword(e.target.value)}
                   placeholder="Минимум 6 символов"
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-cyan-500/50 transition-all"
@@ -149,7 +170,7 @@ export default function Admin() {
               </div>
               {setupError && <p className="text-red-400 text-sm">{setupError}</p>}
               <button type="submit" disabled={auth.loading} className="btn-neon w-full py-3 rounded-xl font-semibold disabled:opacity-50">
-                {auth.loading ? "Сохраняю..." : "Установить пароль"}
+                {auth.loading ? "Сохраняю..." : "Установить пароль и войти"}
               </button>
             </form>
           </div>
@@ -157,32 +178,46 @@ export default function Admin() {
       );
     }
 
+    // Шаг 1: ввод логина
+    if (loginStep === "username") {
+      return (
+        <div className="min-h-screen bg-[#080c14] flex items-center justify-center p-4">
+          <div className="w-full max-w-sm">
+            {logoBlock}
+            <form onSubmit={handleUsernameStep} className="glass-card neon-border rounded-2xl p-8 space-y-4">
+              <div>
+                <label className="block text-gray-400 text-sm mb-1.5">Логин</label>
+                <input
+                  type="text" value={loginUsername} autoFocus
+                  onChange={(e) => setLoginUsername(e.target.value)}
+                  placeholder="owner"
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-cyan-500/50 transition-all"
+                />
+              </div>
+              {auth.error && <p className="text-red-400 text-sm">{auth.error}</p>}
+              <button type="submit" disabled={auth.loading} className="btn-neon w-full py-3 rounded-xl font-semibold disabled:opacity-50">
+                {auth.loading ? "Проверяю..." : "Продолжить"}
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // Шаг 2: ввод пароля
     return (
       <div className="min-h-screen bg-[#080c14] flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-                <Icon name="Settings" size={16} className="text-[#080c14]" />
-              </div>
-              <span className="text-white font-bold font-['Oswald'] text-xl">Панель управления</span>
-            </div>
-            <p className="text-gray-500 text-sm">ИТК Аплинк-IT</p>
-          </div>
+          {logoBlock}
           <form onSubmit={handleLogin} className="glass-card neon-border rounded-2xl p-8 space-y-4">
-            <div>
-              <label className="block text-gray-400 text-sm mb-1.5">Логин</label>
-              <input
-                type="text" value={loginUsername}
-                onChange={(e) => setLoginUsername(e.target.value)}
-                placeholder="owner"
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-cyan-500/50 transition-all"
-              />
-            </div>
+            <button type="button" onClick={() => { setLoginStep("username"); setLoginPassword(""); }} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-300 text-sm transition-colors mb-1">
+              <Icon name="ArrowLeft" size={14} />
+              {loginUsername}
+            </button>
             <div>
               <label className="block text-gray-400 text-sm mb-1.5">Пароль</label>
               <input
-                type="password" value={loginPassword}
+                type="password" value={loginPassword} autoFocus
                 onChange={(e) => setLoginPassword(e.target.value)}
                 placeholder="Введите пароль"
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-cyan-500/50 transition-all"

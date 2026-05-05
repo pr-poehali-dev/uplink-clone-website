@@ -83,12 +83,32 @@ def get_user_by_token(conn, token: str):
     }
 
 
+def action_check_setup(body: dict) -> dict:
+    """Проверить, нужна ли первоначальная настройка пароля для логина"""
+    username = (body.get('username') or '').strip().lower()
+    if not username:
+        return resp(400, {'error': 'Укажите логин'})
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT id, password_hash, is_active FROM cms_admin_users WHERE username = %s", (username,))
+    row = cur.fetchone()
+    conn.close()
+    if not row:
+        return resp(200, {'setup_required': False, 'exists': False})
+    user_id, pw_hash, is_active = row
+    if not is_active:
+        return resp(403, {'error': 'Аккаунт отключён'})
+    return resp(200, {'setup_required': pw_hash == 'setup_required', 'user_id': user_id if pw_hash == 'setup_required' else None, 'exists': True})
+
+
 def action_login(body: dict, ip: str, ua: str) -> dict:
     """Вход по логину и паролю, возвращает токен"""
     username = (body.get('username') or '').strip().lower()
     password = body.get('password', '')
-    if not username or not password:
-        return resp(400, {'error': 'Укажите логин и пароль'})
+    if not username:
+        return resp(400, {'error': 'Укажите логин'})
+    if not password:
+        return resp(400, {'error': 'Укажите пароль'})
     conn = get_db()
     cur = conn.cursor()
     cur.execute("""
@@ -351,7 +371,9 @@ def handler(event: dict, context) -> dict:
     if method == 'GET' and not action:
         action = 'me'
 
-    if action == 'login':
+    if action == 'check_setup':
+        return action_check_setup(body)
+    elif action == 'login':
         return action_login(body, ip, ua)
     elif action == 'logout':
         return action_logout(token)

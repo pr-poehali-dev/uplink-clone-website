@@ -49,6 +49,32 @@ export function useAdminAuth() {
     setUser(null);
   };
 
+  // Проверяет, нужна ли первичная настройка пароля для логина
+  const checkSetup = useCallback(async (username: string) => {
+    setLoading(true);
+    setError("");
+    try {
+      const r = await fetch(AUTH_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "check_setup", username }),
+      });
+      const data = await r.json();
+      setLoading(false);
+      if (!r.ok) { setError(data.error || "Ошибка"); return { error: data.error }; }
+      if (data.setup_required) {
+        setSetupRequired(true);
+        setSetupUserId(data.user_id);
+        return { setupRequired: true };
+      }
+      return { setupRequired: false, exists: data.exists };
+    } catch {
+      setLoading(false);
+      setError("Ошибка соединения");
+      return { error: "Ошибка соединения" };
+    }
+  }, []);
+
   const login = useCallback(async (username: string, password: string) => {
     setLoading(true);
     setError("");
@@ -59,12 +85,6 @@ export function useAdminAuth() {
         body: JSON.stringify({ action: "login", username, password }),
       });
       const data = await r.json();
-      if (data.setup_required) {
-        setSetupRequired(true);
-        setSetupUserId(data.user_id);
-        setLoading(false);
-        return { setupRequired: true };
-      }
       if (!r.ok) {
         setError(data.error || "Ошибка входа");
         setLoading(false);
@@ -134,7 +154,7 @@ export function useAdminAuth() {
 
   useEffect(() => {
     if (token) verifyToken();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const can = useCallback((permission: string) => {
     return user?.permissions?.includes(permission) ?? false;
@@ -142,7 +162,7 @@ export function useAdminAuth() {
 
   return {
     token, user, loading, error, setupRequired, setupUserId,
-    login, logout, setupPassword, verifyToken, can,
+    login, logout, setupPassword, checkSetup, verifyToken, can,
     isAuthed: !!token && !!user,
   };
 }

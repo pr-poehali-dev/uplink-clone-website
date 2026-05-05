@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { CmsContent, CmsFaqItem } from "@/hooks/useCmsContent";
 import { SaveButton, SaveFn } from "./AdminShared";
 import Icon from "@/components/ui/icon";
+import { AiAssistantButton } from "@/components/AiAssistant";
+import { getStoredToken } from "@/hooks/useAdminAuth";
 import {
   DndContext,
   closestCenter,
@@ -157,7 +159,16 @@ export function FaqTab({ content, save, saving }: { content: CmsContent; passwor
             </div>
 
             <div>
-              <label className="block text-gray-400 text-xs mb-1">Ответ</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-gray-400 text-xs">Ответ</label>
+                <AiAssistantButton
+                  token={getStoredToken()}
+                  fieldHint="развёрнутый ответ на вопрос клиента IT-компании"
+                  context={`Вопрос: ${selected.question}`}
+                  onResult={(t) => setSelected({ ...selected, answer: t })}
+                  className=""
+                />
+              </div>
               <textarea
                 value={selected.answer}
                 onChange={(e) => setSelected({ ...selected, answer: e.target.value })}
