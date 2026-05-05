@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CmsContent, CmsPricingItem } from "@/hooks/useCmsContent";
+import { CmsContent, CmsPricingItem, CmsPage } from "@/hooks/useCmsContent";
 import { SaveButton, SaveFn } from "./AdminShared";
 import Icon from "@/components/ui/icon";
 import { PricingSectionsEditor } from "./PricingSectionsEditor";
@@ -50,7 +50,7 @@ function getCategories(items: CmsPricingItem[]): Category[] {
   return cats;
 }
 
-type TabId = "sections" | "items" | "page";
+type TabId = "sections" | "items" | "page" | "seo";
 
 export function PricingTab({ content, save, saving }: Props) {
   const [tab, setTab] = useState<TabId>("items");
@@ -67,6 +67,9 @@ export function PricingTab({ content, save, saving }: Props) {
     pricing_cta_text: s.pricing_cta_text ?? "Нужен индивидуальный расчёт или не нашли нужную услугу?",
   });
 
+  const [pages, setPages] = useState<CmsPage[]>([]);
+  const [pricingPage, setPricingPage] = useState<(CmsPage & { is_published?: boolean; metrika_counter?: string }) | null>(null);
+
   useEffect(() => {
     const sorted = [...(content.pricing_items ?? [])].sort((a, b) => a.sort_order - b.sort_order);
     setItems(sorted);
@@ -74,6 +77,13 @@ export function PricingTab({ content, save, saving }: Props) {
       setActiveCatSlug(sorted[0].category_slug);
     }
   }, [content.pricing_items]);
+
+  useEffect(() => {
+    const all = [...(content.pages ?? [])];
+    setPages(all);
+    const found = all.find((p) => p.route === "/pricing");
+    if (found) setPricingPage(found as CmsPage & { is_published?: boolean; metrika_counter?: string });
+  }, [content.pages]);
 
   useEffect(() => {
     const s = content.settings ?? {};
@@ -145,10 +155,22 @@ export function PricingTab({ content, save, saving }: Props) {
     save("save_settings", { settings });
   };
 
+  const updatePricingPage = (patch: Partial<CmsPage & { is_published?: boolean; metrika_counter?: string }>) => {
+    if (!pricingPage) return;
+    const updated = { ...pricingPage, ...patch };
+    setPricingPage(updated);
+    setPages((prev) => prev.map((p) => p.route === "/pricing" ? { ...p, ...patch } : p));
+  };
+
+  const handleSaveSeo = () => {
+    save("save_pages", { items: pages });
+  };
+
   const subTabs = [
     { id: "sections" as TabId, label: "Секции", icon: "Layers" },
     { id: "items" as TabId, label: "Категории и позиции", icon: "List" },
     { id: "page" as TabId, label: "Настройки страницы", icon: "Settings" },
+    { id: "seo" as TabId, label: "SEO", icon: "Search" },
   ];
 
   return (
@@ -415,6 +437,97 @@ export function PricingTab({ content, save, saving }: Props) {
           </div>
 
           <SaveButton onClick={handleSavePage} saving={saving} />
+        </div>
+      )}
+
+      {/* TAB: SEO */}
+      {tab === "seo" && (
+        <div className="space-y-4 max-w-2xl">
+          {!pricingPage ? (
+            <div className="glass-card neon-border rounded-2xl p-8 text-center text-gray-500 text-sm">
+              Данные страницы /pricing не найдены в CMS
+            </div>
+          ) : (
+            <>
+              <div className="glass-card neon-border rounded-2xl p-5 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                  <span className="text-gray-400 text-xs font-mono">/pricing</span>
+                  <button
+                    onClick={() => updatePricingPage({ is_published: pricingPage.is_published === false ? true : false })}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                      pricingPage.is_published !== false
+                        ? "bg-green-500/15 text-green-400 border-green-500/25"
+                        : "bg-gray-500/15 text-gray-400 border-gray-500/25"
+                    }`}
+                  >
+                    <Icon name={pricingPage.is_published !== false ? "Eye" : "EyeOff"} size={12} />
+                    {pricingPage.is_published !== false ? "Опубликована" : "Скрыта"}
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className={cls.label}>SEO Title</label>
+                    <input
+                      value={pricingPage.seo_title ?? ""}
+                      onChange={(e) => updatePricingPage({ seo_title: e.target.value })}
+                      className={cls.input}
+                    />
+                    {pricingPage.seo_title && (
+                      <p className={`text-xs mt-1 ${pricingPage.seo_title.length > 70 ? "text-yellow-500" : "text-gray-600"}`}>
+                        {pricingPage.seo_title.length} / 70 символов
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className={cls.label}>SEO Description</label>
+                    <textarea
+                      value={pricingPage.seo_description ?? ""}
+                      onChange={(e) => updatePricingPage({ seo_description: e.target.value })}
+                      rows={2}
+                      className={cls.textarea}
+                    />
+                    {pricingPage.seo_description && (
+                      <p className={`text-xs mt-1 ${pricingPage.seo_description.length > 160 ? "text-yellow-500" : "text-gray-600"}`}>
+                        {pricingPage.seo_description.length} / 160 символов
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className={cls.label}>OG Title (для соцсетей)</label>
+                    <input
+                      value={pricingPage.og_title ?? ""}
+                      onChange={(e) => updatePricingPage({ og_title: e.target.value })}
+                      className={cls.input}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={cls.label}>OG Description (для соцсетей)</label>
+                    <textarea
+                      value={pricingPage.og_description ?? ""}
+                      onChange={(e) => updatePricingPage({ og_description: e.target.value })}
+                      rows={2}
+                      className={cls.textarea}
+                    />
+                  </div>
+                </div>
+
+                {(pricingPage.seo_title || pricingPage.seo_description) && (
+                  <div className="p-3 rounded-xl border border-white/5 bg-white/[0.02] space-y-1">
+                    <p className="text-gray-500 text-xs uppercase tracking-wider font-semibold mb-2">Предпросмотр в поиске</p>
+                    <p className="text-blue-400 text-sm font-medium truncate">{pricingPage.seo_title || "—"}</p>
+                    <p className="text-green-500 text-xs font-mono">https://yourdomain.ru/pricing</p>
+                    <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">{pricingPage.seo_description || "—"}</p>
+                  </div>
+                )}
+              </div>
+
+              <SaveButton onClick={handleSaveSeo} saving={saving} />
+            </>
+          )}
         </div>
       )}
     </div>
