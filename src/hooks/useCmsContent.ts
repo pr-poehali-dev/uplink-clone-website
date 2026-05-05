@@ -47,6 +47,7 @@ export interface CmsService {
   for_whom?: string | null;
   seo_title?: string | null;
   seo_description?: string | null;
+  page_visible?: boolean;
   items: CmsServiceItem[];
   benefits?: CmsServiceBenefit[];
   steps?: CmsServiceStep[];

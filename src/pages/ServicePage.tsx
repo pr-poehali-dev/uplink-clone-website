@@ -38,7 +38,7 @@ export default function ServicePage() {
   const [prefillService, setPrefillService] = useState<string | undefined>();
 
   const service: CmsService | undefined = useMemo(
-    () => content?.services?.find((s) => s.slug === slug && s.is_active),
+    () => content?.services?.find((s) => s.slug === slug && s.is_active && s.page_visible !== false),
     [content, slug]
   );
 

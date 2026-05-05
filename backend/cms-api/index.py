@@ -35,7 +35,7 @@ def get_all_content(conn):
     cur.execute("SELECT key, value FROM cms_settings ORDER BY id")
     settings = {row[0]: row[1] for row in cur.fetchall()}
 
-    cur.execute("SELECT id, sort_order, icon, title, description, accent, is_active, slug, short_desc, hero_title, hero_subtitle, full_description, price_from, for_whom, seo_title, seo_description FROM cms_services ORDER BY sort_order")
+    cur.execute("SELECT id, sort_order, icon, title, description, accent, is_active, slug, short_desc, hero_title, hero_subtitle, full_description, price_from, for_whom, seo_title, seo_description, page_visible FROM cms_services ORDER BY sort_order")
     services_rows = cur.fetchall()
     services = []
     for s in services_rows:
@@ -52,6 +52,7 @@ def get_all_content(conn):
             "accent": s[5], "is_active": s[6], "slug": s[7], "short_desc": s[8],
             "hero_title": s[9], "hero_subtitle": s[10], "full_description": s[11],
             "price_from": s[12], "for_whom": s[13], "seo_title": s[14], "seo_description": s[15],
+            "page_visible": s[16] if s[16] is not None else True,
             "items": items, "benefits": benefits, "steps": steps, "faq": sfaq
         })
 
@@ -297,7 +298,7 @@ def handler(event: dict, context) -> dict:
             if sid:
                 slug_val = "NULL" if not service.get("slug") else "'%s'" % esc(service.get("slug"))
                 cur.execute(
-                    "UPDATE cms_services SET icon='%s', title='%s', description='%s', accent='%s', is_active=%s, sort_order=%s, slug=%s, short_desc='%s', hero_title='%s', hero_subtitle='%s', full_description='%s', price_from='%s', for_whom='%s', seo_title='%s', seo_description='%s', updated_at=NOW() WHERE id=%s" % (
+                    "UPDATE cms_services SET icon='%s', title='%s', description='%s', accent='%s', is_active=%s, sort_order=%s, slug=%s, short_desc='%s', hero_title='%s', hero_subtitle='%s', full_description='%s', price_from='%s', for_whom='%s', seo_title='%s', seo_description='%s', page_visible=%s, updated_at=NOW() WHERE id=%s" % (
                         esc(service.get("icon")),
                         esc(service.get("title")),
                         esc(service.get("description")),
@@ -313,6 +314,7 @@ def handler(event: dict, context) -> dict:
                         esc(service.get("for_whom")),
                         esc(service.get("seo_title")),
                         esc(service.get("seo_description")),
+                        "true" if service.get("page_visible", True) else "false",
                         int(sid)
                     )
                 )

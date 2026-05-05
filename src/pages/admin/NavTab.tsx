@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { CmsContent, CmsNavItem } from "@/hooks/useCmsContent";
 import { SaveButton, SaveFn } from "./AdminShared";
 import Icon from "@/components/ui/icon";
+import { Link } from "react-router-dom";
 
 interface Props {
   content: CmsContent;
@@ -97,8 +98,43 @@ export function NavTab({ content, save, saving }: Props) {
     save("save_settings", { updates: brand });
   };
 
+  const activeServices = (content.services || []).filter((s) => s.is_active && s.slug);
+
   return (
     <div className="space-y-5">
+      {/* Услуги — фиксированный блок дропдауна */}
+      <div className="glass-card neon-border rounded-2xl p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-white font-bold font-['Oswald'] text-lg flex items-center gap-2">
+            <Icon name="Briefcase" size={18} className="text-cyan-400" />
+            Дропдаун «Услуги»
+          </h3>
+          <span className="text-xs text-gray-500">Автоматически из раздела «Услуги»</span>
+        </div>
+        <p className="text-gray-500 text-xs">
+          Пункт «Услуги» всегда отображается в шапке сайта. Подпункты формируются автоматически из активных услуг со заполненным slug.
+          Управлять ими можно в разделе <Link to="/admin" className="text-cyan-400 hover:underline">Страницы → Услуги</Link>.
+        </p>
+        <div className="space-y-1">
+          {activeServices.length === 0 ? (
+            <p className="text-gray-600 text-xs py-2">Нет активных услуг со slug — дропдаун будет пустым</p>
+          ) : (
+            activeServices.map((s) => (
+              <div key={s.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/3 border border-white/5">
+                <div className={`w-5 h-5 rounded-md bg-gradient-to-br ${s.accent || "from-cyan-400 to-blue-500"} flex items-center justify-center flex-shrink-0`}>
+                  <Icon name={s.icon as "Briefcase"} size={11} className="text-[#080c14]" fallback="Briefcase" />
+                </div>
+                <span className="text-gray-300 text-sm">{s.title}</span>
+                <span className="text-gray-600 text-xs font-mono ml-auto">/services/{s.slug}</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded border ${s.page_visible !== false ? "text-green-400 border-green-500/30 bg-green-500/10" : "text-gray-500 border-gray-500/30 bg-gray-500/10"}`}>
+                  {s.page_visible !== false ? "страница открыта" : "страница скрыта"}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
       {/* Nav items */}
       <div className="glass-card neon-border rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">

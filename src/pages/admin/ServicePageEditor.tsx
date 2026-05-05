@@ -41,6 +41,17 @@ export function ServicePageEditor({ service, save, saving, settings }: Props) {
             Открыть страницу
           </a>
         )}
+        <button
+          onClick={() => save("save_service", { service: { ...service, page_visible: service.page_visible === false ? true : false }, order: [] })}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+            service.page_visible !== false
+              ? "bg-green-500/15 text-green-400 border-green-500/25 hover:bg-green-500/25"
+              : "bg-gray-500/15 text-gray-400 border-gray-500/25 hover:bg-gray-500/25"
+          }`}
+        >
+          <Icon name={service.page_visible !== false ? "Eye" : "EyeOff"} size={12} />
+          {service.page_visible !== false ? "Опубликована" : "Скрыта"}
+        </button>
         <QuickAuditBadge slug={service.slug || ""} token={getStoredToken()} />
       </div>
       {!service.slug && (

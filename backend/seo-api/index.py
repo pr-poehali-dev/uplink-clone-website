@@ -46,29 +46,31 @@ def verify_token(token: str) -> bool:
 
 
 def call_claude(prompt: str, max_tokens: int = 1500) -> str:
-    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    api_key = os.environ.get('OPENROUTER_API_KEY', '')
     if not api_key:
-        raise ValueError('AI недоступен: ключ не настроен')
+        raise ValueError('AI недоступен: добавьте OPENROUTER_API_KEY в секреты проекта')
 
     payload = {
-        'model': 'claude-3-5-haiku-20241022',
+        'model': 'anthropic/claude-3-5-haiku',
         'max_tokens': max_tokens,
-        'system': SEO_SYSTEM_PROMPT,
-        'messages': [{'role': 'user', 'content': prompt}],
+        'messages': [
+            {'role': 'system', 'content': SEO_SYSTEM_PROMPT},
+            {'role': 'user', 'content': prompt},
+        ],
     }
     req = urllib.request.Request(
-        'https://api.anthropic.com/v1/messages',
+        'https://openrouter.ai/api/v1/chat/completions',
         data=json.dumps(payload).encode(),
         headers={
-            'x-api-key': api_key,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json',
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://poehali.dev',
         },
         method='POST',
     )
     with urllib.request.urlopen(req, timeout=55) as resp:
         data = json.loads(resp.read())
-        return data['content'][0]['text']
+        return data['choices'][0]['message']['content']
 
 
 def get_all_pages_data(cur) -> list:
