@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { CmsContent } from "@/hooks/useCmsContent";
 import { useAdminAuth, AUTH_API_URL, CMS_API_URL } from "@/hooks/useAdminAuth";
-import { ServicesTab, PasswordTab } from "./admin/AdminTabs";
-import { ProjectsTab, TeamTab } from "./admin/AdminTabs2";
+import { ServicesTab } from "./admin/AdminTabs";
+import { ProjectsTab, TeamTab, PasswordTab } from "./admin/AdminTabs2";
 import { CalculatorTab } from "./admin/CalculatorTab";
 import { SecretsTab } from "./admin/SecretsTab";
 import { PreviewPanel } from "./admin/PreviewPanel";
