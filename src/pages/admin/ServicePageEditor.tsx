@@ -2,6 +2,8 @@ import { useState } from "react";
 import { CmsService, CmsServiceBenefit, CmsServiceStep, CmsServiceFaq } from "@/hooks/useCmsContent";
 import Icon from "@/components/ui/icon";
 import { SaveFn } from "./AdminShared";
+import { AiAssistantButton } from "@/components/AiAssistant";
+import { getStoredToken } from "@/hooks/useAdminAuth";
 
 interface Props {
   service: CmsService;
@@ -68,8 +70,34 @@ export function ServicePageEditor({ service, save, saving }: Props) {
   );
 }
 
+function AiBtn({ token, fieldHint, context, onResult }: { token: string; fieldHint: string; context: string; onResult: (t: string) => void }) {
+  const [open, setOpen] = useState(false);
+  if (!token) return null;
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-1 text-xs text-gray-600 hover:text-purple-400 transition-colors"
+      >
+        <Icon name="Sparkles" size={10} />ИИ
+      </button>
+    );
+  }
+  return (
+    <AiAssistantButton
+      token={token}
+      fieldHint={fieldHint}
+      context={context}
+      onResult={(t) => { onResult(t); setOpen(false); }}
+    />
+  );
+}
+
 function ServiceInfoEditor({ service, save, saving }: Props) {
   const [s, setS] = useState({ ...service });
+  const token = getStoredToken();
+  const svcCtx = `Услуга: ${service.title}. Компания: Аплинк-IT (IT-аутсорсинг, Воронеж).`;
 
   const handleSave = () => {
     save("save_service", { service: s, order: [] });
@@ -86,40 +114,64 @@ function ServiceInfoEditor({ service, save, saving }: Props) {
         />
       </Field>
 
-      <Field label="Краткое описание (для меню и карточки)">
+      <AiField
+        label="Краткое описание (для меню и карточки)"
+        token={token}
+        fieldHint="краткое описание IT-услуги для карточки (1-2 предложения)"
+        context={svcCtx}
+        onResult={(t) => setS({ ...s, short_desc: t })}
+      >
         <textarea
           value={s.short_desc || ""}
           onChange={(e) => setS({ ...s, short_desc: e.target.value })}
           rows={2}
           className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 resize-none"
         />
-      </Field>
+      </AiField>
 
-      <Field label="Заголовок hero-блока">
+      <AiField
+        label="Заголовок hero-блока"
+        token={token}
+        fieldHint="короткий цепляющий заголовок для hero-блока страницы услуги (до 8 слов)"
+        context={svcCtx}
+        onResult={(t) => setS({ ...s, hero_title: t })}
+      >
         <input
           value={s.hero_title || ""}
           onChange={(e) => setS({ ...s, hero_title: e.target.value })}
           className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
         />
-      </Field>
+      </AiField>
 
-      <Field label="Подзаголовок hero-блока">
+      <AiField
+        label="Подзаголовок hero-блока"
+        token={token}
+        fieldHint="подзаголовок hero-блока страницы услуги (1-2 предложения, конкретные выгоды)"
+        context={svcCtx}
+        onResult={(t) => setS({ ...s, hero_subtitle: t })}
+      >
         <textarea
           value={s.hero_subtitle || ""}
           onChange={(e) => setS({ ...s, hero_subtitle: e.target.value })}
           rows={2}
           className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 resize-none"
         />
-      </Field>
+      </AiField>
 
-      <Field label="Полное описание">
+      <AiField
+        label="Полное описание"
+        token={token}
+        fieldHint="полное описание IT-услуги для страницы (3-5 абзацев: что это, как работаем, что получает клиент)"
+        context={svcCtx}
+        onResult={(t) => setS({ ...s, full_description: t })}
+      >
         <textarea
           value={s.full_description || ""}
           onChange={(e) => setS({ ...s, full_description: e.target.value })}
           rows={5}
           className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 resize-none"
         />
-      </Field>
+      </AiField>
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Цена (от)">
@@ -141,21 +193,33 @@ function ServiceInfoEditor({ service, save, saving }: Props) {
 
       <div className="grid grid-cols-1 gap-3 pt-3 border-t border-white/5">
         <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider">SEO</div>
-        <Field label="SEO Title (тег title)">
+        <AiField
+          label="SEO Title (тег title)"
+          token={token}
+          fieldHint="SEO title для страницы услуги (до 65 символов, ключевые слова + город)"
+          context={svcCtx}
+          onResult={(t) => setS({ ...s, seo_title: t })}
+        >
           <input
             value={s.seo_title || ""}
             onChange={(e) => setS({ ...s, seo_title: e.target.value })}
             className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
           />
-        </Field>
-        <Field label="SEO Description (мета-описание)">
+        </AiField>
+        <AiField
+          label="SEO Description (мета-описание)"
+          token={token}
+          fieldHint="SEO description для страницы услуги (до 155 символов, конкретные выгоды + CTA)"
+          context={svcCtx}
+          onResult={(t) => setS({ ...s, seo_description: t })}
+        >
           <textarea
             value={s.seo_description || ""}
             onChange={(e) => setS({ ...s, seo_description: e.target.value })}
             rows={2}
             className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 resize-none"
           />
-        </Field>
+        </AiField>
       </div>
 
       <button
@@ -174,6 +238,8 @@ function BenefitsEditor({ service, save, saving }: Props) {
   const [items, setItems] = useState<CmsServiceBenefit[]>(
     (service.benefits || []).filter((b) => b.title !== "[удалено]")
   );
+  const token = getStoredToken();
+  const svcCtx = `Услуга: ${service.title}. Компания: Аплинк-IT.`;
 
   const add = () => {
     setItems([...items, { id: -Date.now(), sort_order: items.length + 1, icon: "Check", title: "Новое преимущество", description: "" }]);
@@ -209,6 +275,15 @@ function BenefitsEditor({ service, save, saving }: Props) {
               <Icon name="Trash2" size={14} />
             </button>
           </div>
+          <div className="flex items-center justify-between mb-0.5">
+            <span className="text-gray-600 text-xs">Описание</span>
+            <AiBtn
+              token={token}
+              fieldHint={`описание преимущества "${b.title}" для IT-услуги (1-2 предложения)`}
+              context={svcCtx}
+              onResult={(t) => update(b.id, { description: t })}
+            />
+          </div>
           <textarea
             value={b.description || ""}
             onChange={(e) => update(b.id, { description: e.target.value })}
@@ -234,6 +309,8 @@ function StepsEditor({ service, save, saving }: Props) {
   const [items, setItems] = useState<CmsServiceStep[]>(
     (service.steps || []).filter((s) => s.step_title !== "[удалено]")
   );
+  const token = getStoredToken();
+  const svcCtx = `Услуга: ${service.title}. Компания: Аплинк-IT.`;
 
   const add = () => setItems([...items, { id: -Date.now(), sort_order: items.length + 1, step_title: "Новый этап", step_description: "" }]);
   const remove = (id: number) => setItems(items.filter((i) => i.id !== id));
@@ -264,6 +341,15 @@ function StepsEditor({ service, save, saving }: Props) {
               <Icon name="Trash2" size={14} />
             </button>
           </div>
+          <div className="flex items-center justify-between mb-0.5">
+            <span className="text-gray-600 text-xs">Описание</span>
+            <AiBtn
+              token={token}
+              fieldHint={`описание этапа "${st.step_title}" при подключении IT-услуги (1-2 предложения)`}
+              context={svcCtx}
+              onResult={(t) => update(st.id, { step_description: t })}
+            />
+          </div>
           <textarea
             value={st.step_description || ""}
             onChange={(e) => update(st.id, { step_description: e.target.value })}
@@ -289,6 +375,8 @@ function ServiceFaqEditor({ service, save, saving }: Props) {
   const [items, setItems] = useState<CmsServiceFaq[]>(
     (service.faq || []).filter((f) => f.question !== "[удалено]")
   );
+  const token = getStoredToken();
+  const svcCtx = `Услуга: ${service.title}. Компания: Аплинк-IT (IT-аутсорсинг, Воронеж).`;
 
   const add = () => setItems([...items, { id: -Date.now(), sort_order: items.length + 1, question: "Новый вопрос", answer: "" }]);
   const remove = (id: number) => setItems(items.filter((i) => i.id !== id));
@@ -316,6 +404,15 @@ function ServiceFaqEditor({ service, save, saving }: Props) {
               <Icon name="Trash2" size={14} />
             </button>
           </div>
+          <div className="flex items-center justify-between mb-0.5">
+            <span className="text-gray-600 text-xs">Ответ</span>
+            <AiBtn
+              token={token}
+              fieldHint={`развёрнутый ответ на вопрос клиента об IT-услуге`}
+              context={`${svcCtx} Вопрос: ${f.question}`}
+              onResult={(t) => update(f.id, { answer: t })}
+            />
+          </div>
           <textarea
             value={f.answer}
             onChange={(e) => update(f.id, { answer: e.target.value })}
@@ -333,6 +430,42 @@ function ServiceFaqEditor({ service, save, saving }: Props) {
           <Icon name="Save" size={14} />Сохранить
         </button>
       </div>
+    </div>
+  );
+}
+
+function AiField({ label, token, fieldHint, context, onResult, children }: {
+  label: string;
+  token: string;
+  fieldHint: string;
+  context: string;
+  onResult: (t: string) => void;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <label className="block text-gray-400 text-xs">{label}</label>
+        {token && !open && (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="flex items-center gap-1 text-xs text-gray-600 hover:text-purple-400 transition-colors"
+          >
+            <Icon name="Sparkles" size={10} />ИИ
+          </button>
+        )}
+      </div>
+      {children}
+      {open && (
+        <AiAssistantButton
+          token={token}
+          fieldHint={fieldHint}
+          context={context}
+          onResult={(t) => { onResult(t); setOpen(false); }}
+        />
+      )}
     </div>
   );
 }
