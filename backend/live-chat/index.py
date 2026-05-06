@@ -93,8 +93,15 @@ def send_visitor_message_to_maax(
         f"{text}"
     )
     resp = maax_request(api_key, "POST", f"/messages?chat_id={chat_id}", {"text": msg_text})
-    mid = (resp.get("message") or {}).get("mid") or resp.get("mid") or ""
-    print(f"[MAAX] visitor msg chat={chat_id} session={short_id} is_first={is_first} mid={mid} -> {resp}")
+    # MAX возвращает mid в разных местах в зависимости от версии API
+    mid = (
+        (resp.get("message") or {}).get("body", {}).get("mid") or
+        (resp.get("message") or {}).get("mid") or
+        (resp.get("body") or {}).get("mid") or
+        resp.get("mid") or
+        ""
+    )
+    print(f"[MAAX] visitor msg chat={chat_id} session={short_id} mid={mid} full_resp={resp}")
     return mid
 
 
