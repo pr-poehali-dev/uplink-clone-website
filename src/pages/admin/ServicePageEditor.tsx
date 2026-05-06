@@ -1,21 +1,29 @@
 import { useState } from "react";
-import { CmsService, CmsServiceBenefit, CmsServiceStep, CmsServiceFaq, CmsSettings } from "@/hooks/useCmsContent";
+import { CmsService, CmsServiceBenefit, CmsServiceStep, CmsServiceFaq, CmsSettings, CmsContent } from "@/hooks/useCmsContent";
 import Icon from "@/components/ui/icon";
 import { SaveFn } from "./AdminShared";
 import { AiAssistantButton } from "@/components/AiAssistant";
 import { getStoredToken } from "@/hooks/useAdminAuth";
 import { QuickAuditBadge } from "./QuickAuditBadge";
 import { ServiceSectionsEditor } from "./ServiceSectionsEditor";
+import { CalculatorTab } from "./CalculatorTab";
+import { VideoCalcTab } from "./VideoCalcTab";
 
 interface Props {
   service: CmsService;
   save: SaveFn;
   saving: boolean;
   settings?: CmsSettings;
+  content?: CmsContent;
+  password?: string;
 }
 
-export function ServicePageEditor({ service, save, saving, settings }: Props) {
-  const [tab, setTab] = useState<"sections" | "info" | "benefits" | "steps" | "faq">("sections");
+export function ServicePageEditor({ service, save, saving, settings, content, password }: Props) {
+  const hasCalc = service.slug === "it-outsourcing";
+  const hasVideoCalc = service.slug === "video-surveillance";
+  const showCalcTab = hasCalc || hasVideoCalc;
+
+  const [tab, setTab] = useState<"sections" | "info" | "benefits" | "steps" | "faq" | "calculator">("sections");
 
   const subTabs: { id: typeof tab; label: string; icon: string }[] = [
     { id: "sections", label: "Секции", icon: "Layers" },
@@ -23,6 +31,7 @@ export function ServicePageEditor({ service, save, saving, settings }: Props) {
     { id: "benefits", label: "Преимущества", icon: "Sparkles" },
     { id: "steps", label: "Этапы", icon: "Workflow" },
     { id: "faq", label: "FAQ", icon: "HelpCircle" },
+    ...(showCalcTab ? [{ id: "calculator" as const, label: "Калькулятор", icon: "Calculator" }] : []),
   ];
 
   return (
@@ -83,6 +92,12 @@ export function ServicePageEditor({ service, save, saving, settings }: Props) {
       {tab === "benefits" && <BenefitsEditor service={service} save={save} saving={saving} />}
       {tab === "steps" && <StepsEditor service={service} save={save} saving={saving} />}
       {tab === "faq" && <ServiceFaqEditor service={service} save={save} saving={saving} />}
+      {tab === "calculator" && content && hasCalc && (
+        <CalculatorTab content={content} save={save} saving={saving} />
+      )}
+      {tab === "calculator" && content && hasVideoCalc && (
+        <VideoCalcTab content={content} password={password ?? ""} save={save} saving={saving} />
+      )}
     </div>
   );
 }

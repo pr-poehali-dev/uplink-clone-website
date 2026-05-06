@@ -286,6 +286,8 @@ export function ServicesTab({ content, save, saving }: { content: CmsContent; pa
               save={save}
               saving={saving}
               settings={content.settings}
+              content={content}
+              password={(content.settings as Record<string, string>)?.admin_password ?? ""}
             />
           </>
         )}
