@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/webapp/Index";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollToTop from "@/components/ScrollToTop";
+import LiveChat from "@/components/LiveChat";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useCmsContent } from "@/hooks/useCmsContent";
 
@@ -56,6 +57,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <CookieBanner />
+        <LiveChat />
         <DesignApplicator />
         <BrowserRouter>
           <ScrollToTop />

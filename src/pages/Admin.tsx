@@ -22,6 +22,7 @@ import { AdminSidebar, Tab, NavGroup } from "./admin/AdminSidebar";
 import { DashboardTab } from "./admin/AdminDashboard";
 import { HomePageTab } from "./admin/HomePageTab";
 import { PrivacyPageTab } from "./admin/PrivacyPageTab";
+import { LiveChatTab } from "./admin/LiveChatTab";
 
 export default function Admin() {
   const auth = useAdminAuth();
@@ -158,6 +159,7 @@ export default function Admin() {
       items: [
         { id: "dashboard", label: "Дашборд", icon: "LayoutDashboard" },
         { id: "leads", label: "Заявки", icon: "Inbox", badge: unreadLeads || undefined },
+        { id: "livechat", label: "Живой чат", icon: "MessageCircle" },
         { id: "history", label: "История правок", icon: "History" },
       ],
     },
@@ -219,6 +221,7 @@ export default function Admin() {
           <div className="p-6 max-w-5xl">
             {tab === "dashboard" && <DashboardTab content={content} onNavigate={setTab} />}
             {tab === "leads" && <LeadsTab password={password} cmsApiUrl={CMS_API_URL} />}
+            {tab === "livechat" && <LiveChatTab token={auth.token} />}
             {tab === "history" && <HistoryTab token={auth.token} cmsApiUrl={CMS_API_URL} />}
 
             {/* Страницы */}

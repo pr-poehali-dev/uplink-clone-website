@@ -5,7 +5,7 @@ export type Tab =
   | "calculator" | "projects" | "team" | "faq" | "secrets" | "password"
   | "whyus" | "quickorder" | "pricing" | "nav" | "videocalc" | "pages"
   | "media" | "design" | "users" | "history" | "seo"
-  | "home" | "privacy";
+  | "home" | "privacy" | "livechat";
 
 export interface NavGroup {
   label: string;

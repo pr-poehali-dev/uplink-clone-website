@@ -1,0 +1,25 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS CORS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Send message - creates session",
+      "method": "POST",
+      "path": "/?action=send",
+      "body": {"text": "Привет, есть вопрос!", "name": "Тест"},
+      "expectedStatus": 200,
+      "expectedBody": {"ok": true},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Poll without session_id returns error",
+      "method": "GET",
+      "path": "/?action=poll",
+      "expectedStatus": 400
+    }
+  ]
+}
