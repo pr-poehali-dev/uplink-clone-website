@@ -35,6 +35,7 @@
     --radius: 0.75rem;
 
     --neon-blue: #00d4ff;
+    --neon-blue-rgb: 0, 212, 255;
     --dark-bg: #080c14;
     --section-bg: #080c14;
     --section-bg-alt: #0a0f1a;
@@ -79,6 +80,7 @@
     --ring: 199 89% 48%;
 
     --neon-blue: #0284c7;
+    --neon-blue-rgb: 2, 132, 199;
     --dark-bg: #f8fafc;
     --section-bg: #f8fafc;
     --section-bg-alt: #eff6ff;

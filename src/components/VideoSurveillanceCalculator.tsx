@@ -38,19 +38,20 @@ function SliderRow({
   label: string; value: number; onChange: (v: number) => void;
   min: number; max: number; suffix: string;
 }) {
+  const pct = max > min ? ((value - min) / (max - min)) * 100 : 0;
   return (
     <div className="mb-4">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm text-gray-400">{label}</span>
-        <span className="text-sm font-bold text-cyan-400">{value} {suffix}</span>
+        <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{label}</span>
+        <span className="text-sm font-bold" style={{ color: "var(--neon-blue)" }}>{value} {suffix}</span>
       </div>
       <input
         type="range" min={min} max={max} value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-        style={{ background: `linear-gradient(to right, #00d4ff ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.1) 0%)` }}
+        style={{ background: `linear-gradient(to right, var(--neon-blue) ${pct}%, var(--range-track) 0%)` }}
       />
-      <div className="flex justify-between text-xs text-gray-600 mt-1">
+      <div className="flex justify-between text-xs mt-1" style={{ color: "var(--text-muted)" }}>
         <span>{min}</span><span>{max}</span>
       </div>
     </div>
@@ -127,8 +128,8 @@ export default function VideoSurveillanceCalculator({
       <div className="space-y-4">
         {/* Тип монтажа */}
         <div>
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <Icon name="Camera" size={13} className="text-cyan-400" />
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+            <Icon name="Camera" size={13} style={{ color: "var(--neon-blue)" }} />
             Тип камер
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -136,12 +137,14 @@ export default function VideoSurveillanceCalculator({
               <button
                 key={mt.key}
                 onClick={() => setMountType(mt.key)}
-                className={`p-2.5 rounded-xl border text-left transition-all ${
-                  mountType === mt.key ? "bg-cyan-500/15 border-cyan-500/50" : "bg-white/5 border-white/10 hover:border-cyan-500/30"
-                }`}
+                className="p-2.5 rounded-xl border text-left transition-all"
+                style={mountType === mt.key
+                  ? { background: "rgba(var(--neon-blue-rgb),0.12)", borderColor: "var(--neon-blue)" }
+                  : { background: "var(--range-track)", borderColor: "var(--card-border)" }
+                }
               >
-                <div className="text-xs font-semibold text-white truncate">{mt.label}</div>
-                <div className="text-xs text-gray-500">{formatRub(mt.price)}/шт.</div>
+                <div className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{mt.label}</div>
+                <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{formatRub(mt.price)}/шт.</div>
               </button>
             ))}
           </div>
@@ -149,8 +152,8 @@ export default function VideoSurveillanceCalculator({
 
         {/* Слайдеры */}
         <div>
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <Icon name="Sliders" size={13} className="text-cyan-400" />
+          <div className="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+            <Icon name="Sliders" size={13} style={{ color: "var(--neon-blue)" }} />
             Параметры
           </div>
           {activeSliders.map(s => (
@@ -167,8 +170,8 @@ export default function VideoSurveillanceCalculator({
         {/* Доп. работы */}
         {extraWorks.length > 0 && (
           <div>
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Icon name="Wrench" size={13} className="text-cyan-400" />
+            <div className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+              <Icon name="Wrench" size={13} style={{ color: "var(--neon-blue)" }} />
               Дополнительные работы
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -178,18 +181,27 @@ export default function VideoSurveillanceCalculator({
                   <button
                     key={w.key}
                     onClick={() => toggleExtra(w.key)}
-                    className={`text-left px-3 py-2.5 rounded-xl border transition-all flex items-center gap-2.5 ${
-                      checked ? "bg-cyan-500/10 border-cyan-500/40" : "bg-white/5 border-white/10 hover:border-cyan-500/30"
-                    }`}
+                    className="text-left px-3 py-2.5 rounded-xl border transition-all flex items-center gap-2.5"
+                    style={checked
+                      ? { background: "rgba(var(--neon-blue-rgb),0.08)", borderColor: "var(--neon-blue)" }
+                      : { background: "var(--range-track)", borderColor: "var(--card-border)" }
+                    }
                   >
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${checked ? "bg-cyan-500/30" : "bg-white/5"}`}>
-                      <Icon name={w.icon as "Settings"} size={13} className={checked ? "text-cyan-400" : "text-gray-400"} fallback="Wrench" />
+                    <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: checked ? "rgba(var(--neon-blue-rgb),0.18)" : "var(--range-track)" }}
+                    >
+                      <Icon name={w.icon as "Settings"} size={13} style={{ color: checked ? "var(--neon-blue)" : "var(--text-muted)" }} fallback="Wrench" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium text-white leading-tight truncate">{w.label}</div>
-                      <div className="text-xs text-gray-500">{formatRub(w.price)}</div>
+                      <div className="text-xs font-medium leading-tight truncate" style={{ color: "var(--text-primary)" }}>{w.label}</div>
+                      <div className="text-xs" style={{ color: "var(--text-muted)" }}>{formatRub(w.price)}</div>
                     </div>
-                    <div className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center ${checked ? "bg-cyan-500 border-cyan-500" : "border-gray-600"}`}>
+                    <div className="w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center"
+                      style={checked
+                        ? { background: "var(--neon-blue)", borderColor: "var(--neon-blue)" }
+                        : { borderColor: "var(--text-muted)" }
+                      }
+                    >
                       {checked && <Icon name="Check" size={10} className="text-white" />}
                     </div>
                   </button>
@@ -200,37 +212,37 @@ export default function VideoSurveillanceCalculator({
         )}
 
         {/* Итог */}
-        <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+        <div className="rounded-2xl p-4" style={{ background: "var(--range-track)", border: "1px solid var(--card-border)" }}>
           <div className="space-y-1.5 text-sm mb-3">
-            <div className="flex justify-between text-gray-400">
-              <span>Монтаж {currentMount?.label} ({cameraCount} шт.)</span>
-              <span className="text-white font-medium">{formatRub(result.mountTotal)}</span>
+            <div className="flex justify-between">
+              <span style={{ color: "var(--text-muted)" }}>Монтаж {currentMount?.label} ({cameraCount} шт.)</span>
+              <span className="font-medium" style={{ color: "var(--text-primary)" }}>{formatRub(result.mountTotal)}</span>
             </div>
             {activeSliders.filter(s => s.key !== "cameras" && s.price_per_unit > 0).map(s => (
-              <div key={s.key} className="flex justify-between text-gray-400">
-                <span>{s.label} ({sliderVals[s.key] ?? s.default_val} {s.suffix})</span>
-                <span className="text-white font-medium">{formatRub((sliderVals[s.key] ?? s.default_val) * s.price_per_unit)}</span>
+              <div key={s.key} className="flex justify-between">
+                <span style={{ color: "var(--text-muted)" }}>{s.label} ({sliderVals[s.key] ?? s.default_val} {s.suffix})</span>
+                <span className="font-medium" style={{ color: "var(--text-primary)" }}>{formatRub((sliderVals[s.key] ?? s.default_val) * s.price_per_unit)}</span>
               </div>
             ))}
             {result.extrasTotal > 0 && (
-              <div className="flex justify-between text-gray-400">
-                <span>Дополнительные работы</span>
-                <span className="text-white font-medium">{formatRub(result.extrasTotal)}</span>
+              <div className="flex justify-between">
+                <span style={{ color: "var(--text-muted)" }}>Дополнительные работы</span>
+                <span className="font-medium" style={{ color: "var(--text-primary)" }}>{formatRub(result.extrasTotal)}</span>
               </div>
             )}
           </div>
-          <div className="border-t border-white/10 pt-3 flex items-center justify-between">
+          <div className="pt-3 flex items-center justify-between" style={{ borderTop: "1px solid var(--card-border)" }}>
             <div>
-              <div className="text-xs text-gray-500">Итого работы</div>
+              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Итого работы</div>
               <div className="text-2xl font-bold gradient-text font-['Oswald']">{formatRub(result.total)}</div>
-              <div className="text-xs text-gray-600 mt-0.5">Оборудование — отдельно</div>
+              <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Оборудование — отдельно</div>
             </div>
             <button onClick={handleOrder} className="btn-neon px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 text-sm">
               <Icon name="PhoneCall" size={15} />
               Заказать
             </button>
           </div>
-          <p className="text-xs text-amber-400/70 mt-3 leading-relaxed">{disclaimer}</p>
+          <p className="text-xs mt-3 leading-relaxed" style={{ color: "var(--text-muted)" }}>{disclaimer}</p>
         </div>
       </div>
     );

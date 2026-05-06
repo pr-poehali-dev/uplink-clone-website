@@ -89,8 +89,8 @@ export default function Calculator({ calcSettings, calcOptions, calcSliders, onC
       <div className="space-y-4">
         {/* Слайдеры */}
         <div>
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <Icon name="Sliders" size={13} className="text-cyan-400" />
+          <div className="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+            <Icon name="Sliders" size={13} style={{ color: "var(--neon-blue)" }} />
             Параметры инфраструктуры
           </div>
           {activeSliders.map(s => (
@@ -106,8 +106,8 @@ export default function Calculator({ calcSettings, calcOptions, calcSliders, onC
 
         {/* Время реакции */}
         <div>
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <Icon name="Clock" size={13} className="text-cyan-400" />
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+            <Icon name="Clock" size={13} style={{ color: "var(--neon-blue)" }} />
             Время реагирования
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -115,9 +115,11 @@ export default function Calculator({ calcSettings, calcOptions, calcSliders, onC
               <button
                 key={r.key}
                 onClick={() => setResponse(r.key)}
-                className={`px-2 py-2 rounded-xl text-xs font-medium transition-all border ${
-                  response === r.key ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40" : "bg-white/5 text-gray-400 border-white/10 hover:border-cyan-500/30"
-                }`}
+                className="px-2 py-2 rounded-xl text-xs font-medium transition-all border"
+                style={response === r.key
+                  ? { background: "rgba(var(--neon-blue-rgb),0.12)", color: "var(--neon-blue)", borderColor: "var(--neon-blue)" }
+                  : { background: "var(--range-track)", color: "var(--text-secondary)", borderColor: "var(--card-border)" }
+                }
               >
                 {r.label}
               </button>
@@ -128,8 +130,8 @@ export default function Calculator({ calcSettings, calcOptions, calcSliders, onC
         {/* Доп. опции */}
         {activeOptions.length > 0 && (
           <div>
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Icon name="Plus" size={13} className="text-cyan-400" />
+            <div className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+              <Icon name="Plus" size={13} style={{ color: "var(--neon-blue)" }} />
               Дополнительные услуги
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -139,18 +141,27 @@ export default function Calculator({ calcSettings, calcOptions, calcSliders, onC
                   <button
                     key={o.id}
                     onClick={() => toggleOption(o.key)}
-                    className={`text-left px-3 py-2.5 rounded-xl border transition-all flex items-center gap-2.5 ${
-                      checked ? "bg-cyan-500/10 border-cyan-500/40" : "bg-white/5 border-white/10 hover:border-cyan-500/30"
-                    }`}
+                    className="text-left px-3 py-2.5 rounded-xl border transition-all flex items-center gap-2.5"
+                    style={checked
+                      ? { background: "rgba(var(--neon-blue-rgb),0.08)", borderColor: "var(--neon-blue)" }
+                      : { background: "var(--range-track)", borderColor: "var(--card-border)" }
+                    }
                   >
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${checked ? "bg-cyan-500/30" : "bg-white/5"}`}>
-                      <Icon name={o.icon as "Check"} size={13} className={checked ? "text-cyan-400" : "text-gray-400"} fallback="Plus" />
+                    <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: checked ? "rgba(var(--neon-blue-rgb),0.18)" : "var(--range-track)" }}
+                    >
+                      <Icon name={o.icon as "Check"} size={13} style={{ color: checked ? "var(--neon-blue)" : "var(--text-muted)" }} fallback="Plus" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium text-white truncate">{o.label}</div>
-                      <div className="text-xs text-cyan-400">+{formatRub(Number(o.price))}</div>
+                      <div className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>{o.label}</div>
+                      <div className="text-xs" style={{ color: "var(--neon-blue)" }}>+{formatRub(Number(o.price))}</div>
                     </div>
-                    <div className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center ${checked ? "bg-cyan-500 border-cyan-500" : "border-gray-600"}`}>
+                    <div className="w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center"
+                      style={checked
+                        ? { background: "var(--neon-blue)", borderColor: "var(--neon-blue)" }
+                        : { borderColor: "var(--text-muted)" }
+                      }
+                    >
                       {checked && <Icon name="Check" size={10} className="text-white" />}
                     </div>
                   </button>
@@ -161,38 +172,38 @@ export default function Calculator({ calcSettings, calcOptions, calcSliders, onC
         )}
 
         {/* Итог */}
-        <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+        <div className="rounded-2xl p-4" style={{ background: "var(--range-track)", border: "1px solid var(--card-border)" }}>
           <div className="space-y-1.5 text-sm mb-3">
             {activeSliders.map(s => {
               const val = sliderVals[s.key] ?? s.default_val;
               const price = num(cs[s.price_key], s.price_default);
               return (
-                <div key={s.key} className="flex justify-between text-gray-400">
-                  <span>{s.label.replace("Количество ", "")} × {val}</span>
-                  <span className="text-white font-medium">{formatRub(val * price)}</span>
+                <div key={s.key} className="flex justify-between">
+                  <span style={{ color: "var(--text-muted)" }}>{s.label.replace("Количество ", "")} × {val}</span>
+                  <span className="font-medium" style={{ color: "var(--text-primary)" }}>{formatRub(val * price)}</span>
                 </div>
               );
             })}
-            <div className="flex justify-between text-gray-400">
-              <span>Базовая абонплата</span>
-              <span className="text-white font-medium">{formatRub(basePrice)}</span>
+            <div className="flex justify-between">
+              <span style={{ color: "var(--text-muted)" }}>Базовая абонплата</span>
+              <span className="font-medium" style={{ color: "var(--text-primary)" }}>{formatRub(basePrice)}</span>
             </div>
             {responseMultiplier !== 1 && (
-              <div className="flex justify-between text-gray-400">
-                <span>Реакция {RESPONSE_OPTIONS.find(r => r.key === response)?.label}</span>
-                <span className="text-white font-medium">× {responseMultiplier}</span>
+              <div className="flex justify-between">
+                <span style={{ color: "var(--text-muted)" }}>Реакция {RESPONSE_OPTIONS.find(r => r.key === response)?.label}</span>
+                <span className="font-medium" style={{ color: "var(--text-primary)" }}>× {responseMultiplier}</span>
               </div>
             )}
             {optionsTotal > 0 && (
-              <div className="flex justify-between text-gray-400">
-                <span>Доп. опции</span>
-                <span className="text-white font-medium">+{formatRub(optionsTotal)}</span>
+              <div className="flex justify-between">
+                <span style={{ color: "var(--text-muted)" }}>Доп. опции</span>
+                <span className="font-medium" style={{ color: "var(--text-primary)" }}>+{formatRub(optionsTotal)}</span>
               </div>
             )}
           </div>
-          <div className="border-t border-white/10 pt-3 flex items-center justify-between">
+          <div className="pt-3 flex items-center justify-between" style={{ borderTop: "1px solid var(--card-border)" }}>
             <div>
-              <div className="text-xs text-gray-500">Итого в месяц</div>
+              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Итого в месяц</div>
               <div className="text-2xl font-bold gradient-text font-['Oswald']">{formatRub(breakdown.total)}</div>
             </div>
             <button onClick={handleSubmit} className="btn-neon px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 text-sm">
@@ -201,7 +212,7 @@ export default function Calculator({ calcSettings, calcOptions, calcSliders, onC
             </button>
           </div>
           {cs.discount_label && (
-            <div className="text-xs text-cyan-400/70 mt-2 flex items-center gap-1.5">
+            <div className="text-xs mt-2 flex items-center gap-1.5" style={{ color: "var(--neon-blue)" }}>
               <Icon name="Sparkles" size={11} />
               <span>{cs.discount_label}</span>
             </div>
@@ -346,24 +357,32 @@ function SliderRow({ label, value, onChange, min, max, suffix }: {
   return (
     <div className="mb-5">
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm text-gray-400">{label}</label>
+        <label className="text-sm" style={{ color: "var(--text-secondary)" }}>{label}</label>
         <div className="flex items-center gap-2">
-          <button onClick={() => onChange(Math.max(min, value - 1))} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-gray-400 hover:text-cyan-400 text-sm flex items-center justify-center transition-all">−</button>
-          <span className="text-sm font-bold text-cyan-400 min-w-[3rem] text-center">{value} {suffix}</span>
-          <button onClick={() => onChange(Math.min(max, value + 1))} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-gray-400 hover:text-cyan-400 text-sm flex items-center justify-center transition-all">+</button>
+          <button
+            onClick={() => onChange(Math.max(min, value - 1))}
+            className="w-7 h-7 rounded-lg text-sm flex items-center justify-center transition-all"
+            style={{ background: "var(--range-track)", color: "var(--text-muted)" }}
+          >−</button>
+          <span className="text-sm font-bold min-w-[3rem] text-center" style={{ color: "var(--neon-blue)" }}>{value} {suffix}</span>
+          <button
+            onClick={() => onChange(Math.min(max, value + 1))}
+            className="w-7 h-7 rounded-lg text-sm flex items-center justify-center transition-all"
+            style={{ background: "var(--range-track)", color: "var(--text-muted)" }}
+          >+</button>
         </div>
       </div>
       <input type="range" min={min} max={max} value={value} onChange={e => onChange(Number(e.target.value))} className="w-full" />
-      <div className="flex justify-between text-xs text-gray-600 mt-1"><span>{min}</span><span>{max}</span></div>
+      <div className="flex justify-between text-xs mt-1" style={{ color: "var(--text-muted)" }}><span>{min}</span><span>{max}</span></div>
     </div>
   );
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between text-gray-400">
-      <span>{label}</span>
-      <span className="text-white font-medium">{value}</span>
+    <div className="flex items-center justify-between">
+      <span style={{ color: "var(--text-muted)" }}>{label}</span>
+      <span className="font-medium" style={{ color: "var(--text-primary)" }}>{value}</span>
     </div>
   );
 }

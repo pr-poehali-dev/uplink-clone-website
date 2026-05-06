@@ -26,11 +26,7 @@ export default function CalculatorModal({
   videoCameras, videoEquipment, videoCalcSliders, settings,
 }: CalculatorModalProps) {
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
@@ -46,34 +42,38 @@ export default function CalculatorModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col bg-[#0d1420] border border-white/10 rounded-2xl shadow-2xl shadow-cyan-500/10 overflow-hidden">
+      {/* Modal — использует CSS-переменные темы */}
+      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+        style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 flex-shrink-0"
+          style={{ borderBottom: "1px solid var(--card-border)" }}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-              <Icon name={isIT ? "Calculator" : "Camera"} size={16} className="text-cyan-400" />
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: "rgba(var(--neon-blue-rgb), 0.12)" }}
+            >
+              <Icon name={isIT ? "Calculator" : "Camera"} size={17} className="text-[var(--neon-blue)]" />
             </div>
             <div>
-              <h2 className="text-white font-bold font-['Oswald'] text-lg leading-tight">
+              <h2 className="font-bold font-['Oswald'] text-lg leading-tight" style={{ color: "var(--text-primary)" }}>
                 {isIT
                   ? (calcSettings?.title || "Калькулятор IT-аутсорсинга")
                   : (settings?.video_calc_title || "Калькулятор монтажа видеонаблюдения")
                 }
               </h2>
-              <p className="text-gray-500 text-xs">Ориентировочный расчёт стоимости</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Ориентировочный расчёт стоимости</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:opacity-80"
+            style={{ background: "var(--range-track)", color: "var(--text-muted)" }}
           >
-            <Icon name="X" size={16} className="text-gray-400" />
+            <Icon name="X" size={16} />
           </button>
         </div>
 
