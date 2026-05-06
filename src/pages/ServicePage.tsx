@@ -180,6 +180,7 @@ export default function ServicePage() {
               onContactClick={openModal}
               videoCameras={content?.video_cameras}
               videoEquipment={content?.video_equipment}
+              videoCalcSliders={content?.video_calc_sliders}
               settings={content?.settings}
             />
           )}

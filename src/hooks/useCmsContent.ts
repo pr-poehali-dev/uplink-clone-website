@@ -200,6 +200,19 @@ export interface CmsVideoEquipment {
   is_active: boolean;
 }
 
+export interface CmsVideoCalcSlider {
+  id: number;
+  sort_order: number;
+  key: string;
+  label: string;
+  suffix: string;
+  price_per_unit: number;
+  min_val: number;
+  max_val: number;
+  default_val: number;
+  is_active: boolean;
+}
+
 export interface CmsPage {
   id: number;
   route: string;
@@ -240,6 +253,7 @@ export interface CmsContent {
   nav_items?: CmsNavItem[];
   video_cameras?: CmsVideoCameraType[];
   video_equipment?: CmsVideoEquipment[];
+  video_calc_sliders?: CmsVideoCalcSlider[];
   pages?: CmsPage[];
 }
 

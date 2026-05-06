@@ -105,6 +105,9 @@ def get_all_content(conn):
     cur.execute("SELECT id, sort_order, key, label, suffix, price_key, price_default, min_val, max_val, default_val, is_active FROM cms_calc_sliders ORDER BY sort_order")
     calc_sliders = [{"id": r[0], "sort_order": r[1], "key": r[2], "label": r[3], "suffix": r[4], "price_key": r[5], "price_default": r[6], "min_val": r[7], "max_val": r[8], "default_val": r[9], "is_active": r[10]} for r in cur.fetchall()]
 
+    cur.execute("SELECT id, sort_order, key, label, suffix, price_per_unit, min_val, max_val, default_val, is_active FROM cms_video_calc_sliders ORDER BY sort_order")
+    video_calc_sliders = [{"id": r[0], "sort_order": r[1], "key": r[2], "label": r[3], "suffix": r[4], "price_per_unit": r[5], "min_val": r[6], "max_val": r[7], "default_val": r[8], "is_active": r[9]} for r in cur.fetchall()]
+
     cur.execute("SELECT id, route, title, seo_title, seo_description, og_title, og_description, og_image_url, is_active, is_published, metrika_counter FROM cms_pages ORDER BY id")
     pages = [{"id": r[0], "route": r[1], "title": r[2], "seo_title": r[3], "seo_description": r[4], "og_title": r[5], "og_description": r[6], "og_image_url": r[7], "is_active": r[8], "is_published": r[9] if r[9] is not None else True, "metrika_counter": r[10]} for r in cur.fetchall()]
 
@@ -117,6 +120,7 @@ def get_all_content(conn):
         "whyus_cards": whyus_cards, "quickorder_steps": quickorder_steps,
         "pricing_items": pricing_items, "nav_items": nav_items,
         "video_cameras": video_cameras, "video_equipment": video_equipment,
+        "video_calc_sliders": video_calc_sliders,
         "pages": pages,
     }
 
@@ -906,6 +910,35 @@ def handler(event: dict, context) -> dict:
             for eid in existing:
                 if eid not in kept:
                     cur.execute("DELETE FROM cms_video_equipment WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        if action == "save_video_calc_sliders":
+            items = body.get("items", [])
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM cms_video_calc_sliders")
+            existing = [r[0] for r in cur.fetchall()]
+            kept = []
+            for i, it in enumerate(items):
+                iid = it.get("id")
+                if iid and iid in existing:
+                    cur.execute(
+                        "UPDATE cms_video_calc_sliders SET sort_order=%s, key='%s', label='%s', suffix='%s', price_per_unit=%s, min_val=%s, max_val=%s, default_val=%s, is_active=%s, updated_at=NOW() WHERE id=%s" % (
+                            i+1, esc(it.get("key")), esc(it.get("label")), esc(it.get("suffix","шт.")),
+                            int(it.get("price_per_unit",0)), int(it.get("min_val",0)), int(it.get("max_val",100)),
+                            int(it.get("default_val",0)), "true" if it.get("is_active",True) else "false", int(iid)))
+                    kept.append(iid)
+                else:
+                    cur.execute(
+                        "INSERT INTO cms_video_calc_sliders (sort_order, key, label, suffix, price_per_unit, min_val, max_val, default_val, is_active) VALUES (%s,'%s','%s','%s',%s,%s,%s,%s,%s) RETURNING id" % (
+                            i+1, esc(it.get("key","vslider_"+str(i))), esc(it.get("label")), esc(it.get("suffix","шт.")),
+                            int(it.get("price_per_unit",0)), int(it.get("min_val",0)), int(it.get("max_val",100)),
+                            int(it.get("default_val",0)), "true" if it.get("is_active",True) else "false"))
+                    kept.append(cur.fetchone()[0])
+            for eid in existing:
+                if eid not in kept:
+                    cur.execute("DELETE FROM cms_video_calc_sliders WHERE id=%s" % int(eid))
             conn.commit()
             cur.close()
             return ok({"ok": True})

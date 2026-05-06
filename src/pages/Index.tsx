@@ -5,6 +5,7 @@ import Services from "@/components/Services";
 import WhyUs from "@/components/WhyUs";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
+import CalculatorModal, { CalcModalType } from "@/components/CalculatorModal";
 import { useCmsContent } from "@/hooks/useCmsContent";
 import { SECTIONS_ORDER } from "@/config/sections.config";
 
@@ -17,17 +18,30 @@ const Faq = lazy(() => import("@/components/Faq"));
 
 function parseOrder(raw: string | undefined): string[] {
   if (!raw) return SECTIONS_ORDER;
-  const parsed = raw.split(",").map((s) => s.trim()).filter((s) => SECTIONS_ORDER.includes(s));
-  const missing = SECTIONS_ORDER.filter((s) => !parsed.includes(s));
+  const parsed = raw.split(",").map(s => s.trim()).filter(s => SECTIONS_ORDER.includes(s));
+  const missing = SECTIONS_ORDER.filter(s => !parsed.includes(s));
   return [...parsed, ...missing];
 }
 
 export default function Index() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSource, setModalSource] = useState("Не указан");
+  const [calcModalOpen, setCalcModalOpen] = useState(false);
+  const [calcModalType, setCalcModalType] = useState<CalcModalType>("it");
   const { content } = useCmsContent();
 
   const openModal = (source: string) => {
+    setModalSource(source);
+    setModalOpen(true);
+  };
+
+  const openCalcModal = (type: CalcModalType) => {
+    setCalcModalType(type);
+    setCalcModalOpen(true);
+  };
+
+  const handleCalcContact = (source: string, payload?: string) => {
+    setCalcModalOpen(false);
     setModalSource(source);
     setModalOpen(true);
   };
@@ -38,7 +52,7 @@ export default function Index() {
 
   const sectionMap: Record<string, JSX.Element | null> = {
     hero:       <Hero onContactClick={() => openModal("Главный экран (Hero)")} settings={s} />,
-    services:   <Services onContactClick={() => openModal("Блок услуг")} services={content?.services} />,
+    services:   <Services onContactClick={() => openModal("Блок услуг")} onCalcClick={openCalcModal} services={content?.services} />,
     whyus:      <WhyUs settings={s} whyusCards={content?.whyus_cards} />,
     pricing:    <Suspense fallback={null}><Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} /></Suspense>,
     quickorder: <Suspense fallback={null}><QuickOrder steps={content?.quickorder_steps} /></Suspense>,
@@ -52,7 +66,7 @@ export default function Index() {
     <div className="min-h-screen bg-[#080c14]">
       <Header onContactClick={() => openModal("Шапка сайта")} settings={s} services={content?.services} />
 
-      {order.map((id) => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
+      {order.map(id => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
 
       <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} />
 
@@ -63,6 +77,20 @@ export default function Index() {
           source={modalSource}
         />
       </Suspense>
+
+      <CalculatorModal
+        open={calcModalOpen}
+        type={calcModalType}
+        onClose={() => setCalcModalOpen(false)}
+        onContactClick={handleCalcContact}
+        calcSettings={content?.calc_settings}
+        calcOptions={content?.calc_options}
+        calcSliders={content?.calc_sliders}
+        videoCameras={content?.video_cameras}
+        videoEquipment={content?.video_equipment}
+        videoCalcSliders={content?.video_calc_sliders}
+        settings={s}
+      />
 
       {s?.design_float_btn_visible !== "false" && (
         <button
