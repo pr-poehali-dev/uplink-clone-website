@@ -374,6 +374,20 @@ def handler(event: dict, context) -> dict:
             return ok({"sessions": sessions})
 
         # ================================================================
+        # ПУБЛИЧНАЯ ИСТОРИЯ СЕССИИ (для клиента — восстановление после обновления)
+        # ================================================================
+        if action == "history" and params.get("public") == "1":
+            session_id = params.get("session_id", "")
+            if not session_id:
+                return err("session_id required")
+            cur.execute(f"""
+                SELECT id, sender, text, created_at
+                FROM {SCHEMA}.live_chat_messages WHERE session_id = %s ORDER BY created_at ASC
+            """, (session_id,))
+            msgs = [{"id": r[0], "sender": r[1], "text": r[2], "created_at": str(r[3]), "is_read": True} for r in cur.fetchall()]
+            return ok({"messages": msgs})
+
+        # ================================================================
         # ADMIN: ИСТОРИЯ СЕССИИ
         # ================================================================
         if action == "history":

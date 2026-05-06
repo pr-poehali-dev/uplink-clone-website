@@ -4,7 +4,21 @@ import Icon from "@/components/ui/icon";
 const LIVE_CHAT_URL = "https://functions.poehali.dev/baa85bce-d7a6-4cae-8aff-c94dd8c9c1d2";
 const POLL_INTERVAL = 4000;
 const SESSION_KEY = "live_chat_session_id";
+const SESSION_TS_KEY = "live_chat_session_ts";
 const MAX_MSG_ID_KEY = "live_chat_last_id";
+const SESSION_TTL_MS = 3 * 60 * 60 * 1000; // 3 часа
+
+function getSavedSession(): string {
+  const sid = localStorage.getItem(SESSION_KEY) || "";
+  const ts = parseInt(localStorage.getItem(SESSION_TS_KEY) || "0");
+  if (sid && ts && Date.now() - ts < SESSION_TTL_MS) return sid;
+  if (sid) {
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_TS_KEY);
+    localStorage.removeItem(MAX_MSG_ID_KEY);
+  }
+  return "";
+}
 
 interface Message {
   id: number;
@@ -35,10 +49,11 @@ export default function LiveChat() {
   const [sending, setSending] = useState(false);
   const [unread, setUnread] = useState(0);
   const [settings, setSettings] = useState<ChatSettings | null>(null);
+  const [restoringSession, setRestoringSession] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Фоновая сессия — существует даже если форма показана заново
-  const bgSessionId = useRef<string>(localStorage.getItem(SESSION_KEY) || "");
+  const bgSessionId = useRef<string>(getSavedSession());
 
   // Загружаем настройки с бэкенда
   useEffect(() => {
@@ -46,6 +61,29 @@ export default function LiveChat() {
       .then(r => r.json())
       .then(d => { if (d.settings) setSettings(d.settings); })
       .catch(() => {});
+  }, []);
+
+  // Восстанавливаем сессию после обновления страницы
+  useEffect(() => {
+    const saved = getSavedSession();
+    if (!saved) return;
+    setRestoringSession(true);
+    fetch(`${LIVE_CHAT_URL}?action=history&public=1&session_id=${saved}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.messages && d.messages.length > 0) {
+          setMessages(d.messages);
+          const maxId = Math.max(...d.messages.map((m: Message) => m.id));
+          setLastId(maxId);
+          localStorage.setItem(MAX_MSG_ID_KEY, String(maxId));
+        }
+        setSessionId(saved);
+        bgSessionId.current = saved;
+        setStep("chat");
+      })
+      .catch(() => {})
+      .finally(() => setRestoringSession(false));
+   
   }, []);
 
   const scrollToBottom = () => {
@@ -144,6 +182,7 @@ export default function LiveChat() {
       const data = await res.json();
       if (data.session_id) {
         localStorage.setItem(SESSION_KEY, data.session_id);
+        localStorage.setItem(SESSION_TS_KEY, String(Date.now()));
         bgSessionId.current = data.session_id;
         setSessionId(data.session_id);
         const msg: Message = { id: Date.now(), sender: "visitor", text: question.trim(), created_at: new Date().toISOString() };
