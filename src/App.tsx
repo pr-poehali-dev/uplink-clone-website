@@ -1,19 +1,20 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import ServicePage from "./pages/ServicePage";
-import PricingPage from "./pages/Pricing";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useCmsContent } from "@/hooks/useCmsContent";
+
+const Admin = lazy(() => import("./pages/Admin"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const ServicePage = lazy(() => import("./pages/ServicePage"));
+const PricingPage = lazy(() => import("./pages/Pricing"));
 
 const queryClient = new QueryClient();
 
@@ -55,15 +56,17 @@ const App = () => (
         <DesignApplicator />
         <BrowserRouter>
           <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/services/:slug" element={<ServicePage />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/services/:slug" element={<ServicePage />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

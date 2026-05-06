@@ -1,18 +1,19 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
-import Pricing from "@/components/Pricing";
 import WhyUs from "@/components/WhyUs";
-import QuickOrder from "@/components/QuickOrder";
-import Projects from "@/components/Projects";
-import About from "@/components/About";
-import Contacts from "@/components/Contacts";
-import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
 import ContactModal from "@/components/ContactModal";
 import { useCmsContent } from "@/hooks/useCmsContent";
 import { SECTIONS_ORDER } from "@/config/sections.config";
+
+const Pricing = lazy(() => import("@/components/Pricing"));
+const QuickOrder = lazy(() => import("@/components/QuickOrder"));
+const Projects = lazy(() => import("@/components/Projects"));
+const About = lazy(() => import("@/components/About"));
+const Contacts = lazy(() => import("@/components/Contacts"));
+const Faq = lazy(() => import("@/components/Faq"));
 
 function parseOrder(raw: string | undefined): string[] {
   if (!raw) return SECTIONS_ORDER;
@@ -39,12 +40,12 @@ export default function Index() {
     hero:       <Hero onContactClick={() => openModal("Главный экран (Hero)")} settings={s} />,
     services:   <Services onContactClick={() => openModal("Блок услуг")} services={content?.services} />,
     whyus:      <WhyUs settings={s} whyusCards={content?.whyus_cards} />,
-    pricing:    <Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} />,
-    quickorder: <QuickOrder steps={content?.quickorder_steps} />,
-    projects:   <Projects projects={content?.projects} />,
-    team:       <About team={content?.team} />,
-    contacts:   <Contacts onContactClick={() => openModal("Блок контактов")} settings={s} />,
-    faq:        <Faq items={content?.faq} />,
+    pricing:    <Suspense fallback={null}><Pricing onContactClick={() => openModal("Блок тарифов")} plans={content?.plans} /></Suspense>,
+    quickorder: <Suspense fallback={null}><QuickOrder steps={content?.quickorder_steps} /></Suspense>,
+    projects:   <Suspense fallback={null}><Projects projects={content?.projects} /></Suspense>,
+    team:       <Suspense fallback={null}><About team={content?.team} /></Suspense>,
+    contacts:   <Suspense fallback={null}><Contacts onContactClick={() => openModal("Блок контактов")} settings={s} /></Suspense>,
+    faq:        <Suspense fallback={null}><Faq items={content?.faq} /></Suspense>,
   };
 
   return (
@@ -55,11 +56,13 @@ export default function Index() {
 
       <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} />
 
-      <ContactModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        source={modalSource}
-      />
+      <Suspense fallback={null}>
+        <ContactModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          source={modalSource}
+        />
+      </Suspense>
 
       {s?.design_float_btn_visible !== "false" && (
         <button
