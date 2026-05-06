@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { CmsContent } from "@/hooks/useCmsContent";
+import { CmsContent, clearCmsCache } from "@/hooks/useCmsContent";
 import { useAdminAuth, AUTH_API_URL, CMS_API_URL } from "@/hooks/useAdminAuth";
 import { ServicesTab } from "./admin/AdminTabs";
 import { ProjectsTab, TeamTab, PasswordTab } from "./admin/AdminTabs2";
@@ -78,6 +78,7 @@ export default function Admin() {
         }),
       });
       if (r.ok) {
+        clearCmsCache();
         showMsg("Сохранено!");
         loadContent();
       } else {

@@ -251,6 +251,14 @@ function setCache(data: CmsContent) {
   }
 }
 
+export function clearCmsCache() {
+  try {
+    localStorage.removeItem(CACHE_KEY);
+  } catch {
+    // игнорируем
+  }
+}
+
 export function useCmsContent() {
   const [content, setContent] = useState<CmsContent | null>(() => getCached());
   const [loading, setLoading] = useState(() => getCached() === null);
