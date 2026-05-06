@@ -163,7 +163,7 @@ export default function ServicePageSections({
                     Оставить заявку
                   </button>
                   <a
-                    href={settings?.phone_href || "tel:+79869860136"}
+                    href={settings?.phone_href || "tel:+78452397738"}
                     className="btn-outline-neon px-10 py-4 rounded-xl font-semibold inline-flex items-center gap-3"
                   >
                     <Icon name="Phone" size={20} />

@@ -146,8 +146,8 @@ export default function ContactModal({ open, onClose, source = "Не указа�
               </h3>
               <p className="text-gray-400 mb-6">
                 Наш менеджер свяжется с вами в ближайшие 15 минут в рабочее время. Или позвоните нам:{" "}
-                <a href="tel:+79869860136" className="text-cyan-400 hover:underline">
-                  8 (986) 986-01-36
+                <a href="tel:+78452397738" className="text-cyan-400 hover:underline">
+                  8 (845) 239-77-38
                 </a>
               </p>
               <button onClick={handleClose} className="btn-neon px-8 py-3 rounded-xl font-semibold">

@@ -8,8 +8,8 @@ interface FooterProps {
 }
 
 export default function Footer({ onContactClick, settings }: FooterProps) {
-  const phone = settings?.phone ?? "8 (986) 986-01-36";
-  const phoneHref = settings?.phone_href ?? "tel:+79869860136";
+  const phone = settings?.phone ?? "8 (845) 239-77-38";
+  const phoneHref = settings?.phone_href ?? "tel:+78452397738";
   const email = settings?.email_support ?? "support@uplink-it.ru";
   const address = settings?.address ?? "Саратов, Россия";
   const tgUrl = settings?.footer_tg_url ?? "https://t.me/uplinkit";

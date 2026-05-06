@@ -73,7 +73,7 @@ export default function ServicePage() {
         "@type": "Service",
         "name": service.title,
         "description": service.seo_description || service.short_desc || service.description,
-        "provider": { "@type": "LocalBusiness", "name": "ИТК Аплинк-IT", "telephone": "+79869860136", "address": { "@type": "PostalAddress", "addressLocality": "Саратов", "addressCountry": "RU" } },
+        "provider": { "@type": "LocalBusiness", "name": "ИТК Аплинк-IT", "telephone": "+78452397738", "address": { "@type": "PostalAddress", "addressLocality": "Саратов", "addressCountry": "RU" } },
         "areaServed": { "@type": "City", "name": "Саратов" },
         "url": `https://uplink-it.ru/services/${service.slug}`,
         ...(service.price_from ? { "offers": { "@type": "Offer", "price": service.price_from, "priceCurrency": "RUB" } } : {}),

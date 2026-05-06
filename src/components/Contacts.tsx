@@ -11,8 +11,8 @@ const contactItems = [
   {
     icon: "Phone",
     title: "Телефон",
-    lines: ["8 (986) 986-01-36"],
-    link: "tel:+79869860136",
+    lines: ["8 (845) 239-77-38"],
+    link: "tel:+78452397738",
     accent: "from-cyan-400 to-blue-500",
   },
   {
@@ -70,7 +70,7 @@ function ContactCard({
 
 export default function Contacts({ onContactClick, settings }: ContactsProps) {
   const contactItems = [
-    { icon: "Phone", title: "Телефон", lines: [settings?.phone ?? "8 (986) 986-01-36"], link: settings?.phone_href ?? "tel:+79869860136", accent: "from-cyan-400 to-blue-500" },
+    { icon: "Phone", title: "Телефон", lines: [settings?.phone ?? "8 (845) 239-77-38"], link: settings?.phone_href ?? "tel:+78452397738", accent: "from-cyan-400 to-blue-500" },
     { icon: "Mail", title: "Email", lines: [settings?.email_support ?? "support@uplink-it.ru", "Отвечаем в течение часа"], link: `mailto:${settings?.email_info ?? "info@uplink-it.ru"}`, accent: "from-purple-400 to-cyan-400" },
     { icon: "MapPin", title: "Адрес", lines: [settings?.address ?? "Саратов, Россия", "Выезд по всему Саратову и СО"], link: null, accent: "from-green-400 to-cyan-400" },
   ];
@@ -84,7 +84,7 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
       itemType="https://schema.org/LocalBusiness"
     >
       <meta itemProp="name" content="ИТК Аплинк-IT" />
-      <meta itemProp="telephone" content="+79869860136" />
+      <meta itemProp="telephone" content="+78452397738" />
       <meta itemProp="email" content="support@uplink-it.ru" />
       <meta itemProp="priceRange" content="от 7000 ₽/мес" />
       <div itemProp="address" itemScope itemType="https://schema.org/PostalAddress" className="hidden">

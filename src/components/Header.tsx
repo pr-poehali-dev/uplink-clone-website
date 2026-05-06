@@ -24,8 +24,8 @@ const navLinks: NavLink[] = [
 ];
 
 export default function Header({ onContactClick, settings, services }: HeaderProps) {
-  const phone = settings?.phone ?? "8 (986) 986-01-36";
-  const phoneHref = settings?.phone_href ?? "tel:+79869860136";
+  const phone = settings?.phone ?? "8 (845) 239-77-38";
+  const phoneHref = settings?.phone_href ?? "tel:+78452397738";
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
