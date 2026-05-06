@@ -4,18 +4,18 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/webapp/Index";
+import Index from "./pages/Index";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollToTop from "@/components/ScrollToTop";
 import LiveChat from "@/components/LiveChat";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useCmsContent } from "@/hooks/useCmsContent";
 
-const Admin = lazy(() => import("./pages/webapp/Admin"));
-const NotFound = lazy(() => import("./pages/webapp/NotFound"));
-const PrivacyPolicy = lazy(() => import("./pages/webapp/PrivacyPolicy"));
-const ServicePage = lazy(() => import("./pages/webapp/ServicePage"));
-const PricingPage = lazy(() => import("./pages/webapp/Pricing"));
+const Admin = lazy(() => import("./pages/Admin"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const ServicePage = lazy(() => import("./pages/ServicePage"));
+const PricingPage = lazy(() => import("./pages/Pricing"));
 
 const queryClient = new QueryClient();
 

@@ -25,8 +25,12 @@ interface LiveChatTabProps {
   token: string | null;
 }
 
+const WEBHOOK_URL = `${LIVE_CHAT_URL}?action=webhook`;
+
 export function LiveChatTab({ token }: LiveChatTabProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [webhookStatus, setWebhookStatus] = useState<string | null>(null);
+  const [registeringWebhook, setRegisteringWebhook] = useState(false);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [reply, setReply] = useState("");
@@ -79,6 +83,27 @@ export function LiveChatTab({ token }: LiveChatTabProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSession]);
 
+  const registerWebhook = async () => {
+    setRegisteringWebhook(true);
+    setWebhookStatus(null);
+    try {
+      const res = await fetch(`${LIVE_CHAT_URL}?action=register_webhook`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Auth-Token": token || "" },
+        body: JSON.stringify({ webhook_url: WEBHOOK_URL }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setWebhookStatus("Вебхук успешно зарегистрирован! Ответы из MAX теперь приходят мгновенно.");
+      } else {
+        setWebhookStatus(`Ошибка: ${data.error || JSON.stringify(data)}`);
+      }
+    } catch (e) {
+      setWebhookStatus("Ошибка соединения");
+    }
+    setRegisteringWebhook(false);
+  };
+
   const sendReply = async () => {
     const text = reply.trim();
     if (!text || !selectedSession || sending) return;
@@ -123,6 +148,22 @@ export function LiveChatTab({ token }: LiveChatTabProps) {
             <Icon name="RefreshCw" size={14} />
           </button>
         </div>
+
+        <button
+          onClick={registerWebhook}
+          disabled={registeringWebhook}
+          className="w-full text-xs rounded-lg px-3 py-2 mb-2 flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+          style={{ background: "rgba(6,182,212,0.15)", color: "#22d3ee", border: "1px solid rgba(6,182,212,0.3)" }}
+          title="Зарегистрировать вебхук в MAX для мгновенных ответов"
+        >
+          <Icon name="Zap" size={12} />
+          {registeringWebhook ? "Регистрация..." : "Подключить вебхук MAX"}
+        </button>
+        {webhookStatus && (
+          <p className={`text-xs mb-2 px-2 py-1.5 rounded-lg ${webhookStatus.startsWith("Ошибка") ? "bg-red-500/20 text-red-300" : "bg-green-500/20 text-green-300"}`}>
+            {webhookStatus}
+          </p>
+        )}
 
         {loading && <p className="text-sm text-gray-400">Загрузка...</p>}
         {!loading && sessions.length === 0 && (

@@ -6,11 +6,12 @@ POST /?action=webhook — вебхук от бота MAX (ответ опера�
 GET  /?action=sessions — список всех сессий (для админки)
 GET  /?action=history&session_id=... — история сообщений сессии
 POST /?action=close&session_id=... — закрыть сессию
+POST /?action=register_webhook — зарегистрировать вебхук в MAX (для админа)
 """
 import json
 import os
+import re
 import urllib.request
-import urllib.parse
 import psycopg2
 import hashlib
 import time
@@ -89,24 +90,44 @@ def handler(event: dict, context) -> dict:
         # === ВЕБХУК ОТ MAX (ответ оператора) ===
         if action == "webhook":
             body = json.loads(event.get("body") or "{}")
-            update = body
-            message = update.get("message") or {}
-            text = message.get("text") or message.get("body") or ""
-            sender_info = message.get("sender") or update.get("sender") or {}
+            print(f"[WEBHOOK] received: {json.dumps(body)[:500]}")
+
+            # MAX присылает update с полем message
+            message = body.get("message") or {}
+            text = (message.get("text") or message.get("body") or "").strip()
+            sender_info = message.get("sender") or body.get("sender") or {}
             is_bot = sender_info.get("is_bot", False)
 
             if is_bot or not text:
                 return ok({"ok": True})
 
-            # Ищем активную сессию — последнюю незакрытую
-            cur.execute(
-                f"SELECT session_id FROM {SCHEMA}.live_chat_sessions WHERE is_closed = FALSE ORDER BY last_message_at DESC LIMIT 1"
-            )
-            row = cur.fetchone()
-            if not row:
+            # Ищем тег #session_XXXXXXXX в тексте — операторы цитируют уведомление
+            session_id = None
+            match = re.search(r"#session_([a-f0-9]{8})", text)
+            if match:
+                prefix = match.group(1)
+                cur.execute(
+                    f"SELECT session_id FROM {SCHEMA}.live_chat_sessions WHERE session_id LIKE %s AND is_closed = FALSE LIMIT 1",
+                    (prefix + "%",),
+                )
+                row = cur.fetchone()
+                if row:
+                    session_id = row[0]
+                    # Убираем тег из сообщения
+                    text = re.sub(r"\s*#session_[a-f0-9]{8}", "", text).strip()
+
+            # Если не нашли по тегу — берём последнюю незакрытую сессию
+            if not session_id:
+                cur.execute(
+                    f"SELECT session_id FROM {SCHEMA}.live_chat_sessions WHERE is_closed = FALSE ORDER BY last_message_at DESC LIMIT 1"
+                )
+                row = cur.fetchone()
+                if row:
+                    session_id = row[0]
+
+            if not session_id:
                 return ok({"ok": True})
 
-            session_id = row[0]
             cur.execute(
                 f"INSERT INTO {SCHEMA}.live_chat_messages (session_id, sender, text) VALUES (%s, 'operator', %s)",
                 (session_id, text),
@@ -116,7 +137,49 @@ def handler(event: dict, context) -> dict:
                 (session_id,),
             )
             conn.commit()
+            print(f"[WEBHOOK] saved reply for session {session_id}")
             return ok({"ok": True})
+
+        # === РЕГИСТРАЦИЯ ВЕБХУКА В MAX ===
+        if action == "register_webhook":
+            headers = event.get("headers") or {}
+            token = headers.get("X-Auth-Token") or headers.get("x-auth-token") or ""
+            if not token:
+                return err("Unauthorized", 401)
+            cur.execute(f"SELECT COUNT(*) FROM {SCHEMA}.cms_admin_sessions WHERE token = %s AND expires_at > NOW()", (token,))
+            if cur.fetchone()[0] == 0:
+                return err("Unauthorized", 401)
+
+            secrets = get_secrets()
+            api_key = secrets.get("MAAX_API_KEY") or os.environ.get("MAAX_API_KEY", "")
+            if not api_key:
+                return err("MAAX_API_KEY not configured")
+
+            # URL нашей функции для вебхука
+            body_data = json.loads(event.get("body") or "{}")
+            webhook_url = body_data.get("webhook_url", "")
+            if not webhook_url:
+                return err("webhook_url required")
+
+            payload = json.dumps({
+                "url": webhook_url,
+                "update_types": ["message_created"]
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                "https://platform-api.max.ru/subscriptions",
+                data=payload,
+                headers={"Content-Type": "application/json", "Authorization": api_key},
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    resp_body = resp.read().decode("utf-8")
+                    print(f"[WEBHOOK_REG] status={resp.status} body={resp_body}")
+                    return ok({"ok": True, "status": resp.status, "response": resp_body})
+            except urllib.error.HTTPError as e:
+                err_body = e.read().decode("utf-8")
+                print(f"[WEBHOOK_REG] HTTPError {e.code}: {err_body}")
+                return err(f"MAX API error {e.code}: {err_body}", 502)
 
         # === СПИСОК СЕССИЙ (для админки) ===
         if action == "sessions":
@@ -178,10 +241,27 @@ def handler(event: dict, context) -> dict:
             session_id = body.get("session_id") or ""
             visitor_name = (body.get("name") or "Посетитель").strip()
             visitor_email = (body.get("email") or "").strip()
+            is_operator = body.get("sender") == "operator"
 
             if not text:
                 return err("text required")
 
+            if is_operator:
+                # Ответ из админки — сохраняем как operator
+                if not session_id:
+                    return err("session_id required for operator")
+                cur.execute(
+                    f"INSERT INTO {SCHEMA}.live_chat_messages (session_id, sender, text) VALUES (%s, 'operator', %s)",
+                    (session_id, text),
+                )
+                cur.execute(
+                    f"UPDATE {SCHEMA}.live_chat_sessions SET last_message_at = NOW() WHERE session_id = %s",
+                    (session_id,),
+                )
+                conn.commit()
+                return ok({"ok": True, "session_id": session_id})
+
+            # Сообщение от посетителя
             if session_id:
                 cur.execute(f"SELECT session_id FROM {SCHEMA}.live_chat_sessions WHERE session_id = %s", (session_id,))
                 if not cur.fetchone():
@@ -208,7 +288,7 @@ def handler(event: dict, context) -> dict:
             api_key = secrets.get("MAAX_API_KEY") or os.environ.get("MAAX_API_KEY", "")
             chat_id = secrets.get("MAAX_LIVE_CHAT_ID") or os.environ.get("MAAX_LIVE_CHAT_ID", "")
             if api_key and chat_id:
-                notify = f"💬 Сообщение от {visitor_name}:\n{text}\n\n#session_{session_id[:8]}"
+                notify = f"💬 {visitor_name}: {text}\n\n#session_{session_id[:8]}"
                 send_maax(api_key, chat_id, notify)
 
             return ok({"ok": True, "session_id": session_id})
