@@ -102,6 +102,9 @@ def get_all_content(conn):
     cur.execute("SELECT id, label, price, icon, default_checked, sort_order, is_active FROM cms_video_equipment ORDER BY sort_order")
     video_equipment = [{"id": r[0], "label": r[1], "price": r[2], "icon": r[3], "default_checked": r[4], "sort_order": r[5], "is_active": r[6]} for r in cur.fetchall()]
 
+    cur.execute("SELECT id, sort_order, key, label, suffix, price_key, price_default, min_val, max_val, default_val, is_active FROM cms_calc_sliders ORDER BY sort_order")
+    calc_sliders = [{"id": r[0], "sort_order": r[1], "key": r[2], "label": r[3], "suffix": r[4], "price_key": r[5], "price_default": r[6], "min_val": r[7], "max_val": r[8], "default_val": r[9], "is_active": r[10]} for r in cur.fetchall()]
+
     cur.execute("SELECT id, route, title, seo_title, seo_description, og_title, og_description, og_image_url, is_active, is_published, metrika_counter FROM cms_pages ORDER BY id")
     pages = [{"id": r[0], "route": r[1], "title": r[2], "seo_title": r[3], "seo_description": r[4], "og_title": r[5], "og_description": r[6], "og_image_url": r[7], "is_active": r[8], "is_published": r[9] if r[9] is not None else True, "metrika_counter": r[10]} for r in cur.fetchall()]
 
@@ -110,6 +113,7 @@ def get_all_content(conn):
         "settings": settings, "services": services, "plans": plans,
         "projects": projects, "team": team, "faq": faq,
         "calc_settings": calc_settings, "calc_options": calc_options,
+        "calc_sliders": calc_sliders,
         "whyus_cards": whyus_cards, "quickorder_steps": quickorder_steps,
         "pricing_items": pricing_items, "nav_items": nav_items,
         "video_cameras": video_cameras, "video_equipment": video_equipment,
@@ -667,6 +671,42 @@ def handler(event: dict, context) -> dict:
             for eid in existing:
                 if eid not in kept:
                     cur.execute("UPDATE cms_calc_options SET is_active=false, label='[удалено]' WHERE id=%s" % int(eid))
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # --- save_calc_sliders ---
+        if action == "save_calc_sliders":
+            items = body.get("items", [])
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM cms_calc_sliders")
+            existing = [r[0] for r in cur.fetchall()]
+            kept = []
+            for i, it in enumerate(items):
+                iid = it.get("id")
+                if iid and iid in existing:
+                    cur.execute(
+                        "UPDATE cms_calc_sliders SET sort_order=%s, key='%s', label='%s', suffix='%s', price_key='%s', price_default=%s, min_val=%s, max_val=%s, default_val=%s, is_active=%s, updated_at=NOW() WHERE id=%s" % (
+                            i + 1, esc(it.get("key")), esc(it.get("label")), esc(it.get("suffix", "шт.")),
+                            esc(it.get("price_key")), int(it.get("price_default", 0)),
+                            int(it.get("min_val", 0)), int(it.get("max_val", 50)), int(it.get("default_val", 0)),
+                            "true" if it.get("is_active", True) else "false", int(iid)
+                        )
+                    )
+                    kept.append(iid)
+                else:
+                    cur.execute(
+                        "INSERT INTO cms_calc_sliders (sort_order, key, label, suffix, price_key, price_default, min_val, max_val, default_val, is_active) VALUES (%s,'%s','%s','%s','%s',%s,%s,%s,%s,%s) RETURNING id" % (
+                            i + 1, esc(it.get("key", "slider_" + str(i))), esc(it.get("label")), esc(it.get("suffix", "шт.")),
+                            esc(it.get("price_key", "price_per_item")), int(it.get("price_default", 0)),
+                            int(it.get("min_val", 0)), int(it.get("max_val", 50)), int(it.get("default_val", 0)),
+                            "true" if it.get("is_active", True) else "false"
+                        )
+                    )
+                    kept.append(cur.fetchone()[0])
+            for eid in existing:
+                if eid not in kept:
+                    cur.execute("DELETE FROM cms_calc_sliders WHERE id=%s" % int(eid))
             conn.commit()
             cur.close()
             return ok({"ok": True})

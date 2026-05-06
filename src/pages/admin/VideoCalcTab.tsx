@@ -21,11 +21,10 @@ const cls = {
 };
 
 const VIDEO_SETTINGS: { key: string; label: string; placeholder: string; type?: "text" | "number" }[] = [
-  { key: "video_calc_title", label: "Заголовок калькулятора", placeholder: "Видеонаблюдение под ключ", type: "text" },
-  { key: "video_calc_subtitle", label: "Подзаголовок", placeholder: "Рассчитайте стоимость", type: "text" },
-  { key: "video_calc_disclaimer", label: "Дисклеймер / Примечание", placeholder: "Итоговая стоимость может отличаться...", type: "text" },
-  { key: "video_calc_install_per_camera", label: "Монтаж 1 камеры (₽)", placeholder: "1500", type: "number" },
-  { key: "video_calc_cable_per_meter", label: "Кабель за 1 м (₽)", placeholder: "150", type: "number" },
+  { key: "video_calc_title", label: "Заголовок калькулятора", placeholder: "Калькулятор стоимости монтажа", type: "text" },
+  { key: "video_calc_subtitle", label: "Подзаголовок", placeholder: "Укажите параметры — получите ориентировочную стоимость работ", type: "text" },
+  { key: "video_calc_disclaimer", label: "Дисклеймер / Примечание", placeholder: "Расчёт является приблизительным...", type: "text" },
+  { key: "video_calc_cable_per_meter", label: "Прокладка кабеля за 1 м (₽)", placeholder: "80", type: "number" },
   { key: "video_calc_min_cameras", label: "Мин. камер", placeholder: "1", type: "number" },
   { key: "video_calc_max_cameras", label: "Макс. камер", placeholder: "32", type: "number" },
   { key: "video_calc_min_cable", label: "Мин. кабель (м)", placeholder: "10", type: "number" },
@@ -125,7 +124,7 @@ export function VideoCalcTab({ content, save, saving }: Props) {
         <div className="flex items-center justify-between">
           <h3 className="text-white font-bold font-['Oswald'] text-lg flex items-center gap-2">
             <Icon name="Camera" size={18} className="text-cyan-400" />
-            Типы камер
+            Виды монтажа (по типу камер)
             <span className="text-gray-500 text-sm font-normal">({cameras.length})</span>
           </h3>
           <button onClick={addCamera} disabled={saving} className={cls.addBtn}>
@@ -135,7 +134,7 @@ export function VideoCalcTab({ content, save, saving }: Props) {
         </div>
 
         {cameras.length === 0 && (
-          <p className="text-gray-500 text-sm text-center py-4">Нет типов камер</p>
+          <p className="text-gray-500 text-sm text-center py-4">Нет видов монтажа. Укажите типы камер и цену работ за 1 шт.</p>
         )}
 
         <div className="space-y-2">
@@ -173,7 +172,7 @@ export function VideoCalcTab({ content, save, saving }: Props) {
                     type="number"
                     value={cam.price}
                     onChange={(e) => updateCamera(cam.id, { price: Number(e.target.value) })}
-                    placeholder="Цена (₽)"
+                    placeholder="Цена работ (₽/шт.)"
                     className={cls.input}
                   />
                 </div>
@@ -213,8 +212,8 @@ export function VideoCalcTab({ content, save, saving }: Props) {
       <div className="glass-card neon-border rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-white font-bold font-['Oswald'] text-lg flex items-center gap-2">
-            <Icon name="Package" size={18} className="text-cyan-400" />
-            Оборудование
+            <Icon name="Wrench" size={18} className="text-cyan-400" />
+            Дополнительные работы (чекбоксы)
             <span className="text-gray-500 text-sm font-normal">({equipment.length})</span>
           </h3>
           <button onClick={addEquip} disabled={saving} className={cls.addBtn}>
@@ -224,7 +223,7 @@ export function VideoCalcTab({ content, save, saving }: Props) {
         </div>
 
         {equipment.length === 0 && (
-          <p className="text-gray-500 text-sm text-center py-4">Нет позиций оборудования</p>
+          <p className="text-gray-500 text-sm text-center py-4">Нет дополнительных работ</p>
         )}
 
         <div className="space-y-2">
@@ -262,7 +261,7 @@ export function VideoCalcTab({ content, save, saving }: Props) {
                     type="number"
                     value={eq.price}
                     onChange={(e) => updateEquip(eq.id, { price: Number(e.target.value) })}
-                    placeholder="Цена (₽)"
+                    placeholder="Стоимость работ (₽)"
                     className={cls.input}
                   />
                 </div>
@@ -274,7 +273,7 @@ export function VideoCalcTab({ content, save, saving }: Props) {
                     onChange={(e) => updateEquip(eq.id, { default_checked: e.target.checked })}
                     className="accent-cyan-400 w-3.5 h-3.5"
                   />
-                  <span className="text-gray-400 text-xs">По умолч.</span>
+                  <span className="text-gray-400 text-xs">Вкл. по умолч.</span>
                 </label>
                 {/* Active */}
                 <label className="flex items-center gap-1.5 cursor-pointer select-none flex-shrink-0">
@@ -332,7 +331,7 @@ export function VideoCalcTab({ content, save, saving }: Props) {
 
         <div className="pt-2 border-t border-white/5 flex items-center gap-3">
           <SaveButton onClick={saveSettings} saving={saving} />
-          <p className="text-gray-600 text-xs">Настройки применяются к калькулятору видеонаблюдения</p>
+          <p className="text-gray-600 text-xs">Настройки применяются к калькулятору монтажа видеонаблюдения</p>
         </div>
       </div>
     </div>

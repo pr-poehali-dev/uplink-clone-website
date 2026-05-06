@@ -167,6 +167,20 @@ export interface CmsNavItem {
   is_visible: boolean;
 }
 
+export interface CmsCalcSlider {
+  id: number;
+  sort_order: number;
+  key: string;
+  label: string;
+  suffix: string;
+  price_key: string;
+  price_default: number;
+  min_val: number;
+  max_val: number;
+  default_val: number;
+  is_active: boolean;
+}
+
 export interface CmsVideoCameraType {
   id: number;
   label: string;
@@ -219,6 +233,7 @@ export interface CmsContent {
   faq: CmsFaqItem[];
   calc_settings?: Record<string, string>;
   calc_options?: CmsCalcOption[];
+  calc_sliders?: CmsCalcSlider[];
   whyus_cards?: CmsWhyusCard[];
   quickorder_steps?: CmsQuickorderStep[];
   pricing_items?: CmsPricingItem[];

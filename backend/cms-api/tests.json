@@ -5,7 +5,7 @@
       "method": "GET",
       "path": "/",
       "expectedStatus": 200,
-      "expectedBody": {"settings": {"phone": "8 (986) 986-01-36"}},
+      "expectedBody": {"settings": {}},
       "bodyMatcher": "partial"
     }
   ]

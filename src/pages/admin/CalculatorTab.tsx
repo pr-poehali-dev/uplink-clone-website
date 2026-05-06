@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CmsContent, CmsCalcOption } from "@/hooks/useCmsContent";
+import { CmsContent, CmsCalcOption, CmsCalcSlider } from "@/hooks/useCmsContent";
 import { SaveButton, SaveFn } from "./AdminShared";
 import Icon from "@/components/ui/icon";
 
@@ -52,13 +52,48 @@ const SETTINGS_GROUPS: { label: string; keys: { key: string; label: string; type
 export function CalculatorTab({ content, save, saving }: Props) {
   const [vals, setVals] = useState<Record<string, string>>({});
   const [options, setOptions] = useState<CmsCalcOption[]>([]);
+  const [sliders, setSliders] = useState<CmsCalcSlider[]>([]);
 
   useEffect(() => {
     setVals(content.calc_settings || {});
     setOptions((content.calc_options || []).filter((o) => o.label !== "[удалено]"));
-  }, [content.calc_settings, content.calc_options]);
+    setSliders((content.calc_sliders || []).sort((a, b) => a.sort_order - b.sort_order));
+  }, [content.calc_settings, content.calc_options, content.calc_sliders]);
 
   const handleSaveSettings = () => save("save_calc_settings", { updates: vals });
+
+  const handleSaveSliders = () => {
+    save("save_calc_sliders", {
+      items: sliders.map((s, i) => ({ ...s, sort_order: i + 1, id: s.id < 0 ? undefined : s.id })),
+    });
+  };
+
+  const addSlider = () => {
+    const id = -Date.now();
+    setSliders([...sliders, {
+      id, sort_order: sliders.length + 1,
+      key: `slider_${Math.random().toString(36).slice(2, 6)}`,
+      label: "Новый параметр",
+      suffix: "шт.",
+      price_key: `price_per_item_${Math.random().toString(36).slice(2, 6)}`,
+      price_default: 500,
+      min_val: 0, max_val: 50, default_val: 1,
+      is_active: true,
+    }]);
+  };
+
+  const updateSlider = (id: number, patch: Partial<CmsCalcSlider>) =>
+    setSliders(sliders.map(s => s.id === id ? { ...s, ...patch } : s));
+
+  const removeSlider = (id: number) => setSliders(sliders.filter(s => s.id !== id));
+
+  const moveSlider = (idx: number, dir: -1 | 1) => {
+    const t = idx + dir;
+    if (t < 0 || t >= sliders.length) return;
+    const next = [...sliders];
+    [next[idx], next[t]] = [next[t], next[idx]];
+    setSliders(next);
+  };
 
   const handleSaveOptions = () => {
     save("save_calc_options", {
@@ -124,6 +159,96 @@ export function CalculatorTab({ content, save, saving }: Props) {
 
         <div className="pt-3 border-t border-white/5">
           <SaveButton onClick={handleSaveSettings} saving={saving} />
+        </div>
+      </div>
+
+      {/* Слайдеры */}
+      <div className="glass-card neon-border rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Icon name="Sliders" size={18} className="text-cyan-400" />
+            <h3 className="text-white font-bold font-['Oswald'] text-lg">Пункты расчёта (слайдеры)</h3>
+          </div>
+          <button
+            onClick={addSlider}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm text-cyan-400 border border-dashed border-cyan-500/30 hover:bg-cyan-500/5"
+          >
+            <Icon name="Plus" size={14} />Добавить
+          </button>
+        </div>
+        <p className="text-gray-500 text-xs mb-3">Каждый слайдер — это параметр расчёта. Цена за единицу берётся из настроек выше (поле «Ключ цены»).</p>
+
+        <div className="space-y-2">
+          {sliders.map((s, i) => (
+            <div key={s.id} className={`border rounded-xl p-3 space-y-2 transition-opacity ${s.is_active ? "bg-white/3 border-white/10" : "bg-white/[0.02] border-white/5 opacity-55"}`}>
+              <div className="grid grid-cols-[1fr_80px_80px_80px_80px_auto] gap-2 items-center">
+                <input
+                  value={s.label}
+                  onChange={e => updateSlider(s.id, { label: e.target.value })}
+                  placeholder="Название параметра"
+                  className="px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                />
+                <input
+                  value={s.suffix}
+                  onChange={e => updateSlider(s.id, { suffix: e.target.value })}
+                  placeholder="шт."
+                  className="px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                />
+                <input
+                  type="number"
+                  value={s.min_val}
+                  onChange={e => updateSlider(s.id, { min_val: Number(e.target.value) })}
+                  placeholder="Мин"
+                  className="px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                />
+                <input
+                  type="number"
+                  value={s.max_val}
+                  onChange={e => updateSlider(s.id, { max_val: Number(e.target.value) })}
+                  placeholder="Макс"
+                  className="px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                />
+                <input
+                  type="number"
+                  value={s.default_val}
+                  onChange={e => updateSlider(s.id, { default_val: Number(e.target.value) })}
+                  placeholder="По умолч."
+                  className="px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                />
+                <div className="flex items-center gap-0.5">
+                  <button onClick={() => moveSlider(i, -1)} disabled={i === 0} className="p-1 text-gray-500 hover:text-cyan-400 disabled:opacity-30"><Icon name="ChevronUp" size={14} /></button>
+                  <button onClick={() => moveSlider(i, 1)} disabled={i === sliders.length - 1} className="p-1 text-gray-500 hover:text-cyan-400 disabled:opacity-30"><Icon name="ChevronDown" size={14} /></button>
+                  <button onClick={() => removeSlider(s.id)} className="p-1 text-gray-500 hover:text-red-400"><Icon name="Trash2" size={14} /></button>
+                </div>
+              </div>
+              <div className="grid grid-cols-[1fr_120px] gap-2 items-center">
+                <div>
+                  <span className="text-gray-500 text-xs mr-1">Ключ цены:</span>
+                  <input
+                    value={s.price_key}
+                    onChange={e => updateSlider(s.id, { price_key: e.target.value.replace(/[^a-z0-9_]/gi, "_") })}
+                    placeholder="price_per_pc"
+                    className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-cyan-400 text-xs font-mono focus:outline-none focus:border-cyan-500/50 w-48"
+                  />
+                  <span className="text-gray-600 text-xs ml-2">Цена по умолч. (₽):</span>
+                  <input
+                    type="number"
+                    value={s.price_default}
+                    onChange={e => updateSlider(s.id, { price_default: Number(e.target.value) })}
+                    className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-500/50 w-24 ml-1"
+                  />
+                </div>
+                <label className="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer">
+                  <input type="checkbox" checked={s.is_active} onChange={e => updateSlider(s.id, { is_active: e.target.checked })} className="accent-cyan-400" />
+                  Активен
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="pt-4 border-t border-white/5 mt-4">
+          <SaveButton onClick={handleSaveSliders} saving={saving} />
         </div>
       </div>
 

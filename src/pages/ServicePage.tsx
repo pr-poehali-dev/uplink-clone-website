@@ -171,6 +171,7 @@ export default function ServicePage() {
             <Calculator
               calcSettings={content?.calc_settings}
               calcOptions={content?.calc_options}
+              calcSliders={content?.calc_sliders}
               onContactClick={openModal}
             />
           )}
