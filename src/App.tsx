@@ -23,6 +23,9 @@ function DesignApplicator() {
   useEffect(() => {
     if (!content?.settings) return;
     const s = content.settings;
+    if (s.site_meta_description) {
+      document.querySelector('meta[name="description"]')?.setAttribute("content", s.site_meta_description);
+    }
     const root = document.documentElement;
     if (s.design_accent_color) {
       root.style.setProperty("--neon-blue", s.design_accent_color);

@@ -82,6 +82,7 @@ export function SettingsTab({ content, save, saving }: { content: CmsContent; pa
   const handleSave = () => save("save_settings", { updates: vals });
 
   const groups: { label: string; keys: string[]; textarea?: string[] }[] = [
+    { label: "SEO сайта", keys: ["site_meta_description"], textarea: ["site_meta_description"] },
     { label: "Контакты", keys: ["phone", "phone_href", "email_support", "email_info", "address", "work_hours", "response_time"] },
     { label: "Главный экран", keys: ["hero_badge", "hero_title_1", "hero_title_2", "hero_description"], textarea: ["hero_description"] },
     { label: "Цифры в шапке", keys: ["hero_stat_1_value", "hero_stat_1_label", "hero_stat_2_value", "hero_stat_2_label", "hero_stat_3_value", "hero_stat_3_label"] },
@@ -91,6 +92,7 @@ export function SettingsTab({ content, save, saving }: { content: CmsContent; pa
   ];
 
   const settingsMeta: Record<string, string> = {
+    site_meta_description: "Описание сайта (meta description — для поисковиков и панели публикации)",
     phone: "Телефон (отображается)", phone_href: "Телефон (ссылка tel:)", email_support: "Email поддержки", email_info: "Email общий",
     address: "Адрес", work_hours: "Режим работы", response_time: "Время реагирования",
     hero_badge: "Подпись над заголовком", hero_title_1: "Заголовок (строка 1)", hero_title_2: "Заголовок (строка 2)", hero_description: "Описание",
