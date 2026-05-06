@@ -110,17 +110,30 @@ def handler(event: dict, context) -> dict:
             print(f"[WEBHOOK] body: {json.dumps(body)[:800]}")
 
             message = body.get("message") or {}
-            text = (message.get("text") or message.get("body") or "").strip()
+            # В MAX текст находится в message.body.text (body — объект), а не в message.text
+            msg_body = message.get("body") or {}
+            if isinstance(msg_body, dict):
+                text = (msg_body.get("text") or "").strip()
+            else:
+                text = (message.get("text") or str(msg_body)).strip()
             sender_info = message.get("sender") or body.get("sender") or {}
             is_bot = sender_info.get("is_bot", False)
 
+            print(f"[WEBHOOK] is_bot={is_bot} text={repr(text)}")
             if is_bot or not text:
                 return ok({"ok": True})
 
-            # Пробуем найти сессию по reply_to.mid — самый точный способ
+            # Маршрутизация: MAX использует link.message.mid при ответе (reply)
             session_id = None
+            link = message.get("link") or {}
+            link_type = link.get("type") or ""
+            linked_msg = link.get("message") or {}
+            reply_mid = linked_msg.get("mid") or ""
+
+            # Также проверяем reply_to (на случай другой версии API)
             reply_to = message.get("reply_to") or {}
-            reply_mid = reply_to.get("mid") or reply_to.get("message_id") or ""
+            if not reply_mid:
+                reply_mid = reply_to.get("mid") or reply_to.get("message_id") or ""
 
             if reply_mid:
                 cur.execute(
@@ -130,7 +143,7 @@ def handler(event: dict, context) -> dict:
                 row = cur.fetchone()
                 if row:
                     session_id = row[0]
-                    print(f"[WEBHOOK] routed by reply_to mid={reply_mid} -> session={session_id}")
+                    print(f"[WEBHOOK] routed by link.message.mid={reply_mid} -> session={session_id}")
 
             # Fallback: ищем по тегу #session_XXXXXXXX в тексте
             if not session_id:

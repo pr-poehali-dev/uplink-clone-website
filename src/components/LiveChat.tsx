@@ -33,12 +33,15 @@ export default function LiveChat() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [sessionId, setSessionId] = useState<string>(() => localStorage.getItem(SESSION_KEY) || "");
+  // sessionId хранится в ref — используем как «фоновая сессия» даже если шаг = welcome/form
+  const [sessionId, setSessionId] = useState<string>("");
   const [lastId, setLastId] = useState<number>(() => parseInt(localStorage.getItem(MAX_MSG_ID_KEY) || "0"));
   const [sending, setSending] = useState(false);
   const [unread, setUnread] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Фоновая сессия: ID из localStorage (ответы из MAX придут, даже если форма открыта заново)
+  const bgSessionId = useRef<string>(localStorage.getItem(SESSION_KEY) || "");
 
   const scrollToBottom = () => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
@@ -62,14 +65,38 @@ export default function LiveChat() {
     }
   }, [sessionId, lastId, open]);
 
+  // Фоновый polling: запускаем если есть активная сессия (из ref) даже до setSessionId
+  const bgPoll = useCallback(async () => {
+    const sid = bgSessionId.current;
+    if (!sid) return;
+    try {
+      const storedLastId = parseInt(localStorage.getItem(MAX_MSG_ID_KEY) || "0");
+      const res = await fetch(`${LIVE_CHAT_URL}?action=poll&session_id=${sid}&since_id=${storedLastId}`);
+      const data = await res.json();
+      if (data.messages && data.messages.length > 0) {
+        const newMax = Math.max(...data.messages.map((m: Message) => m.id));
+        localStorage.setItem(MAX_MSG_ID_KEY, String(newMax));
+        setLastId(newMax);
+        setMessages(prev => [...prev, ...data.messages]);
+        setUnread(u => u + data.messages.length);
+        // Если пришёл ответ оператора — автоматически переключаем в чат
+        setStep("chat");
+        setSessionId(bgSessionId.current);
+        scrollToBottom();
+      }
+    } catch (e) {
+      console.warn("[LiveChat] bgPoll error", e);
+    }
+  }, []);
+
+  // Запускаем фоновый polling сразу при монтировании если есть сохранённая сессия
   useEffect(() => {
-    if (sessionId) {
-      setStep("chat");
-      pollRef.current = setInterval(poll, POLL_INTERVAL);
+    if (bgSessionId.current) {
+      pollRef.current = setInterval(bgPoll, POLL_INTERVAL);
     }
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, []);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -102,6 +129,7 @@ export default function LiveChat() {
       const data = await res.json();
       if (data.session_id) {
         localStorage.setItem(SESSION_KEY, data.session_id);
+        bgSessionId.current = data.session_id;
         setSessionId(data.session_id);
         const msg: Message = { id: Date.now(), sender: "visitor", text: question.trim(), created_at: new Date().toISOString() };
         setMessages([msg]);
