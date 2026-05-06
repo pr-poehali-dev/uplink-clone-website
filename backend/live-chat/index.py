@@ -78,11 +78,11 @@ def send_visitor_message_to_maax(
     service_topic: str,
     text: str,
     is_first: bool,
-) -> None:
+) -> str:
     """
     Отправляет сообщение клиента в групповой чат MAX.
-    Каждое сообщение содержит: имя клиента, тему, текст сообщения,
-    инструкцию для ответа и inline-кнопку с командой /reply XXXXXXXX.
+    Возвращает mid отправленного сообщения — сохраняем в maax_message_id,
+    чтобы роутить ответы оператора через нативный reply в MAX.
     """
     short_id = session_id[:8]
     topic_line = f" · {service_topic}" if service_topic else ""
@@ -90,29 +90,12 @@ def send_visitor_message_to_maax(
     msg_text = (
         f"{prefix} | 👤 {visitor_name}{topic_line} | #{short_id}\n"
         f"\n"
-        f"{text}\n"
-        f"\n"
-        f"Для ответа: /reply {short_id} ваш текст"
+        f"{text}"
     )
-    payload = {
-        "text": msg_text,
-        "attachments": [
-            {
-                "type": "inline_keyboard",
-                "payload": {
-                    "buttons": [[
-                        {
-                            "type": "callback",
-                            "text": f"✏️ Ответить #{short_id}",
-                            "payload": f"reply:{short_id}"
-                        }
-                    ]]
-                }
-            }
-        ]
-    }
-    resp = maax_request(api_key, "POST", f"/messages?chat_id={chat_id}", payload)
-    print(f"[MAAX] visitor msg to chat {chat_id} session={short_id} is_first={is_first} -> {resp}")
+    resp = maax_request(api_key, "POST", f"/messages?chat_id={chat_id}", {"text": msg_text})
+    mid = (resp.get("message") or {}).get("mid") or resp.get("mid") or ""
+    print(f"[MAAX] visitor msg chat={chat_id} session={short_id} is_first={is_first} mid={mid} -> {resp}")
+    return mid
 
 
 def ok(body: dict, status: int = 200) -> dict:
@@ -173,74 +156,59 @@ def handler(event: dict, context) -> dict:
             update_type = body.get("update_type") or ""
             message = body.get("message") or {}
 
-            # Обрабатываем callback от нажатия кнопки (update_type = message_callback)
-            if update_type == "message_callback":
-                callback = body.get("callback") or {}
-                cb_payload = (callback.get("payload") or "").strip()
-                print(f"[WEBHOOK] message_callback payload={repr(cb_payload)}")
-                # Отвечаем на callback чтобы убрать "загрузку" с кнопки
-                callback_id = callback.get("callback_id") or callback.get("id") or ""
-                if callback_id and api_key:
-                    maax_request(api_key, "POST", f"/answers?callback_id={callback_id}", {"type": "empty"})
-                # payload = "reply:XXXXXXXX" — шлём шаблон в чат
-                if cb_payload.startswith("reply:"):
-                    short_id = cb_payload.split(":", 1)[1].strip()
-                    # Узнаём имя и тему клиента
+            # Извлекаем текст
+            msg_body = message.get("body") or {}
+            if isinstance(msg_body, dict):
+                text = (msg_body.get("text") or "").strip()
+            else:
+                text = str(msg_body).strip()
+
+            sender_info = message.get("sender") or {}
+            is_bot = sender_info.get("is_bot", False)
+
+            if is_bot or not text:
+                print(f"[WEBHOOK] skip: is_bot={is_bot} text={repr(text)}")
+                return ok({"ok": True})
+
+            print(f"[WEBHOOK] update_type={update_type} text={repr(text)}")
+
+            # --- Роутинг 1: нативный reply в MAX ---
+            # Оператор нажал "Ответить" на сообщение бота → в message.link.mid лежит mid того сообщения
+            link = msg_body.get("link") or message.get("link") or {}
+            replied_mid = (link.get("message") or {}).get("mid") or link.get("mid") or ""
+            print(f"[WEBHOOK] replied_mid={repr(replied_mid)}")
+
+            session_id = None
+
+            if replied_mid:
+                cur.execute(
+                    f"SELECT session_id FROM {SCHEMA}.live_chat_sessions WHERE maax_message_id = %s AND is_closed = FALSE LIMIT 1",
+                    (replied_mid,),
+                )
+                row = cur.fetchone()
+                if row:
+                    session_id = row[0]
+                    print(f"[WEBHOOK] routed by reply mid={replied_mid} -> session={session_id}")
+
+            # --- Роутинг 2: команда /reply XXXXXXXX текст (fallback) ---
+            if not session_id:
+                import re as _re
+                m = _re.match(r'^/reply\s+([a-f0-9]{8})\s+([\s\S]+)$', text.strip(), _re.IGNORECASE)
+                if m:
+                    short_id = m.group(1).lower()
+                    text = m.group(2).strip()
                     cur.execute(
-                        f"SELECT visitor_name, service_topic FROM {SCHEMA}.live_chat_sessions WHERE session_id LIKE %s LIMIT 1",
+                        f"SELECT session_id FROM {SCHEMA}.live_chat_sessions WHERE session_id LIKE %s AND is_closed = FALSE LIMIT 1",
                         (short_id + "%",),
                     )
                     row = cur.fetchone()
-                    name = row[0] if row else "клиент"
-                    topic = f" [{row[1]}]" if row and row[1] else ""
-                    # Чат откуда пришёл callback
-                    recipient = (body.get("callback") or {}).get("chat_id") or notify_chat_id
-                    maax_request(api_key, "POST", f"/messages?chat_id={recipient}", {
-                        "text": f"Отвечаете {name}{topic} #{short_id}\nНапишите:\n/reply {short_id} ваш ответ"
-                    })
+                    if row:
+                        session_id = row[0]
+                        print(f"[WEBHOOK] routed by /reply short_id={short_id} -> session={session_id}")
+
+            if not session_id:
+                print(f"[WEBHOOK] cannot route message, ignoring")
                 return ok({"ok": True})
-            else:
-                # Извлекаем текст (MAX кладёт текст в message.body.text)
-                msg_body = message.get("body") or {}
-                if isinstance(msg_body, dict):
-                    text = (msg_body.get("text") or "").strip()
-                else:
-                    text = str(msg_body).strip()
-
-                sender_info = message.get("sender") or {}
-                is_bot = sender_info.get("is_bot", False)
-
-                # Игнорируем сообщения от ботов и пустые
-                if is_bot or not text:
-                    print(f"[WEBHOOK] skip: is_bot={is_bot} text={repr(text)}")
-                    return ok({"ok": True})
-
-            print(f"[WEBHOOK] text={repr(text)}")
-
-            # Единственный поддерживаемый формат ответа из MAX:
-            #   /reply XXXXXXXX текст ответа
-            # где XXXXXXXX — первые 8 символов session_id
-            import re as _re
-            m = _re.match(r'^/reply\s+([a-f0-9]{8})\s+([\s\S]+)$', text.strip(), _re.IGNORECASE)
-            if not m:
-                print(f"[WEBHOOK] not a /reply command, ignoring")
-                return ok({"ok": True})
-
-            short_id = m.group(1).lower()
-            reply_text = m.group(2).strip()
-
-            cur.execute(
-                f"SELECT session_id FROM {SCHEMA}.live_chat_sessions WHERE session_id LIKE %s AND is_closed = FALSE LIMIT 1",
-                (short_id + "%",),
-            )
-            row = cur.fetchone()
-            if not row:
-                print(f"[WEBHOOK] no open session for short_id={short_id}")
-                return ok({"ok": True})
-
-            session_id = row[0]
-            text = reply_text
-            print(f"[WEBHOOK] /reply routed short_id={short_id} -> session={session_id}")
 
             cur.execute(
                 f"INSERT INTO {SCHEMA}.live_chat_messages (session_id, sender, text) VALUES (%s, 'operator', %s)",
@@ -328,18 +296,25 @@ def handler(event: dict, context) -> dict:
             )
             conn.commit()
 
-            # Каждое сообщение клиента отправляем в MAX с именем, темой и кнопкой /reply
+            # Каждое сообщение клиента отправляем в MAX
             if api_key and notify_chat_id:
                 cur.execute(
                     f"SELECT COUNT(*) FROM {SCHEMA}.live_chat_messages WHERE session_id = %s AND sender = 'visitor'",
                     (session_id,),
                 )
                 msg_count = cur.fetchone()[0]
-                send_visitor_message_to_maax(
+                mid = send_visitor_message_to_maax(
                     api_key, notify_chat_id, session_id,
                     visitor_name, service_topic, text,
                     is_first=(msg_count <= 1),
                 )
+                # Сохраняем mid последнего сообщения — по нему роутим ответы оператора
+                if mid:
+                    cur.execute(
+                        f"UPDATE {SCHEMA}.live_chat_sessions SET maax_message_id = %s WHERE session_id = %s",
+                        (mid, session_id),
+                    )
+                    conn.commit()
 
             return ok({"ok": True, "session_id": session_id})
 
