@@ -6,6 +6,16 @@ const POLL_INTERVAL = 4000;
 const SESSION_KEY = "live_chat_session_id";
 const MAX_MSG_ID_KEY = "live_chat_last_id";
 
+const SERVICES = [
+  "IT-аутсорсинг",
+  "Видеонаблюдение",
+  "Администрирование серверов",
+  "Монтаж ЛВС / СКС",
+  "IP-телефония",
+  "Вызов IT-специалиста",
+  "Другой вопрос",
+];
+
 interface Message {
   id: number;
   sender: "visitor" | "operator";
@@ -13,12 +23,14 @@ interface Message {
   created_at: string;
 }
 
-type Step = "intro" | "chat";
+type Step = "welcome" | "form" | "chat";
 
 export default function LiveChat() {
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<Step>("intro");
+  const [step, setStep] = useState<Step>("welcome");
+  const [selectedService, setSelectedService] = useState("");
   const [name, setName] = useState("");
+  const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState<string>(() => localStorage.getItem(SESSION_KEY) || "");
@@ -74,20 +86,24 @@ export default function LiveChat() {
   }, [open]);
 
   const startChat = async () => {
-    if (!name.trim()) return;
-    const greeting = `Добрый день! Меня зовут ${name}.`;
+    if (!name.trim() || !question.trim() || !selectedService) return;
     setSending(true);
     try {
+      const firstMessage = `Тема: ${selectedService}\n\n${question}`;
       const res = await fetch(`${LIVE_CHAT_URL}?action=send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: greeting, name: name.trim() }),
+        body: JSON.stringify({
+          text: firstMessage,
+          name: name.trim(),
+          service_topic: selectedService,
+        }),
       });
       const data = await res.json();
       if (data.session_id) {
         localStorage.setItem(SESSION_KEY, data.session_id);
         setSessionId(data.session_id);
-        const msg: Message = { id: Date.now(), sender: "visitor", text: greeting, created_at: new Date().toISOString() };
+        const msg: Message = { id: Date.now(), sender: "visitor", text: question.trim(), created_at: new Date().toISOString() };
         setMessages([msg]);
         setStep("chat");
       }
@@ -121,6 +137,8 @@ export default function LiveChat() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
+  const canSubmit = name.trim().length > 0 && question.trim().length > 0 && selectedService !== "";
+
   return (
     <>
       {/* Плавающая кнопка */}
@@ -130,11 +148,10 @@ export default function LiveChat() {
         style={{ background: "hsl(var(--primary))" }}
         aria-label="Открыть чат"
       >
-        {open ? (
-          <Icon name="X" size={24} style={{ color: "hsl(var(--primary-foreground))" }} />
-        ) : (
-          <Icon name="MessageCircle" size={26} style={{ color: "hsl(var(--primary-foreground))" }} />
-        )}
+        {open
+          ? <Icon name="X" size={24} style={{ color: "hsl(var(--primary-foreground))" }} />
+          : <Icon name="MessageCircle" size={26} style={{ color: "hsl(var(--primary-foreground))" }} />
+        }
         {unread > 0 && !open && (
           <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
             {unread}
@@ -146,60 +163,113 @@ export default function LiveChat() {
       {open && (
         <div
           className="fixed bottom-24 right-6 z-50 w-80 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-          style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", maxHeight: "480px" }}
+          style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", maxHeight: "560px" }}
         >
           {/* Шапка */}
-          <div className="flex items-center gap-3 px-4 py-3" style={{ background: "hsl(var(--primary))" }}>
+          <div className="flex items-center gap-3 px-4 py-3 flex-shrink-0" style={{ background: "hsl(var(--primary))" }}>
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
               <Icon name="Headset" size={18} style={{ color: "hsl(var(--primary-foreground))" }} />
             </div>
             <div>
-              <div className="font-semibold text-sm" style={{ color: "hsl(var(--primary-foreground))" }}>Онлайн-чат</div>
+              <div className="font-semibold text-sm" style={{ color: "hsl(var(--primary-foreground))" }}>Аплинк-ИТ</div>
               <div className="text-xs opacity-75" style={{ color: "hsl(var(--primary-foreground))" }}>Обычно отвечаем за несколько минут</div>
             </div>
           </div>
 
-          {/* Шаг 1: Ввод имени */}
-          {step === "intro" && (
-            <div className="flex flex-col gap-4 p-5">
+          {/* Шаг 1: Приветствие + выбор услуги */}
+          {step === "welcome" && (
+            <div className="flex flex-col overflow-y-auto" style={{ maxHeight: "460px" }}>
+              <div className="px-4 pt-4 pb-2">
+                <p className="text-sm leading-relaxed" style={{ color: "hsl(var(--foreground))" }}>
+                  Добро пожаловать! 👋😊<br />
+                  <span className="font-semibold">Команда «Аплинк-ИТ».</span> Поможем с подбором видеонаблюдения и ИТ-обслуживания.<br /><br />
+                  Выберите, с чего начать наш диалог:
+                </p>
+              </div>
+              <div className="flex flex-col gap-1.5 px-4 pb-4">
+                {SERVICES.map(service => (
+                  <button
+                    key={service}
+                    onClick={() => { setSelectedService(service); setStep("form"); }}
+                    className="text-left text-sm px-3 py-2.5 rounded-xl transition-all hover:scale-[1.02]"
+                    style={{
+                      background: "hsl(var(--secondary))",
+                      color: "hsl(var(--foreground))",
+                      border: "1px solid hsl(var(--border))",
+                    }}
+                  >
+                    {service}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Шаг 2: Имя + вопрос */}
+          {step === "form" && (
+            <div className="flex flex-col gap-3 p-4 overflow-y-auto" style={{ maxHeight: "460px" }}>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setStep("welcome")}
+                  className="text-xs flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity"
+                  style={{ color: "hsl(var(--foreground))" }}
+                >
+                  <Icon name="ChevronLeft" size={14} /> Назад
+                </button>
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: "hsl(var(--primary) / 0.2)", color: "hsl(var(--primary))" }}
+                >
+                  {selectedService}
+                </span>
+              </div>
+
               <p className="text-sm" style={{ color: "hsl(var(--foreground))" }}>
-                Привет! Как вас зовут?
+                Как вас зовут и в чём вопрос?
               </p>
+
               <input
                 autoFocus
                 type="text"
                 placeholder="Ваше имя"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && startChat()}
                 className="w-full rounded-lg px-3 py-2 text-sm outline-none"
                 style={{ background: "hsl(var(--secondary))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}
               />
+
+              <textarea
+                rows={3}
+                placeholder="Опишите ваш вопрос..."
+                value={question}
+                onChange={e => setQuestion(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && canSubmit) { e.preventDefault(); startChat(); } }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
+                style={{ background: "hsl(var(--secondary))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}
+              />
+
               <button
                 onClick={startChat}
-                disabled={!name.trim() || sending}
-                className="w-full rounded-lg py-2 text-sm font-semibold transition-opacity disabled:opacity-50"
+                disabled={!canSubmit || sending}
+                className="w-full rounded-lg py-2 text-sm font-semibold transition-opacity disabled:opacity-40"
                 style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
               >
-                {sending ? "Подключение..." : "Начать чат"}
+                {sending ? "Отправляем..." : "Начать диалог"}
               </button>
             </div>
           )}
 
-          {/* Шаг 2: Чат */}
+          {/* Шаг 3: Чат */}
           {step === "chat" && (
             <>
-              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2" style={{ minHeight: 0, maxHeight: "300px" }}>
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2" style={{ minHeight: 0, maxHeight: "360px" }}>
                 {messages.length === 0 && (
                   <p className="text-xs text-center py-4" style={{ color: "hsl(var(--muted-foreground))" }}>
-                    Напишите ваш вопрос — мы ответим в ближайшее время
+                    Ваш вопрос отправлен — ответим в ближайшее время
                   </p>
                 )}
                 {messages.map(msg => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.sender === "visitor" ? "justify-end" : "justify-start"}`}
-                  >
+                  <div key={msg.id} className={`flex ${msg.sender === "visitor" ? "justify-end" : "justify-start"}`}>
                     <div
                       className="max-w-[75%] rounded-2xl px-3 py-2 text-sm"
                       style={
@@ -216,7 +286,7 @@ export default function LiveChat() {
               </div>
 
               {/* Поле ввода */}
-              <div className="flex items-end gap-2 p-3" style={{ borderTop: "1px solid hsl(var(--border))" }}>
+              <div className="flex items-end gap-2 p-3 flex-shrink-0" style={{ borderTop: "1px solid hsl(var(--border))" }}>
                 <textarea
                   rows={1}
                   value={input}

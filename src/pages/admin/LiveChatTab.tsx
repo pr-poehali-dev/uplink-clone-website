@@ -10,6 +10,7 @@ interface Session {
   created_at: string;
   last_message_at: string;
   is_closed: boolean;
+  service_topic: string | null;
   unread: number;
 }
 
@@ -192,6 +193,9 @@ export function LiveChatTab({ token }: LiveChatTabProps) {
                   {s.is_closed && <span className="text-xs text-gray-500">закрыт</span>}
                 </div>
               </div>
+              {s.service_topic && (
+                <p className="text-xs mt-0.5 truncate" style={{ color: "hsl(var(--primary))" }}>{s.service_topic}</p>
+              )}
               {s.visitor_email && <p className="text-xs text-gray-400 truncate">{s.visitor_email}</p>}
               <p className="text-xs text-gray-500 mt-0.5">
                 {new Date(s.last_message_at).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
