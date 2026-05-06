@@ -10,13 +10,18 @@ const SESSION_TTL_MS = 3 * 60 * 60 * 1000; // 3 часа
 
 function getSavedSession(): string {
   const sid = localStorage.getItem(SESSION_KEY) || "";
+  if (!sid) return "";
   const ts = parseInt(localStorage.getItem(SESSION_TS_KEY) || "0");
-  if (sid && ts && Date.now() - ts < SESSION_TTL_MS) return sid;
-  if (sid) {
-    localStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem(SESSION_TS_KEY);
-    localStorage.removeItem(MAX_MSG_ID_KEY);
+  // Если ts нет — сессия создана до нашего обновления, считаем её живой и ставим ts сейчас
+  if (!ts) {
+    localStorage.setItem(SESSION_TS_KEY, String(Date.now()));
+    return sid;
   }
+  if (Date.now() - ts < SESSION_TTL_MS) return sid;
+  // Сессия протухла — чистим
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(SESSION_TS_KEY);
+  localStorage.removeItem(MAX_MSG_ID_KEY);
   return "";
 }
 
