@@ -70,31 +70,49 @@ def maax_request(api_key: str, method: str, path: str, payload: dict = None) -> 
         return {"error": str(e)}
 
 
-def notify_new_session(api_key: str, notify_chat_id: str, session_id: str, visitor_name: str, service_topic: str, first_message: str) -> None:
+def send_visitor_message_to_maax(
+    api_key: str,
+    chat_id: str,
+    session_id: str,
+    visitor_name: str,
+    service_topic: str,
+    text: str,
+    is_first: bool,
+) -> None:
     """
-    Отправляет уведомление о новом клиенте в групповой чат MAX.
-    Содержит короткий ID сессии и инструкцию — чтобы ответить, нужно написать:
-      /reply XXXXXXXX текст ответа
+    Отправляет сообщение клиента в групповой чат MAX.
+    Каждое сообщение содержит: имя клиента, тему, текст сообщения,
+    инструкцию для ответа и inline-кнопку с командой /reply XXXXXXXX.
     """
     short_id = session_id[:8]
-    topic_line = f"[{service_topic}] " if service_topic else ""
-    text = (
-        f"🆕 {topic_line}{visitor_name} #{short_id}\n"
-        f"✉️ {first_message}\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"Чтобы ответить этому клиенту:\n"
-        f"/reply {short_id} ваш ответ"
+    topic_line = f" · {service_topic}" if service_topic else ""
+    prefix = "🆕 Новый клиент" if is_first else "✉️ Сообщение"
+    msg_text = (
+        f"{prefix} | 👤 {visitor_name}{topic_line} | #{short_id}\n"
+        f"\n"
+        f"{text}\n"
+        f"\n"
+        f"Для ответа: /reply {short_id} ваш текст"
     )
-    resp = maax_request(api_key, "POST", f"/messages?chat_id={notify_chat_id}", {"text": text})
-    print(f"[MAAX] notify new session #{short_id} -> {resp}")
-
-
-def send_to_maax_chat(api_key: str, chat_id: str, text: str) -> str:
-    """Отправляет сообщение в конкретный чат MAX. Возвращает mid."""
-    resp = maax_request(api_key, "POST", f"/messages?chat_id={chat_id}", {"text": text})
-    mid = (resp.get("message") or {}).get("mid") or resp.get("mid") or ""
-    print(f"[MAAX] send to chat {chat_id} -> mid={mid}")
-    return mid
+    payload = {
+        "text": msg_text,
+        "attachments": [
+            {
+                "type": "inline_keyboard",
+                "payload": {
+                    "buttons": [[
+                        {
+                            "type": "callback",
+                            "text": f"✏️ Ответить #{short_id}",
+                            "payload": f"/reply {short_id} "
+                        }
+                    ]]
+                }
+            }
+        ]
+    }
+    resp = maax_request(api_key, "POST", f"/messages?chat_id={chat_id}", payload)
+    print(f"[MAAX] visitor msg to chat {chat_id} session={short_id} is_first={is_first} -> {resp}")
 
 
 def ok(body: dict, status: int = 200) -> dict:
@@ -264,9 +282,8 @@ def handler(event: dict, context) -> dict:
                 )
                 conn.commit()
 
-                # Отправляем уведомление в MAX с инструкцией /reply XXXXXXXX
+                # Новая сессия — фиксируем chat_id
                 if api_key and notify_chat_id:
-                    notify_new_session(api_key, notify_chat_id, session_id, visitor_name, service_topic, text)
                     cur.execute(
                         f"UPDATE {SCHEMA}.live_chat_sessions SET maax_chat_id = %s WHERE session_id = %s",
                         (notify_chat_id, session_id),
@@ -284,16 +301,18 @@ def handler(event: dict, context) -> dict:
             )
             conn.commit()
 
-            # Последующие сообщения того же клиента — шлём в MAX как доп. информацию
-            if api_key and notify_chat_id and session_id not in ("",):
+            # Каждое сообщение клиента отправляем в MAX с именем, темой и кнопкой /reply
+            if api_key and notify_chat_id:
                 cur.execute(
                     f"SELECT COUNT(*) FROM {SCHEMA}.live_chat_messages WHERE session_id = %s AND sender = 'visitor'",
                     (session_id,),
                 )
                 msg_count = cur.fetchone()[0]
-                if msg_count > 1:
-                    short_id = session_id[:8]
-                    send_to_maax_chat(api_key, notify_chat_id, f"✉️ [{short_id}] {visitor_name}: {text}")
+                send_visitor_message_to_maax(
+                    api_key, notify_chat_id, session_id,
+                    visitor_name, service_topic, text,
+                    is_first=(msg_count <= 1),
+                )
 
             return ok({"ok": True, "session_id": session_id})
 
