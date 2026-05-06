@@ -6,21 +6,18 @@ const POLL_INTERVAL = 4000;
 const SESSION_KEY = "live_chat_session_id";
 const MAX_MSG_ID_KEY = "live_chat_last_id";
 
-const SERVICES = [
-  "IT-аутсорсинг",
-  "Видеонаблюдение",
-  "Администрирование серверов",
-  "Монтаж ЛВС / СКС",
-  "IP-телефония",
-  "Вызов IT-специалиста",
-  "Другой вопрос",
-];
-
 interface Message {
   id: number;
   sender: "visitor" | "operator";
   text: string;
   created_at: string;
+}
+
+interface ChatSettings {
+  welcome_text: string;
+  services: string;
+  header_title: string;
+  header_subtitle: string;
 }
 
 type Step = "welcome" | "form" | "chat";
@@ -33,20 +30,35 @@ export default function LiveChat() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  // sessionId хранится в ref — используем как «фоновая сессия» даже если шаг = welcome/form
   const [sessionId, setSessionId] = useState<string>("");
   const [lastId, setLastId] = useState<number>(() => parseInt(localStorage.getItem(MAX_MSG_ID_KEY) || "0"));
   const [sending, setSending] = useState(false);
   const [unread, setUnread] = useState(0);
+  const [settings, setSettings] = useState<ChatSettings | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  // Фоновая сессия: ID из localStorage (ответы из MAX придут, даже если форма открыта заново)
+  // Фоновая сессия — существует даже если форма показана заново
   const bgSessionId = useRef<string>(localStorage.getItem(SESSION_KEY) || "");
+
+  // Загружаем настройки с бэкенда
+  useEffect(() => {
+    fetch(`${LIVE_CHAT_URL}?action=settings`)
+      .then(r => r.json())
+      .then(d => { if (d.settings) setSettings(d.settings); })
+      .catch(() => {});
+  }, []);
 
   const scrollToBottom = () => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
   };
 
+  const servicesList = settings?.services
+    ? settings.services.split(",").map(s => s.trim()).filter(Boolean)
+    : ["IT-аутсорсинг", "Видеонаблюдение", "Администрирование серверов", "Монтаж ЛВС / СКС", "IP-телефония", "Вызов IT-специалиста", "Другой вопрос"];
+
+  // ----------------------------------------------------------------
+  // Polling активной сессии
+  // ----------------------------------------------------------------
   const poll = useCallback(async () => {
     if (!sessionId) return;
     try {
@@ -65,7 +77,7 @@ export default function LiveChat() {
     }
   }, [sessionId, lastId, open]);
 
-  // Фоновый polling: запускаем если есть активная сессия (из ref) даже до setSessionId
+  // Фоновый polling — работает пока форма показана заново
   const bgPoll = useCallback(async () => {
     const sid = bgSessionId.current;
     if (!sid) return;
@@ -79,7 +91,7 @@ export default function LiveChat() {
         setLastId(newMax);
         setMessages(prev => [...prev, ...data.messages]);
         setUnread(u => u + data.messages.length);
-        // Если пришёл ответ оператора — автоматически переключаем в чат
+        // Пришёл ответ — переключаем в чат
         setStep("chat");
         setSessionId(bgSessionId.current);
         scrollToBottom();
@@ -89,7 +101,7 @@ export default function LiveChat() {
     }
   }, []);
 
-  // Запускаем фоновый polling сразу при монтировании если есть сохранённая сессия
+  // Запускаем фоновый polling при монтировании если есть сессия
   useEffect(() => {
     if (bgSessionId.current) {
       pollRef.current = setInterval(bgPoll, POLL_INTERVAL);
@@ -98,6 +110,7 @@ export default function LiveChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Переключаем на основной polling когда сессия активна
   useEffect(() => {
     if (!sessionId) return;
     if (pollRef.current) clearInterval(pollRef.current);
@@ -112,16 +125,18 @@ export default function LiveChat() {
     }
   }, [open]);
 
+  // ----------------------------------------------------------------
+  // Отправка первого сообщения
+  // ----------------------------------------------------------------
   const startChat = async () => {
     if (!name.trim() || !question.trim() || !selectedService) return;
     setSending(true);
     try {
-      const firstMessage = `Тема: ${selectedService}\n\n${question}`;
       const res = await fetch(`${LIVE_CHAT_URL}?action=send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: firstMessage,
+          text: question.trim(),
           name: name.trim(),
           service_topic: selectedService,
         }),
@@ -141,6 +156,9 @@ export default function LiveChat() {
     setSending(false);
   };
 
+  // ----------------------------------------------------------------
+  // Отправка следующих сообщений
+  // ----------------------------------------------------------------
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || !sessionId || sending) return;
@@ -187,7 +205,7 @@ export default function LiveChat() {
         )}
       </button>
 
-      {/* Виджет чата */}
+      {/* Виджет */}
       {open && (
         <div
           className="fixed bottom-24 right-6 z-50 w-80 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
@@ -199,23 +217,25 @@ export default function LiveChat() {
               <Icon name="Headset" size={18} style={{ color: "hsl(var(--primary-foreground))" }} />
             </div>
             <div>
-              <div className="font-semibold text-sm" style={{ color: "hsl(var(--primary-foreground))" }}>Аплинк-ИТ</div>
-              <div className="text-xs opacity-75" style={{ color: "hsl(var(--primary-foreground))" }}>Обычно отвечаем за несколько минут</div>
+              <div className="font-semibold text-sm" style={{ color: "hsl(var(--primary-foreground))" }}>
+                {settings?.header_title || "Онлайн-чат"}
+              </div>
+              <div className="text-xs opacity-75" style={{ color: "hsl(var(--primary-foreground))" }}>
+                {settings?.header_subtitle || "Обычно отвечаем за несколько минут"}
+              </div>
             </div>
           </div>
 
-          {/* Шаг 1: Приветствие + выбор услуги */}
+          {/* ШАГ 1: Приветствие + выбор услуги */}
           {step === "welcome" && (
             <div className="flex flex-col overflow-y-auto" style={{ maxHeight: "460px" }}>
               <div className="px-4 pt-4 pb-2">
-                <p className="text-sm leading-relaxed" style={{ color: "hsl(var(--foreground))" }}>
-                  Добро пожаловать! 👋😊<br />
-                  <span className="font-semibold">Команда «Аплинк-ИТ».</span> Поможем с подбором видеонаблюдения и ИТ-обслуживания.<br /><br />
-                  Выберите, с чего начать наш диалог:
+                <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "hsl(var(--foreground))" }}>
+                  {settings?.welcome_text || "Добро пожаловать! Выберите тему обращения:"}
                 </p>
               </div>
               <div className="flex flex-col gap-1.5 px-4 pb-4">
-                {SERVICES.map(service => (
+                {servicesList.map(service => (
                   <button
                     key={service}
                     onClick={() => { setSelectedService(service); setStep("form"); }}
@@ -233,7 +253,7 @@ export default function LiveChat() {
             </div>
           )}
 
-          {/* Шаг 2: Имя + вопрос */}
+          {/* ШАГ 2: Имя + вопрос */}
           {step === "form" && (
             <div className="flex flex-col gap-3 p-4 overflow-y-auto" style={{ maxHeight: "460px" }}>
               <div className="flex items-center gap-2">
@@ -287,7 +307,7 @@ export default function LiveChat() {
             </div>
           )}
 
-          {/* Шаг 3: Чат */}
+          {/* ШАГ 3: Чат */}
           {step === "chat" && (
             <>
               <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2" style={{ minHeight: 0, maxHeight: "360px" }}>
@@ -313,7 +333,6 @@ export default function LiveChat() {
                 <div ref={bottomRef} />
               </div>
 
-              {/* Поле ввода */}
               <div className="flex items-end gap-2 p-3 flex-shrink-0" style={{ borderTop: "1px solid hsl(var(--border))" }}>
                 <textarea
                   rows={1}
