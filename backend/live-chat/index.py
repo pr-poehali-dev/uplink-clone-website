@@ -102,9 +102,9 @@ def send_visitor_message_to_maax(
                 "payload": {
                     "buttons": [[
                         {
-                            "type": "message",
+                            "type": "callback",
                             "text": f"✏️ Ответить #{short_id}",
-                            "payload": f"/reply {short_id} "
+                            "payload": f"reply:{short_id}"
                         }
                     ]]
                 }
@@ -182,11 +182,23 @@ def handler(event: dict, context) -> dict:
                 callback_id = callback.get("callback_id") or callback.get("id") or ""
                 if callback_id and api_key:
                     maax_request(api_key, "POST", f"/answers?callback_id={callback_id}", {"type": "empty"})
-                # Если payload содержит /reply — обрабатываем как команду
-                if cb_payload.startswith("/reply"):
-                    text = cb_payload
-                else:
-                    return ok({"ok": True})
+                # payload = "reply:XXXXXXXX" — шлём шаблон в чат
+                if cb_payload.startswith("reply:"):
+                    short_id = cb_payload.split(":", 1)[1].strip()
+                    # Узнаём имя и тему клиента
+                    cur.execute(
+                        f"SELECT visitor_name, service_topic FROM {SCHEMA}.live_chat_sessions WHERE session_id LIKE %s LIMIT 1",
+                        (short_id + "%",),
+                    )
+                    row = cur.fetchone()
+                    name = row[0] if row else "клиент"
+                    topic = f" [{row[1]}]" if row and row[1] else ""
+                    # Чат откуда пришёл callback
+                    recipient = (body.get("callback") or {}).get("chat_id") or notify_chat_id
+                    maax_request(api_key, "POST", f"/messages?chat_id={recipient}", {
+                        "text": f"Отвечаете {name}{topic} #{short_id}\nНапишите:\n/reply {short_id} ваш ответ"
+                    })
+                return ok({"ok": True})
             else:
                 # Извлекаем текст (MAX кладёт текст в message.body.text)
                 msg_body = message.get("body") or {}
