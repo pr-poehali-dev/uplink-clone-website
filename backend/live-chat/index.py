@@ -70,23 +70,23 @@ def maax_request(api_key: str, method: str, path: str, payload: dict = None) -> 
         return {"error": str(e)}
 
 
-def get_or_create_chat(api_key: str, notify_chat_id: str, session_id: str, visitor_name: str, service_topic: str) -> str:
+def notify_new_session(api_key: str, notify_chat_id: str, session_id: str, visitor_name: str, service_topic: str, first_message: str) -> None:
     """
     Отправляет уведомление о новом клиенте в групповой чат MAX.
-    Возвращает chat_id куда было отправлено (для привязки сессии).
-    Каждое сообщение помечено уникальным session_id — так бот знает в ответ на какую сессию пишет оператор.
+    Содержит короткий ID сессии и инструкцию — чтобы ответить, нужно написать:
+      /reply XXXXXXXX текст ответа
     """
+    short_id = session_id[:8]
     topic_line = f"[{service_topic}] " if service_topic else ""
     text = (
-        f"🆕 Новый диалог #{session_id[:8]}\n"
-        f"👤 {topic_line}{visitor_name}\n"
+        f"🆕 {topic_line}{visitor_name} #{short_id}\n"
+        f"✉️ {first_message}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"Все ваши ответы в этот чат будут доставлены только этому клиенту."
+        f"Чтобы ответить этому клиенту:\n"
+        f"/reply {short_id} ваш ответ"
     )
     resp = maax_request(api_key, "POST", f"/messages?chat_id={notify_chat_id}", {"text": text})
-    print(f"[MAAX] notify new session -> {resp}")
-    # Возвращаем chat_id куда отправили (= notify_chat_id, фиксируем для роутинга)
-    return str(notify_chat_id)
+    print(f"[MAAX] notify new session #{short_id} -> {resp}")
 
 
 def send_to_maax_chat(api_key: str, chat_id: str, text: str) -> str:
@@ -170,26 +170,32 @@ def handler(event: dict, context) -> dict:
                 print(f"[WEBHOOK] skip: is_bot={is_bot} text={repr(text)}")
                 return ok({"ok": True})
 
-            # chat_id — откуда пришло сообщение
-            recipient = message.get("recipient") or {}
-            incoming_chat_id = str(recipient.get("chat_id") or "")
-            print(f"[WEBHOOK] from chat_id={incoming_chat_id} text={repr(text)}")
+            print(f"[WEBHOOK] text={repr(text)}")
 
-            if not incoming_chat_id:
+            # Единственный поддерживаемый формат ответа из MAX:
+            #   /reply XXXXXXXX текст ответа
+            # где XXXXXXXX — первые 8 символов session_id
+            import re as _re
+            m = _re.match(r'^/reply\s+([a-f0-9]{8})\s+([\s\S]+)$', text.strip(), _re.IGNORECASE)
+            if not m:
+                print(f"[WEBHOOK] not a /reply command, ignoring")
                 return ok({"ok": True})
 
-            # Ищем сессию СТРОГО по maax_chat_id — только этот клиент получит ответ
+            short_id = m.group(1).lower()
+            reply_text = m.group(2).strip()
+
             cur.execute(
-                f"SELECT session_id FROM {SCHEMA}.live_chat_sessions WHERE maax_chat_id = %s AND is_closed = FALSE LIMIT 1",
-                (incoming_chat_id,),
+                f"SELECT session_id FROM {SCHEMA}.live_chat_sessions WHERE session_id LIKE %s AND is_closed = FALSE LIMIT 1",
+                (short_id + "%",),
             )
             row = cur.fetchone()
             if not row:
-                print(f"[WEBHOOK] no session for chat_id={incoming_chat_id}, ignoring")
+                print(f"[WEBHOOK] no open session for short_id={short_id}")
                 return ok({"ok": True})
 
             session_id = row[0]
-            print(f"[WEBHOOK] routed to session={session_id}")
+            text = reply_text
+            print(f"[WEBHOOK] /reply routed short_id={short_id} -> session={session_id}")
 
             cur.execute(
                 f"INSERT INTO {SCHEMA}.live_chat_messages (session_id, sender, text) VALUES (%s, 'operator', %s)",
@@ -258,14 +264,13 @@ def handler(event: dict, context) -> dict:
                 )
                 conn.commit()
 
-                # Создаём чат в MAX и фиксируем chat_id
+                # Отправляем уведомление в MAX с инструкцией /reply XXXXXXXX
                 if api_key and notify_chat_id:
-                    chat_id = get_or_create_chat(api_key, notify_chat_id, session_id, visitor_name, service_topic)
+                    notify_new_session(api_key, notify_chat_id, session_id, visitor_name, service_topic, text)
                     cur.execute(
                         f"UPDATE {SCHEMA}.live_chat_sessions SET maax_chat_id = %s WHERE session_id = %s",
-                        (chat_id, session_id),
+                        (notify_chat_id, session_id),
                     )
-                    maax_chat_id = chat_id
                     conn.commit()
 
             # Сохраняем сообщение
@@ -279,9 +284,16 @@ def handler(event: dict, context) -> dict:
             )
             conn.commit()
 
-            # Отправляем текст клиента в чат MAX (только текст, без системного заголовка)
-            if api_key and maax_chat_id:
-                send_to_maax_chat(api_key, maax_chat_id, f"✉️ {visitor_name}: {text}")
+            # Последующие сообщения того же клиента — шлём в MAX как доп. информацию
+            if api_key and notify_chat_id and session_id not in ("",):
+                cur.execute(
+                    f"SELECT COUNT(*) FROM {SCHEMA}.live_chat_messages WHERE session_id = %s AND sender = 'visitor'",
+                    (session_id,),
+                )
+                msg_count = cur.fetchone()[0]
+                if msg_count > 1:
+                    short_id = session_id[:8]
+                    send_to_maax_chat(api_key, notify_chat_id, f"✉️ [{short_id}] {visitor_name}: {text}")
 
             return ok({"ok": True, "session_id": session_id})
 
