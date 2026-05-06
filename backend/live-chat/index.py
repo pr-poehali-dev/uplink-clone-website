@@ -102,7 +102,7 @@ def send_visitor_message_to_maax(
                 "payload": {
                     "buttons": [[
                         {
-                            "type": "callback",
+                            "type": "message",
                             "text": f"✏️ Ответить #{short_id}",
                             "payload": f"/reply {short_id} "
                         }
@@ -168,25 +168,40 @@ def handler(event: dict, context) -> dict:
         # ================================================================
         if action == "webhook":
             body = json.loads(event.get("body") or "{}")
-            print(f"[WEBHOOK] raw: {json.dumps(body)[:1000]}")
+            print(f"[WEBHOOK] raw: {json.dumps(body)[:2000]}")
 
             update_type = body.get("update_type") or ""
             message = body.get("message") or {}
 
-            # Извлекаем текст (MAX кладёт текст в message.body.text)
-            msg_body = message.get("body") or {}
-            if isinstance(msg_body, dict):
-                text = (msg_body.get("text") or "").strip()
+            # Обрабатываем callback от нажатия кнопки (update_type = message_callback)
+            if update_type == "message_callback":
+                callback = body.get("callback") or {}
+                cb_payload = (callback.get("payload") or "").strip()
+                print(f"[WEBHOOK] message_callback payload={repr(cb_payload)}")
+                # Отвечаем на callback чтобы убрать "загрузку" с кнопки
+                callback_id = callback.get("callback_id") or callback.get("id") or ""
+                if callback_id and api_key:
+                    maax_request(api_key, "POST", f"/answers?callback_id={callback_id}", {"type": "empty"})
+                # Если payload содержит /reply — обрабатываем как команду
+                if cb_payload.startswith("/reply"):
+                    text = cb_payload
+                else:
+                    return ok({"ok": True})
             else:
-                text = str(msg_body).strip()
+                # Извлекаем текст (MAX кладёт текст в message.body.text)
+                msg_body = message.get("body") or {}
+                if isinstance(msg_body, dict):
+                    text = (msg_body.get("text") or "").strip()
+                else:
+                    text = str(msg_body).strip()
 
-            sender_info = message.get("sender") or {}
-            is_bot = sender_info.get("is_bot", False)
+                sender_info = message.get("sender") or {}
+                is_bot = sender_info.get("is_bot", False)
 
-            # Игнорируем сообщения от ботов и пустые
-            if is_bot or not text:
-                print(f"[WEBHOOK] skip: is_bot={is_bot} text={repr(text)}")
-                return ok({"ok": True})
+                # Игнорируем сообщения от ботов и пустые
+                if is_bot or not text:
+                    print(f"[WEBHOOK] skip: is_bot={is_bot} text={repr(text)}")
+                    return ok({"ok": True})
 
             print(f"[WEBHOOK] text={repr(text)}")
 
