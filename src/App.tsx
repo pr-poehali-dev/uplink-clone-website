@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -35,6 +35,7 @@ function VisualEditorProvider() {
 
 function DesignApplicator() {
   const { content } = useCmsContent();
+  const location = useLocation();
   useEffect(() => {
     if (!content?.settings) return;
     const s = content.settings;
@@ -80,17 +81,18 @@ function DesignApplicator() {
       root.style.setProperty("--font-body", `'${s.design_font_body}', sans-serif`);
       document.body.style.fontFamily = `'${s.design_font_body}', sans-serif`;
     }
-    // Анимации и эффекты — вешаем data-атрибуты на body (без перезагрузки)
-    if (s.design_scroll_animation) body.dataset.scrollAnim = s.design_scroll_animation;
-    if (s.design_anim_speed) body.dataset.animSpeed = s.design_anim_speed;
-    if (s.design_hover_cards) body.dataset.hoverCards = s.design_hover_cards;
-    if (s.design_hover_buttons) body.dataset.hoverButtons = s.design_hover_buttons;
-    if (s.design_hover_menu) body.dataset.hoverMenu = s.design_hover_menu;
-    if (s.design_modal_animation) body.dataset.modalAnim = s.design_modal_animation;
-    if (s.design_bg_effect) body.dataset.bgEffect = s.design_bg_effect;
-    if (s.design_btn_style) body.dataset.btnStyle = s.design_btn_style;
-    if (s.design_card_style) body.dataset.cardStyle = s.design_card_style;
-    if (s.design_shadow_style) body.dataset.shadowStyle = s.design_shadow_style;
+    // Анимации и эффекты — всегда устанавливаем data-атрибуты на body
+    // (не используем if-check чтобы не оставлять старые значения от pre-hydration)
+    body.dataset.scrollAnim     = s.design_scroll_animation || "fade-up";
+    body.dataset.animSpeed      = s.design_anim_speed || "normal";
+    body.dataset.hoverCards     = s.design_hover_cards || "lift";
+    body.dataset.hoverButtons   = s.design_hover_buttons || "glow";
+    body.dataset.hoverMenu      = s.design_hover_menu || "underline";
+    body.dataset.modalAnim      = s.design_modal_animation || "scale-in";
+    body.dataset.bgEffect       = s.design_bg_effect || "none";
+    body.dataset.btnStyle       = s.design_btn_style || "rounded";
+    body.dataset.cardStyle      = s.design_card_style || "glass";
+    body.dataset.shadowStyle    = s.design_shadow_style || "neon";
 
     // Применяем JS-анимации как CSS-классы на .hover-card и .hover-btn (глобальные)
     const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
@@ -137,7 +139,7 @@ function DesignApplicator() {
       });
     }
 
-  }, [content?.settings, content?.section_animations]);
+  }, [content?.settings, content?.section_animations, location.pathname]);
   return null;
 }
 
@@ -155,11 +157,11 @@ const App = () => (
         <Sonner />
         <CookieBanner />
         <LiveChat />
-        <DesignApplicator />
         <InteractiveAnimationsProvider />
         <VisualEditorProvider />
         <BrowserRouter>
           <ScrollToTop />
+          <DesignApplicator />
           <ElementAnimationsProvider />
           <Suspense fallback={null}>
             <Routes>

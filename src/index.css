@@ -802,14 +802,12 @@
   will-change: auto;
 }
 
-/* Premium-карта — своё финальное состояние */
-.plan-highlighted {
-  /* масштаб применяется только после завершения анимации */
-}
-.plan-highlighted.anim-done {
+/* Premium-карта — масштаб 1.05 всегда (не через scroll-anim) */
+.plan-highlighted.scroll-anim.visible,
+.plan-highlighted.scroll-anim.anim-done {
   transform: scale(1.05) !important;
 }
-.plan-highlighted.anim-done:hover {
+.plan-highlighted.scroll-anim.anim-done:hover {
   transform: scale(1.05) translateY(-4px) !important;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35) !important;
 }

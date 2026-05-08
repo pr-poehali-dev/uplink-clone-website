@@ -64,6 +64,8 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-[#080c14]">
+      {/* Слой для фоновых эффектов (data-bg-effect на body управляет стилями) */}
+      <div className="bg-effect-layer" aria-hidden="true" />
       <Header onContactClick={() => openModal("Шапка сайта")} settings={s} services={content?.services} />
 
       {order.map(id => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
