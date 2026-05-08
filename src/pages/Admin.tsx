@@ -43,14 +43,14 @@ export default function Admin() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [unreadLeads, setUnreadLeads] = useState(0);
 
-  const loadContent = useCallback(async () => {
-    setLoading(true);
+  const loadContent = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const r = await fetch(CMS_API_URL);
       const data = await r.json();
       if (data.settings) setContent(data);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
@@ -81,7 +81,7 @@ export default function Admin() {
       if (r.ok) {
         clearCmsCache();
         showMsg("Сохранено!");
-        loadContent();
+        loadContent(true);
       } else {
         showMsg("Ошибка сохранения");
       }

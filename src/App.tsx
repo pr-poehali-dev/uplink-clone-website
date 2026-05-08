@@ -10,6 +10,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import LiveChat from "@/components/LiveChat";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useCmsContent } from "@/hooks/useCmsContent";
+import { useInteractiveAnimations } from "@/hooks/useInteractiveAnimations";
 
 const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -18,6 +19,11 @@ const ServicePage = lazy(() => import("./pages/ServicePage"));
 const PricingPage = lazy(() => import("./pages/Pricing"));
 
 const queryClient = new QueryClient();
+
+function InteractiveAnimationsProvider() {
+  useInteractiveAnimations();
+  return null;
+}
 
 function DesignApplicator() {
   const { content } = useCmsContent();
@@ -77,6 +83,17 @@ function DesignApplicator() {
     if (s.design_btn_style) body.dataset.btnStyle = s.design_btn_style;
     if (s.design_card_style) body.dataset.cardStyle = s.design_card_style;
     if (s.design_shadow_style) body.dataset.shadowStyle = s.design_shadow_style;
+
+    // Применяем JS-анимации как CSS-классы на .hover-card и .hover-btn
+    const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
+    const applyAnimClass = (selector: string, animVal: string) => {
+      document.querySelectorAll<HTMLElement>(selector).forEach(el => {
+        JS_ANIMS.forEach(a => el.classList.remove(`anim-${a}`));
+        if (JS_ANIMS.includes(animVal)) el.classList.add(`anim-${animVal}`);
+      });
+    };
+    if (s.design_hover_cards) applyAnimClass(".hover-card", s.design_hover_cards);
+    if (s.design_hover_buttons) applyAnimClass(".hover-btn", s.design_hover_buttons);
   }, [content?.settings]);
   return null;
 }
@@ -90,6 +107,7 @@ const App = () => (
         <CookieBanner />
         <LiveChat />
         <DesignApplicator />
+        <InteractiveAnimationsProvider />
         <BrowserRouter>
           <ScrollToTop />
           <Suspense fallback={null}>

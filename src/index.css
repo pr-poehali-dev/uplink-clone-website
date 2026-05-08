@@ -404,6 +404,375 @@
 }
 
 /* ============================================================
+   НОВЫЕ ИНТЕРАКТИВНЫЕ АНИМАЦИИ — JS-управляемые
+   ============================================================ */
+
+/* --- Magnetic (прилипание к мышке) --- */
+.anim-magnetic {
+  transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+}
+
+/* --- 3D Tilt (наклон карточки за мышкой) --- */
+.anim-tilt {
+  transition: transform 0.1s ease;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+.anim-tilt-inner {
+  transform: translateZ(20px);
+}
+
+/* --- Glitch (сбой/помехи) --- */
+.anim-glitch {
+  position: relative;
+}
+.anim-glitch:hover {
+  animation: glitchEffect 0.4s steps(1) infinite;
+}
+.anim-glitch:hover::before,
+.anim-glitch:hover::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  background: inherit;
+  border-radius: inherit;
+}
+.anim-glitch:hover::before {
+  color: #ff0080;
+  clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+  animation: glitchSlice1 0.3s steps(1) infinite;
+}
+.anim-glitch:hover::after {
+  color: #00ffff;
+  clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+  animation: glitchSlice2 0.3s steps(1) infinite reverse;
+}
+@keyframes glitchEffect {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 1px);
+  }
+  40% {
+    transform: translate(2px, -1px);
+  }
+  60% {
+    transform: translate(-1px, 2px);
+  }
+  80% {
+    transform: translate(1px, -2px);
+  }
+}
+@keyframes glitchSlice1 {
+  0%,
+  100% {
+    transform: translate(0);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translate(-4px, 0);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translate(4px, 0);
+    opacity: 0.6;
+  }
+}
+@keyframes glitchSlice2 {
+  0%,
+  100% {
+    transform: translate(0);
+    opacity: 0.8;
+  }
+  33% {
+    transform: translate(4px, 0);
+    opacity: 0.6;
+  }
+  66% {
+    transform: translate(-4px, 0);
+    opacity: 0.6;
+  }
+}
+
+/* --- Morph Border (морфинг рамки) --- */
+.anim-morph {
+  transition:
+    border-radius 0.4s ease,
+    box-shadow 0.3s ease;
+}
+.anim-morph:hover {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70% !important;
+  box-shadow: 0 0 30px rgba(var(--neon-blue-rgb), 0.4);
+}
+
+/* --- Neon Flicker (мигание неона) --- */
+.anim-flicker:hover {
+  animation: neonFlicker 0.8s ease-in-out infinite alternate;
+}
+@keyframes neonFlicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    box-shadow:
+      0 0 10px rgba(var(--neon-blue-rgb), 0.4),
+      0 0 20px rgba(var(--neon-blue-rgb), 0.3),
+      0 0 40px rgba(var(--neon-blue-rgb), 0.2);
+    border-color: rgba(var(--neon-blue-rgb), 0.8);
+  }
+  20%,
+  24%,
+  55% {
+    box-shadow: none;
+    border-color: rgba(var(--neon-blue-rgb), 0.1);
+  }
+}
+
+/* --- Rubber Band (резиновый) --- */
+.anim-rubber:hover {
+  animation: rubberBand 0.6s ease;
+}
+@keyframes rubberBand {
+  0% {
+    transform: scale(1, 1);
+  }
+  15% {
+    transform: scale(1.25, 0.75);
+  }
+  30% {
+    transform: scale(0.75, 1.25);
+  }
+  45% {
+    transform: scale(1.15, 0.85);
+  }
+  60% {
+    transform: scale(0.95, 1.05);
+  }
+  75% {
+    transform: scale(1.05, 0.95);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+/* --- Swing (качание) --- */
+.anim-swing:hover {
+  transform-origin: top center;
+  animation: swingEffect 0.6s ease;
+}
+@keyframes swingEffect {
+  0% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(12deg);
+  }
+  40% {
+    transform: rotate(-8deg);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+  80% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* --- Jello (желе) --- */
+.anim-jello:hover {
+  animation: jelloEffect 0.7s ease;
+}
+@keyframes jelloEffect {
+  0%,
+  100% {
+    transform: skewX(0deg) skewY(0deg);
+  }
+  11% {
+    transform: skewX(-12deg) skewY(-12deg);
+  }
+  22% {
+    transform: skewX(10deg) skewY(10deg);
+  }
+  33% {
+    transform: skewX(-8deg) skewY(-8deg);
+  }
+  44% {
+    transform: skewX(6deg) skewY(6deg);
+  }
+  55% {
+    transform: skewX(-4deg) skewY(-4deg);
+  }
+  66% {
+    transform: skewX(2deg) skewY(2deg);
+  }
+  77% {
+    transform: skewX(-1deg) skewY(-1deg);
+  }
+}
+
+/* --- Float Up (парение вверх) --- */
+.anim-float-up {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.anim-float-up:hover {
+  transform: translateY(-10px);
+  box-shadow:
+    0 20px 40px rgba(var(--neon-blue-rgb), 0.25),
+    0 0 60px rgba(var(--neon-blue-rgb), 0.1);
+}
+
+/* --- Spotlight Follow (прожектор за мышкой) --- */
+.anim-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+.anim-spotlight::before {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(var(--neon-blue-rgb), 0.15) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  left: var(--mouse-x, 50%);
+  top: var(--mouse-y, 50%);
+}
+.anim-spotlight:hover::before {
+  opacity: 1;
+}
+
+/* --- Shockwave (ударная волна при клике) --- */
+.anim-shockwave {
+  position: relative;
+  overflow: hidden;
+}
+.anim-shockwave::after {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  background: rgba(var(--neon-blue-rgb), 0.3);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  transition: none;
+}
+.anim-shockwave:active::after {
+  animation: shockwaveEffect 0.5s ease-out forwards;
+}
+@keyframes shockwaveEffect {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+/* --- Neon Trace (обводка по периметру) --- */
+.anim-trace {
+  position: relative;
+}
+.anim-trace::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--neon-blue),
+    transparent,
+    var(--neon-blue)
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.anim-trace:hover::before {
+  opacity: 1;
+  animation: traceAnim 1.5s linear infinite;
+}
+@keyframes traceAnim {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+/* --- Heartbeat (пульс сердца) --- */
+.anim-heartbeat:hover {
+  animation: heartbeatEffect 0.8s ease-in-out;
+}
+@keyframes heartbeatEffect {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.08);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+/* --- Neon Wipe (неоновая заливка) --- */
+.anim-wipe {
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+.anim-wipe::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--neon-blue);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  z-index: -1;
+  border-radius: inherit;
+}
+.anim-wipe:hover::before {
+  transform: scaleX(1);
+}
+.anim-wipe:hover {
+  color: #080c14 !important;
+}
+
+/* ============================================================
    DESIGN SYSTEM — SCROLL ANIMATIONS
    Управляется через data-scroll-anim на body
    ============================================================ */
