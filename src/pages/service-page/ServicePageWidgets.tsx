@@ -18,8 +18,7 @@ export function BenefitCard({ b, i }: { b: { id: number; icon: string; title: st
       ref={ref}
       data-elem-id={`card-svc-benefit-${i}`}
       data-elem-type="card"
-      className={`glass-card hover-card neon-border neon-hover rounded-2xl p-6 scroll-anim transition-all duration-700 group ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
-      style={{ transitionDelay: isVisible ? "0ms" : `${i * 80}ms` }}
+      className={`glass-card hover-card neon-border neon-hover rounded-2xl p-6 scroll-anim group ${isVisible ? "visible" : ""}`}
     >
       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
         <Icon name={b.icon as "Check"} size={24} className="text-[#080c14]" fallback="Check" />
@@ -35,8 +34,7 @@ export function StepCard({ step, index }: { step: { id: number; step_title: stri
   return (
     <div
       ref={ref}
-      className={`relative scroll-anim transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-10"}`}
-      style={{ transitionDelay: isVisible ? "0ms" : `${index * 120}ms` }}
+      className={`relative scroll-anim ${isVisible ? "visible" : ""}`}
     >
       <div
         data-elem-id={`card-svc-step-${index}`}
@@ -65,10 +63,9 @@ export function FaqRow({ f, i }: { f: { question: string; answer: string }; i: n
       ref={ref}
       data-elem-id={`card-svc-faq-${i}`}
       data-elem-type="card"
-      className={`glass-card hover-card rounded-2xl border scroll-anim transition-all duration-500 overflow-hidden ${
-        isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-6"
+      className={`glass-card hover-card rounded-2xl border scroll-anim overflow-hidden ${
+        isVisible ? "visible" : ""
       } ${open ? "border-cyan-500/40" : "border-cyan-500/15 hover:border-cyan-500/30"}`}
-      style={{ transitionDelay: isVisible ? "0ms" : `${i * 60}ms` }}
     >
       <button
         onClick={() => setOpen((p) => !p)}
@@ -99,8 +96,7 @@ export function AnimateOnScroll({ children, className = "", delay = 0 }: { child
   return (
     <div
       ref={ref}
-      className={`scroll-anim transition-all duration-700 ${className} ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
-      style={{ transitionDelay: isVisible ? "0ms" : `${delay}ms` }}
+      className={`scroll-anim ${className} ${isVisible ? "visible" : ""}`}
     >
       {children}
     </div>

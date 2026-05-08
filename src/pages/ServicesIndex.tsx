@@ -90,8 +90,7 @@ function ServiceCard({ s, i }: { s: { id: number; slug?: string | null; icon: st
       to={`/services/${s.slug}`}
       data-elem-id={`card-svclist-${s.id}`}
       data-elem-type="card"
-      className={`glass-card hover-card neon-border neon-hover rounded-2xl p-7 group flex flex-col transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
-      style={{ transitionDelay: isVisible ? "0ms" : `${i * 80}ms` }}
+      className={`glass-card hover-card neon-border neon-hover rounded-2xl p-7 group flex flex-col scroll-anim ${isVisible ? "visible" : ""}`}
     >
       <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.accent || "from-cyan-400 to-blue-500"} flex items-center justify-center shadow-lg shadow-cyan-500/30 mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
         <Icon name={s.icon as "Monitor"} size={26} className="text-[#080c14]" fallback="Settings" />

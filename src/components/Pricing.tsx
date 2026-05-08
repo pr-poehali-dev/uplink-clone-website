@@ -243,11 +243,11 @@ function PricingCard({
       ref={ref}
       data-elem-id={`card-pricing-${plan.id ?? index}`}
       data-elem-type="card"
-      className={`relative flex flex-col rounded-2xl p-8 border scroll-anim transition-[opacity,transform] duration-700 hover-card ${plan.border ?? plan.border_class ?? "border-gray-700/50"} ${
+      className={`relative flex flex-col rounded-2xl p-8 border scroll-anim hover-card ${plan.border ?? plan.border_class ?? "border-gray-700/50"} ${
         (plan.highlight ?? plan.is_highlighted)
           ? "glass-card bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 plan-highlighted"
           : "glass-card"
-      } ${isVisible ? "opacity-100 visible" : "opacity-0 translate-y-10"}`}
+      } ${isVisible ? "visible" : ""}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 120}ms` }}
     >
       {plan.badge && (
@@ -303,7 +303,7 @@ export default function Pricing({ onContactClick, plans: cmsPlans }: PricingProp
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 scroll-anim transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-16 scroll-anim ${isVisible ? "visible" : ""}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="CreditCard" size={14} />

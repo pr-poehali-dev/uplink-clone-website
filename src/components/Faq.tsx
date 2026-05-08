@@ -11,14 +11,13 @@ function FaqItem({ item, index }: { item: CmsFaqItem; index: number }) {
   return (
     <div
       ref={ref}
-      className={`rounded-2xl border transition-all duration-500 overflow-hidden scroll-anim ${
-        isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-6"
+      className={`rounded-2xl border overflow-hidden scroll-anim ${
+        isVisible ? "visible" : ""
       } ${
         open
           ? "border-cyan-500/30 bg-cyan-500/5"
           : "border-white/8 bg-white/3 hover:border-white/15 hover:bg-white/5"
       }`}
-      style={{ transitionDelay: isVisible ? "0ms" : `${index * 60}ms` }}
       itemScope
       itemProp="mainEntity"
       itemType="https://schema.org/Question"

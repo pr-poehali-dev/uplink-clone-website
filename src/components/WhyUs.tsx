@@ -65,8 +65,7 @@ function StatItem({
       ref={ref}
       data-elem-id={elemId}
       data-elem-type="card"
-      className={`text-center glass-card hover-card neon-border neon-hover rounded-2xl p-6 scroll-anim ${isVisible ? "opacity-100 scale-100 visible" : "opacity-0 scale-90"}`}
-      style={{ transitionDelay: isVisible ? '0ms' : `${delay}ms` }}
+      className={`text-center glass-card hover-card neon-border neon-hover rounded-2xl p-6 scroll-anim ${isVisible ? "visible" : ""}`}
     >
       <div className="text-4xl font-bold gradient-text font-['Oswald'] mb-2">
         {num}
@@ -97,9 +96,8 @@ function AdvCard({ card, index }: { card: CmsWhyusCard | (typeof advantages)[0];
       data-elem-id={`card-whyus-adv-${index}`}
       data-elem-type="card"
       className={`glass-card hover-card neon-border neon-hover neon-scale rounded-2xl p-6 scroll-anim ${
-        isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-10"
+        isVisible ? "visible" : ""
       }`}
-      style={{ transitionDelay: isVisible ? '0ms' : `${index * 80}ms` }}
     >
       <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${accent} flex items-center justify-center mb-4 shadow-lg transition-transform duration-300`}>
         <Icon name={icon as "Clock"} size={28} className="text-white" fallback="Check" />
@@ -128,7 +126,7 @@ export default function WhyUs({ settings, whyusCards }: { settings?: CmsSettings
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 scroll-anim transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-16 scroll-anim ${isVisible ? "visible" : ""}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="Star" size={14} />
