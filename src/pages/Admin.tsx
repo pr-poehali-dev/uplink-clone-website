@@ -23,6 +23,7 @@ import { DashboardTab } from "./admin/AdminDashboard";
 import { HomePageTab } from "./admin/HomePageTab";
 import { PrivacyPageTab } from "./admin/PrivacyPageTab";
 import { LiveChatTab } from "./admin/LiveChatTab";
+import { SectionsAnimTab } from "./admin/SectionsAnimTab";
 
 export default function Admin() {
   const auth = useAdminAuth();
@@ -176,6 +177,7 @@ export default function Admin() {
       label: "Оформление",
       items: [
         { id: "design", label: "Дизайн", icon: "Palette" },
+        { id: "sections_anim", label: "Анимации секций", icon: "Sparkles" },
         { id: "media", label: "Медиабиблиотека", icon: "Image" },
         { id: "nav", label: "Навигация", icon: "Menu" },
       ],
@@ -232,6 +234,7 @@ export default function Admin() {
 
             {/* Оформление */}
             {tab === "design" && <DesignTab content={content} password={password} save={save} saving={saving} />}
+            {tab === "sections_anim" && <SectionsAnimTab content={content} save={save} saving={saving} />}
             {tab === "media" && <MediaTab password={password} />}
             {tab === "nav" && <NavTab content={content} password={password} save={save} saving={saving} />}
 

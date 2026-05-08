@@ -84,7 +84,7 @@ export default function PricingPage() {
   const ctaBeforeItems = sectionOrder.indexOf("cta") < sectionOrder.indexOf("items");
 
   const heroSection = show("hero") ? (
-    <section key="hero" className="pt-32 pb-10 relative overflow-hidden">
+    <section key="hero" data-section="pricing_hero" className="pt-32 pb-10 relative overflow-hidden">
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
       <div className="absolute top-20 -left-40 w-96 h-96 bg-cyan-500/8 rounded-full blur-3xl pointer-events-none" />
       <div className="container mx-auto px-4 relative">
@@ -122,7 +122,7 @@ export default function PricingPage() {
   ) : null;
 
   const ctaBlock = show("cta") ? (
-    <div key="cta" className="glass-card hover-card neon-border rounded-2xl p-5 mt-4">
+    <div key="cta" data-section="pricing_cta" className="glass-card hover-card neon-border rounded-2xl p-5 mt-4">
       <p className="text-sm text-[var(--text-muted)] mb-3 leading-relaxed">{ctaText}</p>
       <button onClick={() => setModalOpen(true)} className="btn-neon hover-btn w-full py-3 rounded-xl text-sm font-semibold">
         Получить расчёт
@@ -150,7 +150,7 @@ export default function PricingPage() {
 
       {heroSection}
 
-      <section className="pb-16 relative">
+      <section data-section="pricing_list" className="pb-16 relative">
         <div className="container mx-auto px-4">
           {loading ? (
             <div className="text-center py-24 text-[var(--text-muted)]">Загрузка...</div>

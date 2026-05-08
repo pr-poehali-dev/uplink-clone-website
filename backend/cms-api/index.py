@@ -111,6 +111,9 @@ def get_all_content(conn):
     cur.execute("SELECT id, route, title, seo_title, seo_description, og_title, og_description, og_image_url, is_active, is_published, metrika_counter FROM cms_pages ORDER BY id")
     pages = [{"id": r[0], "route": r[1], "title": r[2], "seo_title": r[3], "seo_description": r[4], "og_title": r[5], "og_description": r[6], "og_image_url": r[7], "is_active": r[8], "is_published": r[9] if r[9] is not None else True, "metrika_counter": r[10]} for r in cur.fetchall()]
 
+    cur.execute("SELECT section_id, page, label, scroll_anim, hover_cards, hover_buttons, anim_speed FROM section_animations ORDER BY id")
+    section_animations = [{"section_id": r[0], "page": r[1], "label": r[2], "scroll_anim": r[3] or "inherit", "hover_cards": r[4] or "inherit", "hover_buttons": r[5] or "inherit", "anim_speed": r[6] or "inherit"} for r in cur.fetchall()]
+
     cur.close()
     return {
         "settings": settings, "services": services, "plans": plans,
@@ -122,6 +125,7 @@ def get_all_content(conn):
         "video_cameras": video_cameras, "video_equipment": video_equipment,
         "video_calc_sliders": video_calc_sliders,
         "pages": pages,
+        "section_animations": section_animations,
     }
 
 
@@ -965,6 +969,27 @@ def handler(event: dict, context) -> dict:
                         metrika_val, int(pid)))
             conn.commit()
             save_history(conn, "save_pages", "pages", "all", list(old_pages.values()), "Обновлены настройки страниц", user_id, username)
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        # ---- SECTION ANIMATIONS ----
+        if action == "save_section_animations":
+            items = body.get("items", [])
+            cur = conn.cursor()
+            for it in items:
+                sid = esc(it.get("section_id", ""))
+                if not sid:
+                    continue
+                cur.execute(
+                    "UPDATE section_animations SET scroll_anim='%s', hover_cards='%s', hover_buttons='%s', anim_speed='%s', updated_at=NOW() WHERE section_id='%s'" % (
+                        esc(it.get("scroll_anim", "inherit")),
+                        esc(it.get("hover_cards", "inherit")),
+                        esc(it.get("hover_buttons", "inherit")),
+                        esc(it.get("anim_speed", "inherit")),
+                        sid
+                    )
+                )
             conn.commit()
             cur.close()
             return ok({"ok": True})

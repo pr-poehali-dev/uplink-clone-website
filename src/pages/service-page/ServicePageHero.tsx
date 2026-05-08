@@ -21,7 +21,7 @@ export default function ServicePageHero({
   const navigate = useNavigate();
 
   return (
-    <section className="pt-32 pb-20 relative overflow-hidden">
+    <section data-section="svc_hero" className="pt-32 pb-20 relative overflow-hidden">
       {/* Декоративные блобы */}
       <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
       <div className="absolute top-20 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-blob pointer-events-none" />

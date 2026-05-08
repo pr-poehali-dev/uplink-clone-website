@@ -94,6 +94,22 @@ function DesignApplicator() {
     };
     if (s.design_hover_cards) applyAnimClass(".hover-card", s.design_hover_cards);
     if (s.design_hover_buttons) applyAnimClass(".hover-btn", s.design_hover_buttons);
+
+    // Анимации по секциям — вешаем data-атрибуты на [data-section="..."]
+    if (content?.section_animations) {
+      content.section_animations.forEach((sa) => {
+        const el = document.querySelector<HTMLElement>(`[data-section="${sa.section_id}"]`);
+        if (!el) return;
+        if (sa.scroll_anim !== "inherit") el.dataset.scrollAnim = sa.scroll_anim;
+        else el.removeAttribute("data-scroll-anim");
+        if (sa.hover_cards !== "inherit") el.dataset.hoverCards = sa.hover_cards;
+        else el.removeAttribute("data-hover-cards");
+        if (sa.hover_buttons !== "inherit") el.dataset.hoverButtons = sa.hover_buttons;
+        else el.removeAttribute("data-hover-buttons");
+        if (sa.anim_speed !== "inherit") el.dataset.animSpeed = sa.anim_speed;
+        else el.removeAttribute("data-anim-speed");
+      });
+    }
   }, [content?.settings]);
   return null;
 }

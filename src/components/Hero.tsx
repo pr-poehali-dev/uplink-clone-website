@@ -27,6 +27,7 @@ export default function Hero({ onContactClick, settings }: HeroProps) {
   return (
     <section
       id="home"
+      data-section="home"
       className="relative min-h-screen flex items-center grid-bg overflow-hidden"
     >
       <div className="absolute inset-0 pointer-events-none">

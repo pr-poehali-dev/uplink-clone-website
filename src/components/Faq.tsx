@@ -71,6 +71,7 @@ export default function Faq({ items }: FaqProps) {
 
   return (
     <section
+      data-section="faq"
       className="py-14 relative overflow-hidden faq-bg"
       itemScope
       itemType="https://schema.org/FAQPage"

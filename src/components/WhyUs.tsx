@@ -117,7 +117,7 @@ export default function WhyUs({ settings, whyusCards }: { settings?: CmsSettings
   const cards = activeCards.length > 0 ? activeCards : advantages;
 
   return (
-    <section className="py-14 relative overflow-hidden bg-[#0a0f1a]">
+    <section data-section="whyus" className="py-14 relative overflow-hidden bg-[#0a0f1a]">
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
       <div className="container mx-auto px-4">
         <div

@@ -773,6 +773,154 @@
 }
 
 /* ============================================================
+   СЕКЦИОННЫЕ АНИМАЦИИ — data-scroll-anim, data-hover-cards,
+   data-hover-buttons, data-anim-speed на [data-section="..."]
+   Переопределяют глобальные body-настройки внутри секции
+   ============================================================ */
+
+/* scroll-anim внутри секции */
+[data-section][data-scroll-anim] .scroll-anim {
+  opacity: 0;
+}
+[data-section][data-scroll-anim="fade-up"] .scroll-anim {
+  transform: translateY(30px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-section][data-scroll-anim="fade-down"] .scroll-anim {
+  transform: translateY(-30px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-section][data-scroll-anim="fade-left"] .scroll-anim {
+  transform: translateX(-40px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-section][data-scroll-anim="fade-right"] .scroll-anim {
+  transform: translateX(40px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-section][data-scroll-anim="zoom-in"] .scroll-anim {
+  transform: scale(0.85);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+[data-section][data-scroll-anim="zoom-out"] .scroll-anim {
+  transform: scale(1.15);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-section][data-scroll-anim="flip-x"] .scroll-anim {
+  transform: perspective(600px) rotateX(30deg);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+[data-section][data-scroll-anim="flip-y"] .scroll-anim {
+  transform: perspective(600px) rotateY(30deg);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+[data-section][data-scroll-anim="slide-up"] .scroll-anim {
+  transform: translateY(50px);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-section][data-scroll-anim="bounce"] .scroll-anim {
+  transform: translateY(40px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+[data-section][data-scroll-anim="rotate-in"] .scroll-anim {
+  transform: rotate(-8deg) scale(0.9);
+  transition:
+    opacity 0.6s ease,
+    transform 0.7s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+[data-section][data-scroll-anim="blur-in"] .scroll-anim {
+  filter: blur(12px);
+  transition:
+    opacity 0.7s ease,
+    filter 0.7s ease;
+}
+[data-section][data-scroll-anim] .scroll-anim.visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+[data-section][data-scroll-anim="none"] .scroll-anim {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* hover-cards внутри секции */
+[data-section][data-hover-cards="lift"] .hover-card {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+[data-section][data-hover-cards="lift"] .hover-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+[data-section][data-hover-cards="glow"] .hover-card:hover {
+  box-shadow: 0 0 30px rgba(var(--neon-blue-rgb), 0.35);
+  border-color: rgba(var(--neon-blue-rgb), 0.6) !important;
+}
+[data-section][data-hover-cards="scale"] .hover-card:hover {
+  transform: scale(1.03);
+}
+[data-section][data-hover-cards="border-glow"] .hover-card:hover {
+  border-color: var(--neon-blue) !important;
+  box-shadow:
+    0 0 0 1px var(--neon-blue),
+    0 8px 32px rgba(0, 212, 255, 0.15);
+}
+[data-section][data-hover-cards="tilt"] .hover-card:hover {
+  transform: perspective(800px) rotateY(3deg) rotateX(-2deg) translateY(-4px);
+}
+[data-section][data-hover-cards="none"] .hover-card:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+}
+
+/* hover-buttons внутри секции */
+[data-section][data-hover-buttons="glow"] .hover-btn:hover {
+  box-shadow:
+    0 0 20px rgba(var(--neon-blue-rgb), 0.6),
+    0 0 40px rgba(var(--neon-blue-rgb), 0.3);
+}
+[data-section][data-hover-buttons="scale"] .hover-btn:hover {
+  transform: scale(1.06);
+}
+[data-section][data-hover-buttons="lift"] .hover-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+[data-section][data-hover-buttons="none"] .hover-btn:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+}
+
+/* anim-speed внутри секции */
+[data-section][data-anim-speed="fast"] .scroll-anim {
+  transition-duration: 0.35s !important;
+}
+[data-section][data-anim-speed="slow"] .scroll-anim {
+  transition-duration: 1.1s !important;
+}
+
+/* ============================================================
    DESIGN SYSTEM — SCROLL ANIMATIONS
    Управляется через data-scroll-anim на body
    ============================================================ */

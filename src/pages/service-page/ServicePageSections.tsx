@@ -76,7 +76,7 @@ export default function ServicePageSections({
     ) : null,
 
     benefits: show("benefits") && benefits && benefits.length > 0 ? (
-      <section key="benefits" className="py-12 relative overflow-hidden">
+      <section key="benefits" data-section="svc_benefits" className="py-12 relative overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
         <div className="container mx-auto px-4 relative">
           <AnimateOnScroll className="text-center mb-14">
@@ -97,7 +97,7 @@ export default function ServicePageSections({
     ) : null,
 
     steps: show("steps") && steps && steps.length > 0 ? (
-      <section key="steps" className="py-12 relative overflow-hidden faq-bg">
+      <section key="steps" data-section="svc_steps" className="py-12 relative overflow-hidden faq-bg">
         <div className="container mx-auto px-4 relative">
           <AnimateOnScroll className="text-center mb-14">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
@@ -120,7 +120,7 @@ export default function ServicePageSections({
     ) : null,
 
     faq: show("faq") && sFaq && sFaq.length > 0 ? (
-      <section key="faq" className="py-12 relative">
+      <section key="faq" data-section="svc_faq" className="py-12 relative">
         <div className="container mx-auto px-4 max-w-3xl">
           <AnimateOnScroll className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
@@ -137,7 +137,7 @@ export default function ServicePageSections({
     ) : null,
 
     cta: show("cta") ? (
-      <section key="cta" className="py-12 relative">
+      <section key="cta" data-section="svc_cta" className="py-12 relative">
         <div className="container mx-auto px-4">
           <AnimateOnScroll>
             <div className="glass-card hover-card neon-border rounded-3xl p-10 md:p-16 text-center max-w-5xl mx-auto relative overflow-hidden">
@@ -178,7 +178,7 @@ export default function ServicePageSections({
     ) : null,
 
     other: show("other") && otherServices.length > 0 ? (
-      <section key="other" className="py-12 relative">
+      <section key="other" data-section="svc_other" className="py-12 relative">
         <div className="container mx-auto px-4">
           <AnimateOnScroll className="text-center mb-10">
             <h2 className="text-3xl font-bold font-['Oswald'] text-white">

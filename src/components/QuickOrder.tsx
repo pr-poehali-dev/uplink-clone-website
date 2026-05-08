@@ -141,7 +141,7 @@ export default function QuickOrder({ steps }: { steps?: CmsQuickorderStep[] }) {
   const activeSteps = steps?.filter(s => s.is_active) ?? [];
 
   return (
-    <section className="py-14 relative overflow-hidden">
+    <section data-section="quickorder" className="py-14 relative overflow-hidden">
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
       <div className="container mx-auto px-4">
         <div
