@@ -84,7 +84,7 @@ export default function Hero({ onContactClick, settings }: HeroProps) {
           >
             <button
               onClick={onContactClick}
-              className="btn-neon px-8 py-4 rounded-xl text-base font-semibold flex items-center gap-2 justify-center"
+              className="btn-neon hover-btn px-8 py-4 rounded-xl text-base font-semibold flex items-center gap-2 justify-center"
             >
               <Icon name="PhoneCall" size={20} />
               Получить бесплатную консультацию
@@ -95,7 +95,7 @@ export default function Hero({ onContactClick, settings }: HeroProps) {
                   .querySelector("#services")
                   ?.scrollIntoView({ behavior: "smooth" })
               }
-              className="btn-outline-neon px-8 py-4 rounded-xl text-base font-semibold flex items-center gap-2 justify-center"
+              className="btn-outline-neon hover-btn px-8 py-4 rounded-xl text-base font-semibold flex items-center gap-2 justify-center"
             >
               Наши услуги
               <Icon name="ArrowDown" size={20} />
@@ -108,7 +108,7 @@ export default function Hero({ onContactClick, settings }: HeroProps) {
             {stats.map((s) => (
               <div
                 key={s.value}
-                className="glass-card rounded-xl p-5 neon-border neon-hover"
+                className="glass-card hover-card rounded-xl p-5 neon-border neon-hover"
               >
                 <div className="text-3xl font-bold gradient-text font-['Oswald'] mb-1">
                   {s.value}

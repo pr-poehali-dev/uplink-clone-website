@@ -73,7 +73,7 @@ function TimelineItem({
   return (
     <div
       ref={ref}
-      className={`flex gap-4 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}
+      className={`flex gap-4 scroll-anim transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-x-0 visible" : "opacity-0 -translate-x-8"}`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <div className="flex flex-col items-center">
@@ -108,7 +108,7 @@ function ApproachItem({
   return (
     <div
       ref={ref}
-      className={`flex gap-4 glass-card neon-border neon-hover rounded-xl p-4 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"}`}
+      className={`flex gap-4 glass-card hover-card neon-border neon-hover rounded-xl p-4 scroll-anim ${isVisible ? "opacity-100 translate-x-0 visible" : "opacity-0 translate-x-8"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 100}ms` }}
     >
       <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
@@ -135,7 +135,7 @@ function TeamCard({
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border neon-hover neon-scale-sm rounded-2xl p-5 text-center ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      className={`glass-card hover-card neon-border neon-hover neon-scale-sm rounded-2xl p-5 text-center scroll-anim ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 100}ms` }}
     >
       <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center mx-auto mb-3 overflow-hidden">
@@ -169,7 +169,7 @@ export default function About({ team: cmsTeam }: { team?: CmsTeamMember[] }) {
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-16 scroll-anim transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="Info" size={14} />О компании
@@ -209,7 +209,7 @@ export default function About({ team: cmsTeam }: { team?: CmsTeamMember[] }) {
 
         <div
           ref={teamRef}
-          className={`transition-all duration-700 ${teamVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`scroll-anim transition-all duration-700 ${teamVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
         >
           <h3 className="text-2xl font-bold text-white font-['Oswald'] mb-8 text-center flex items-center justify-center gap-2">
             <Icon name="Users" size={24} className="text-cyan-400" />

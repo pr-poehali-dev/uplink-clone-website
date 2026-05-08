@@ -104,7 +104,7 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
                 <li key={s.slug}>
                   <Link
                     to={`/services/${s.slug}`}
-                    className="text-gray-500 hover:text-cyan-400 text-sm transition-colors flex items-center gap-1.5"
+                    className="hover-nav-item text-gray-500 hover:text-cyan-400 text-sm transition-colors flex items-center gap-1.5"
                   >
                     <Icon name="ChevronRight" size={12} className="text-cyan-500/50" />
                     {s.label}
@@ -121,7 +121,7 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
                 <li key={label}>
                   <button
                     onClick={() => handleAnchor(anchor)}
-                    className="text-gray-500 hover:text-cyan-400 text-sm transition-colors flex items-center gap-1.5"
+                    className="hover-nav-item text-gray-500 hover:text-cyan-400 text-sm transition-colors flex items-center gap-1.5"
                   >
                     <Icon name="ChevronRight" size={12} className="text-cyan-500/50" />
                     {label}
@@ -174,7 +174,7 @@ export default function Footer({ onContactClick, settings }: FooterProps) {
             </p>
             <Link
               to="/privacy"
-              className="text-gray-600 hover:text-cyan-400 text-xs transition-colors whitespace-nowrap"
+              className="hover-nav-item text-gray-600 hover:text-cyan-400 text-xs transition-colors whitespace-nowrap"
             >
               Политика конфиденциальности
             </Link>

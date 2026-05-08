@@ -42,7 +42,7 @@ function ContactCard({
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border neon-hover neon-scale-sm rounded-2xl p-7 text-center ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      className={`glass-card hover-card neon-border neon-hover neon-scale-sm rounded-2xl p-7 text-center scroll-anim ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: isVisible ? '0ms' : `${index * 100}ms` }}
     >
       <div
@@ -96,7 +96,7 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-16 scroll-anim transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="Phone" size={14} />
@@ -118,7 +118,7 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
         </div>
 
         <div className="mt-16 text-center">
-          <div className="glass-card neon-border neon-hover rounded-3xl p-10 max-w-2xl mx-auto">
+          <div className="glass-card hover-card neon-border neon-hover rounded-3xl p-10 max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold text-white font-['Oswald'] mb-3">
               Готовы начать сотрудничество?
             </h3>
@@ -129,14 +129,14 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={onContactClick}
-                className="btn-neon px-8 py-4 rounded-xl font-semibold flex items-center gap-2 justify-center"
+                className="btn-neon hover-btn px-8 py-4 rounded-xl font-semibold flex items-center gap-2 justify-center"
               >
                 <Icon name="Send" size={18} />
                 Оставить заявку
               </button>
               <a
                 href={settings?.phone_href ?? "tel:+79869860136"}
-                className="btn-outline-neon px-8 py-4 rounded-xl font-semibold flex items-center gap-2 justify-center"
+                className="btn-outline-neon hover-btn px-8 py-4 rounded-xl font-semibold flex items-center gap-2 justify-center"
               >
                 <Icon name="Phone" size={18} />
                 Позвонить сейчас

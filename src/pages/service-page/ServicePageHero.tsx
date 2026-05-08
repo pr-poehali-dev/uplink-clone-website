@@ -65,7 +65,7 @@ export default function ServicePageHero({
             </div>
 
             {service.price_from && (
-              <div className="inline-flex items-baseline gap-3 mb-8 px-5 py-3 rounded-2xl glass-card neon-border">
+              <div className="inline-flex items-baseline gap-3 mb-8 px-5 py-3 rounded-2xl glass-card hover-card neon-border">
                 <span className="text-sm text-gray-400">Стоимость</span>
                 <span className="text-2xl font-bold gradient-text font-['Oswald']">{service.price_from}</span>
               </div>
@@ -74,7 +74,7 @@ export default function ServicePageHero({
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={onContactClick}
-                className="btn-neon px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2"
+                className="btn-neon hover-btn px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2"
               >
                 <Icon name="PhoneCall" size={18} />
                 Получить консультацию
@@ -82,7 +82,7 @@ export default function ServicePageHero({
               {(isOutsourcing || isVideoSurveillance) && (
                 <a
                   href={isVideoSurveillance ? "#video-calculator" : "#calculator"}
-                  className="btn-outline-neon px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2"
+                  className="btn-outline-neon hover-btn px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2"
                 >
                   <Icon name="Calculator" size={18} />
                   Калькулятор
@@ -93,7 +93,7 @@ export default function ServicePageHero({
 
           {/* Карточка "Что входит" */}
           <div className="animate-fade-in-up delay-200">
-            <div className="glass-card neon-border rounded-3xl p-7 relative overflow-hidden">
+            <div className="glass-card hover-card neon-border rounded-3xl p-7 relative overflow-hidden">
               <div className="absolute -top-20 -right-20 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-5">

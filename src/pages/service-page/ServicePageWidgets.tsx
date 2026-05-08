@@ -16,7 +16,7 @@ export function BenefitCard({ b, i }: { b: { id: number; icon: string; title: st
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border neon-hover rounded-2xl p-6 transition-all duration-700 group ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      className={`glass-card hover-card neon-border neon-hover rounded-2xl p-6 scroll-anim transition-all duration-700 group ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${i * 80}ms` }}
     >
       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
@@ -33,10 +33,10 @@ export function StepCard({ step, index }: { step: { id: number; step_title: stri
   return (
     <div
       ref={ref}
-      className={`relative transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+      className={`relative scroll-anim transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-10"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 120}ms` }}
     >
-      <div className="glass-card neon-border rounded-2xl p-6 pt-12 h-full hover:border-cyan-500/40 transition-colors duration-300">
+      <div className="glass-card hover-card neon-border rounded-2xl p-6 pt-12 h-full hover:border-cyan-500/40 transition-colors duration-300">
         <div className="absolute -top-2 left-1/2 -translate-x-1/2 lg:left-6 lg:translate-x-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center font-bold text-2xl text-[#080c14] shadow-lg shadow-cyan-500/40 font-['Oswald'] z-10">
           {index + 1}
         </div>
@@ -57,8 +57,8 @@ export function FaqRow({ f, i }: { f: { question: string; answer: string }; i: n
   return (
     <div
       ref={ref}
-      className={`glass-card rounded-2xl border transition-all duration-500 overflow-hidden ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      className={`glass-card hover-card rounded-2xl border scroll-anim transition-all duration-500 overflow-hidden ${
+        isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-6"
       } ${open ? "border-cyan-500/40" : "border-cyan-500/15 hover:border-cyan-500/30"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${i * 60}ms` }}
     >
@@ -91,7 +91,7 @@ export function AnimateOnScroll({ children, className = "", delay = 0 }: { child
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ${className} ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      className={`scroll-anim transition-all duration-700 ${className} ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${delay}ms` }}
     >
       {children}

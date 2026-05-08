@@ -129,7 +129,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
         <nav className="hidden lg:flex items-center gap-1">
           <button
             onClick={() => handleNav("/")}
-            className="px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
+            className="hover-nav-item px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
           >
             Главная
           </button>
@@ -142,7 +142,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
           >
             <button
               onClick={() => setServicesOpen((p) => !p)}
-              className={`px-4 py-2 text-sm transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium flex items-center gap-1 ${
+              className={`hover-nav-item px-4 py-2 text-sm transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium flex items-center gap-1 ${
                 servicesOpen || location.pathname.startsWith("/services")
                   ? "text-cyan-400"
                   : "text-gray-300 hover:text-cyan-400"
@@ -174,7 +174,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
                     key={s.id}
                     to={`/services/${s.slug}`}
                     onClick={() => setServicesOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cyan-500/10 transition-all group"
+                    className="hover-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cyan-500/10 transition-all group"
                     style={{
                       animation: servicesOpen ? `fadeInUp 0.3s ${i * 40}ms both` : "none",
                     }}
@@ -201,14 +201,14 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
             <button
               key={l.href}
               onClick={() => handleNav(l.href)}
-              className="px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
+              className="hover-nav-item px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
             >
               {l.label}
             </button>
           ))}
           <Link
             to="/pricing"
-            className="px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
+            className="hover-nav-item px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
           >
             Прайс
           </Link>
@@ -279,7 +279,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
         <div className="lg:hidden bg-[#080c14]/98 backdrop-blur-md border-t border-cyan-500/10 px-4 py-4 max-h-[calc(100vh-5rem)] overflow-y-auto animate-fade-in">
           <button
             onClick={() => handleNav("/")}
-            className="block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
+            className="hover-nav-item block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
           >
             Главная
           </button>
@@ -288,7 +288,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
           <div className="border-b border-gray-800/50">
             <button
               onClick={() => setMobileServicesOpen((p) => !p)}
-              className="w-full flex items-center justify-between py-3 text-gray-300 hover:text-cyan-400 transition-colors text-sm font-medium"
+              className="hover-nav-item w-full flex items-center justify-between py-3 text-gray-300 hover:text-cyan-400 transition-colors text-sm font-medium"
             >
               Услуги
               <Icon name="ChevronDown" size={16} className={`transition-transform ${mobileServicesOpen ? "rotate-180" : ""}`} />
@@ -300,7 +300,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
                     key={s.id}
                     to={`/services/${s.slug}`}
                     onClick={() => setMenuOpen(false)}
-                    className="block py-2 text-sm text-gray-400 hover:text-cyan-400"
+                    className="hover-nav-item block py-2 text-sm text-gray-400 hover:text-cyan-400"
                   >
                     {s.title}
                   </Link>
@@ -313,7 +313,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
             <button
               key={l.href}
               onClick={() => handleNav(l.href)}
-              className="block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
+              className="hover-nav-item block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
             >
               {l.label}
             </button>
@@ -321,7 +321,7 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
           <Link
             to="/pricing"
             onClick={() => setMenuOpen(false)}
-            className="block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
+            className="hover-nav-item block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
           >
             Прайс
           </Link>

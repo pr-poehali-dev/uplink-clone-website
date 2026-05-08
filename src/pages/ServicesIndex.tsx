@@ -64,7 +64,7 @@ export default function ServicesIndex() {
           <div className="mt-12 text-center">
             <button
               onClick={() => open("Каталог услуг")}
-              className="btn-neon px-10 py-4 rounded-xl font-semibold inline-flex items-center gap-3 animate-glow"
+              className="btn-neon hover-btn px-10 py-4 rounded-xl font-semibold inline-flex items-center gap-3 animate-glow"
             >
               <Icon name="PhoneCall" size={20} />
               Заказать IT-аудит бесплатно
@@ -86,7 +86,7 @@ function ServiceCard({ s, i }: { s: { id: number; slug?: string | null; icon: st
     <Link
       ref={ref as unknown as React.Ref<HTMLAnchorElement>}
       to={`/services/${s.slug}`}
-      className={`glass-card neon-border neon-hover rounded-2xl p-7 group flex flex-col transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+      className={`glass-card hover-card neon-border neon-hover rounded-2xl p-7 group flex flex-col transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${i * 80}ms` }}
     >
       <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.accent || "from-cyan-400 to-blue-500"} flex items-center justify-center shadow-lg shadow-cyan-500/30 mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>

@@ -118,7 +118,7 @@ function PlanOrderModal({ plan, onClose }: PlanOrderModalProps) {
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose} />
-      <div className="relative w-full max-w-md glass-card rounded-3xl border border-cyan-500/20 shadow-2xl shadow-cyan-500/10 overflow-hidden">
+      <div className="relative w-full max-w-md glass-card modal-anim rounded-3xl border border-cyan-500/20 shadow-2xl shadow-cyan-500/10 overflow-hidden">
         <div className="h-1 bg-gradient-to-r from-cyan-400 to-blue-500" />
         <div className="p-8">
           <button
@@ -145,7 +145,7 @@ function PlanOrderModal({ plan, onClose }: PlanOrderModalProps) {
               <p className="text-gray-400 text-sm mb-6">
                 Свяжемся с вами в ближайшее время для уточнения деталей и подписания договора.
               </p>
-              <button onClick={handleClose} className="btn-neon px-8 py-3 rounded-xl font-semibold">
+              <button onClick={handleClose} className="btn-neon hover-btn px-8 py-3 rounded-xl font-semibold">
                 Отлично, жду звонка!
               </button>
             </div>
@@ -200,7 +200,7 @@ function PlanOrderModal({ plan, onClose }: PlanOrderModalProps) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-neon w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="btn-neon hover-btn w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {loading ? (
                     <>
@@ -241,11 +241,11 @@ function PricingCard({
   return (
     <div
       ref={ref}
-      className={`relative flex flex-col rounded-2xl p-8 border transition-[opacity,transform] duration-700 ${plan.border ?? plan.border_class ?? "border-gray-700/50"} ${
+      className={`relative flex flex-col rounded-2xl p-8 border scroll-anim transition-[opacity,transform] duration-700 ${plan.border ?? plan.border_class ?? "border-gray-700/50"} ${
         (plan.highlight ?? plan.is_highlighted)
           ? "bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 scale-105"
-          : "glass-card"
-      } ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          : "glass-card hover-card"
+      } ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-10"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 120}ms` }}
     >
       {plan.badge && (
@@ -273,7 +273,7 @@ function PricingCard({
       </ul>
       <button
         onClick={onSelect}
-        className={`${plan.btnClass ?? plan.btn_class ?? "btn-outline-neon"} w-full py-3 rounded-xl font-semibold text-sm`}
+        className={`${plan.btnClass ?? plan.btn_class ?? "btn-outline-neon"} hover-btn w-full py-3 rounded-xl font-semibold text-sm`}
       >
         Выбрать тариф
       </button>
@@ -299,7 +299,7 @@ export default function Pricing({ onContactClick, plans: cmsPlans }: PricingProp
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-16 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-16 scroll-anim transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="CreditCard" size={14} />
@@ -323,7 +323,7 @@ export default function Pricing({ onContactClick, plans: cmsPlans }: PricingProp
           <p className="text-gray-400 mb-4 text-sm">Нужен индивидуальный расчёт?</p>
           <button
             onClick={onContactClick}
-            className="btn-outline-neon px-8 py-3 rounded-xl font-semibold text-sm"
+            className="btn-outline-neon hover-btn px-8 py-3 rounded-xl font-semibold text-sm"
           >
             Получить коммерческое предложение
           </button>

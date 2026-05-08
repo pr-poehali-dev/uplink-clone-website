@@ -45,7 +45,7 @@ export default function CalculatorModal({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal — использует CSS-переменные темы */}
-      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col modal-anim rounded-2xl shadow-2xl overflow-hidden"
         style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}
       >
         {/* Header */}

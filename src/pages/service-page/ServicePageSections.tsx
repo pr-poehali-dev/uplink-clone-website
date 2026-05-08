@@ -50,7 +50,7 @@ export default function ServicePageSections({
 
             {service.for_whom && (
               <AnimateOnScroll className="self-start">
-                <div className="glass-card neon-border rounded-3xl p-6 sticky top-24">
+                <div className="glass-card hover-card neon-border rounded-3xl p-6 sticky top-24">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
                       <Icon name="Users" size={18} className="text-[#080c14]" />
@@ -61,7 +61,7 @@ export default function ServicePageSections({
                   <div className="mt-5 pt-5 border-t border-cyan-500/15">
                     <button
                       onClick={() => onContactClick(`Услуга sidebar: ${service.title}`)}
-                      className="w-full btn-neon py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-sm"
+                      className="w-full btn-neon hover-btn py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-sm"
                     >
                       <Icon name="Send" size={16} />
                       Обсудить задачу
@@ -140,7 +140,7 @@ export default function ServicePageSections({
       <section key="cta" className="py-12 relative">
         <div className="container mx-auto px-4">
           <AnimateOnScroll>
-            <div className="glass-card neon-border rounded-3xl p-10 md:p-16 text-center max-w-5xl mx-auto relative overflow-hidden">
+            <div className="glass-card hover-card neon-border rounded-3xl p-10 md:p-16 text-center max-w-5xl mx-auto relative overflow-hidden">
               <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
               <div className="absolute -top-32 -left-32 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-blob pointer-events-none" />
               <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-blob pointer-events-none" style={{ animationDelay: "3s" }} />
@@ -157,14 +157,14 @@ export default function ServicePageSections({
                 <div className="flex flex-wrap justify-center gap-3">
                   <button
                     onClick={() => onContactClick(`CTA услуги: ${service.title}`)}
-                    className="btn-neon px-10 py-4 rounded-xl font-semibold inline-flex items-center gap-3 animate-glow"
+                    className="btn-neon hover-btn px-10 py-4 rounded-xl font-semibold inline-flex items-center gap-3 animate-glow"
                   >
                     <Icon name="Send" size={20} />
                     Оставить заявку
                   </button>
                   <a
                     href={settings?.phone_href || "tel:+78452397738"}
-                    className="btn-outline-neon px-10 py-4 rounded-xl font-semibold inline-flex items-center gap-3"
+                    className="btn-outline-neon hover-btn px-10 py-4 rounded-xl font-semibold inline-flex items-center gap-3"
                   >
                     <Icon name="Phone" size={20} />
                     {settings?.phone || "Позвонить"}
@@ -190,7 +190,7 @@ export default function ServicePageSections({
               <AnimateOnScroll key={s.id} delay={i * 100}>
                 <Link
                   to={`/services/${s.slug}`}
-                  className="block glass-card neon-border neon-hover rounded-2xl p-6 group h-full"
+                  className="block glass-card hover-card neon-border neon-hover rounded-2xl p-6 group h-full"
                 >
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${s.accent || "from-cyan-400 to-blue-500"} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon name={s.icon as "Monitor"} size={20} className="text-[#080c14]" fallback="Settings" />

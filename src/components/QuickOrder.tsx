@@ -84,7 +84,7 @@ function ServiceAccordion({ s }: { s: (typeof services)[0] }) {
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border neon-hover rounded-2xl overflow-hidden ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}
+      className={`glass-card hover-card neon-border neon-hover rounded-2xl overflow-hidden scroll-anim ${isVisible ? "opacity-100 translate-x-0 visible" : "opacity-0 -translate-x-8"}`}
     >
       <button
         onClick={() => setOpen(!open)}
@@ -123,7 +123,7 @@ function CmsStepCard({ step, index }: { step: CmsQuickorderStep; index: number }
   return (
     <div
       ref={ref}
-      className={`glass-card neon-border rounded-2xl p-6 text-center transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+      className={`glass-card hover-card neon-border rounded-2xl p-6 text-center scroll-anim transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 100}ms` }}
     >
       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-cyan-500/20">
@@ -146,7 +146,7 @@ export default function QuickOrder({ steps }: { steps?: CmsQuickorderStep[] }) {
       <div className="container mx-auto px-4">
         <div
           ref={ref}
-          className={`text-center mb-12 transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center mb-12 scroll-anim transition-[opacity,transform] duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4">
             <Icon name="Zap" size={14} />

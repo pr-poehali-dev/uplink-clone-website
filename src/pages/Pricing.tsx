@@ -122,9 +122,9 @@ export default function PricingPage() {
   ) : null;
 
   const ctaBlock = show("cta") ? (
-    <div key="cta" className="glass-card neon-border rounded-2xl p-5 mt-4">
+    <div key="cta" className="glass-card hover-card neon-border rounded-2xl p-5 mt-4">
       <p className="text-sm text-[var(--text-muted)] mb-3 leading-relaxed">{ctaText}</p>
-      <button onClick={() => setModalOpen(true)} className="btn-neon w-full py-3 rounded-xl text-sm font-semibold">
+      <button onClick={() => setModalOpen(true)} className="btn-neon hover-btn w-full py-3 rounded-xl text-sm font-semibold">
         Получить расчёт
       </button>
     </div>
@@ -158,7 +158,7 @@ export default function PricingPage() {
             <div className="grid lg:grid-cols-[260px_1fr] gap-8 max-w-7xl mx-auto">
               {/* Левая панель — категории + CTA/info если они перед items */}
               <div className="lg:sticky lg:top-24 h-fit">
-                <div className="glass-card neon-border rounded-2xl p-3 space-y-1">
+                <div className="glass-card hover-card neon-border rounded-2xl p-3 space-y-1">
                   {categories.map((cat) => (
                     <button
                       key={cat.slug}
@@ -202,7 +202,7 @@ export default function PricingPage() {
 
                 <div className="space-y-3">
                   {activeItems.map((item) => (
-                    <div key={item.id} className="glass-card neon-border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-3 group hover:border-cyan-500/30 transition-all">
+                    <div key={item.id} className="glass-card hover-card neon-border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-3 group hover:border-cyan-500/30 transition-all">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-[var(--text-primary)] mb-1">{item.name}</h3>
                         <p className="text-sm text-[var(--text-muted)] leading-relaxed">{item.description}</p>

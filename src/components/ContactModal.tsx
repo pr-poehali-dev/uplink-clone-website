@@ -126,7 +126,7 @@ export default function ContactModal({ open, onClose, source = "Не указа�
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={handleClose}
       />
-      <div className="relative w-full max-w-lg glass-card rounded-3xl border border-cyan-500/20 shadow-2xl shadow-cyan-500/10 overflow-hidden">
+      <div className="relative w-full max-w-lg glass-card hover-card modal-anim rounded-3xl border border-cyan-500/20 shadow-2xl shadow-cyan-500/10 overflow-hidden">
         <div className="h-1 bg-gradient-to-r from-cyan-400 to-blue-500" />
         <div className="p-8">
           <button
@@ -150,7 +150,7 @@ export default function ContactModal({ open, onClose, source = "Не указа�
                   8 (845) 239-77-38
                 </a>
               </p>
-              <button onClick={handleClose} className="btn-neon px-8 py-3 rounded-xl font-semibold">
+              <button onClick={handleClose} className="btn-neon hover-btn px-8 py-3 rounded-xl font-semibold">
                 Закрыть
               </button>
             </div>
@@ -249,7 +249,7 @@ export default function ContactModal({ open, onClose, source = "Не указа�
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-neon w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="btn-neon hover-btn w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {loading ? (
                     <>
