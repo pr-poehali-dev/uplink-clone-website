@@ -64,6 +64,8 @@ export default function ServicesIndex() {
           <div className="mt-12 text-center">
             <button
               onClick={() => open("Каталог услуг")}
+              data-elem-id="btn-svclist-cta"
+              data-elem-type="btn"
               className="btn-neon hover-btn px-10 py-4 rounded-xl font-semibold inline-flex items-center gap-3 animate-glow"
             >
               <Icon name="PhoneCall" size={20} />
@@ -86,6 +88,8 @@ function ServiceCard({ s, i }: { s: { id: number; slug?: string | null; icon: st
     <Link
       ref={ref as unknown as React.Ref<HTMLAnchorElement>}
       to={`/services/${s.slug}`}
+      data-elem-id={`card-svclist-${s.id}`}
+      data-elem-type="card"
       className={`glass-card hover-card neon-border neon-hover rounded-2xl p-7 group flex flex-col transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${i * 80}ms` }}
     >

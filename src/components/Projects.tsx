@@ -49,11 +49,13 @@ const projects = [
 
 type ProjectDisplay = { category: string; client?: string; title?: string; desc?: string; description?: string; metrics: { label: string; value: string }[]; tags?: string[]; icon?: string; accent: string; result?: string | null };
 
-function ProjectCard({ p, index }: { p: ProjectDisplay; index: number }) {
+function ProjectCard({ p, index }: { p: ProjectDisplay & { id?: number }; index: number }) {
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div
       ref={ref}
+      data-elem-id={`card-projects-${p.id ?? index}`}
+      data-elem-type="card"
       className={`glass-card hover-card neon-border neon-hover neon-scale rounded-2xl overflow-hidden flex flex-col scroll-anim ${
         isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-10"
       }`}

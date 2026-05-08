@@ -114,6 +114,9 @@ def get_all_content(conn):
     cur.execute("SELECT section_id, page, label, scroll_anim, hover_cards, hover_buttons, anim_speed FROM section_animations ORDER BY id")
     section_animations = [{"section_id": r[0], "page": r[1], "label": r[2], "scroll_anim": r[3] or "inherit", "hover_cards": r[4] or "inherit", "hover_buttons": r[5] or "inherit", "anim_speed": r[6] or "inherit"} for r in cur.fetchall()]
 
+    cur.execute("SELECT elem_id, section_id, elem_type, label, hover_anim, scroll_anim, anim_speed FROM element_animations")
+    element_animations = [{"elem_id": r[0], "section_id": r[1], "elem_type": r[2], "label": r[3] or r[0], "hover_anim": r[4] or "inherit", "scroll_anim": r[5] or "inherit", "anim_speed": r[6] or "inherit"} for r in cur.fetchall()]
+
     cur.close()
     return {
         "settings": settings, "services": services, "plans": plans,
@@ -126,6 +129,7 @@ def get_all_content(conn):
         "video_calc_sliders": video_calc_sliders,
         "pages": pages,
         "section_animations": section_animations,
+        "element_animations": element_animations,
     }
 
 
@@ -971,6 +975,39 @@ def handler(event: dict, context) -> dict:
             save_history(conn, "save_pages", "pages", "all", list(old_pages.values()), "Обновлены настройки страниц", user_id, username)
             conn.commit()
             cur.close()
+            return ok({"ok": True})
+
+        # ---- ELEMENT ANIMATIONS ----
+        if action == "save_element_animation":
+            item = body.get("item", {})
+            eid = esc(item.get("elem_id", ""))
+            if not eid:
+                return err("elem_id required")
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO element_animations (elem_id, section_id, elem_type, label, hover_anim, scroll_anim, anim_speed, updated_at) "
+                "VALUES ('%s', %s, '%s', '%s', '%s', '%s', '%s', NOW()) "
+                "ON CONFLICT (elem_id) DO UPDATE SET section_id=EXCLUDED.section_id, elem_type=EXCLUDED.elem_type, label=EXCLUDED.label, hover_anim=EXCLUDED.hover_anim, scroll_anim=EXCLUDED.scroll_anim, anim_speed=EXCLUDED.anim_speed, updated_at=NOW()" % (
+                    eid,
+                    ("'%s'" % esc(item.get("section_id", ""))) if item.get("section_id") else "NULL",
+                    esc(item.get("elem_type", "card")),
+                    esc(item.get("label", eid)),
+                    esc(item.get("hover_anim", "inherit")),
+                    esc(item.get("scroll_anim", "inherit")),
+                    esc(item.get("anim_speed", "inherit")),
+                )
+            )
+            conn.commit()
+            cur.close()
+            return ok({"ok": True})
+
+        if action == "delete_element_animation":
+            eid = esc(body.get("elem_id", ""))
+            if eid:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM element_animations WHERE elem_id='%s'" % eid)
+                conn.commit()
+                cur.close()
             return ok({"ok": True})
 
         # ---- SECTION ANIMATIONS ----

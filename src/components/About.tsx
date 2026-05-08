@@ -108,6 +108,8 @@ function ApproachItem({
   return (
     <div
       ref={ref}
+      data-elem-id={`card-about-approach-${index}`}
+      data-elem-type="card"
       className={`flex gap-4 glass-card hover-card neon-border neon-hover rounded-xl p-4 scroll-anim ${isVisible ? "opacity-100 translate-x-0 visible" : "opacity-0 translate-x-8"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 100}ms` }}
     >
@@ -135,6 +137,8 @@ function TeamCard({
   return (
     <div
       ref={ref}
+      data-elem-id={`card-team-${index}`}
+      data-elem-type="card"
       className={`glass-card hover-card neon-border neon-hover neon-scale-sm rounded-2xl p-5 text-center scroll-anim ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 100}ms` }}
     >

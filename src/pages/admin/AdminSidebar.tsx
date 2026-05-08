@@ -4,7 +4,7 @@ export type Tab =
   | "dashboard" | "leads" | "settings" | "sections" | "services" | "plans"
   | "calculator" | "projects" | "team" | "faq" | "secrets" | "password"
   | "whyus" | "quickorder" | "pricing" | "nav" | "videocalc" | "pages"
-  | "media" | "design" | "sections_anim" | "users" | "history" | "seo"
+  | "media" | "design" | "sections_anim" | "visual_editor" | "users" | "history" | "seo"
   | "home" | "privacy" | "livechat";
 
 export interface NavGroup {

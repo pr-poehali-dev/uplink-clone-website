@@ -52,15 +52,19 @@ function StatItem({
   num,
   label,
   delay,
+  elemId,
 }: {
   num: string;
   label: string;
   delay: number;
+  elemId: string;
 }) {
   const { ref, isVisible } = useScrollAnimation();
   return (
     <div
       ref={ref}
+      data-elem-id={elemId}
+      data-elem-type="card"
       className={`text-center glass-card hover-card neon-border neon-hover rounded-2xl p-6 scroll-anim ${isVisible ? "opacity-100 scale-100 visible" : "opacity-0 scale-90"}`}
       style={{ transitionDelay: isVisible ? '0ms' : `${delay}ms` }}
     >
@@ -90,6 +94,8 @@ function AdvCard({ card, index }: { card: CmsWhyusCard | (typeof advantages)[0];
   return (
     <div
       ref={ref}
+      data-elem-id={`card-whyus-adv-${index}`}
+      data-elem-type="card"
       className={`glass-card hover-card neon-border neon-hover neon-scale rounded-2xl p-6 scroll-anim ${
         isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-10"
       }`}

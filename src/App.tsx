@@ -11,6 +11,7 @@ import LiveChat from "@/components/LiveChat";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { useCmsContent } from "@/hooks/useCmsContent";
 import { useInteractiveAnimations } from "@/hooks/useInteractiveAnimations";
+import { useVisualEditor } from "@/hooks/useVisualEditor";
 
 const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -22,6 +23,11 @@ const queryClient = new QueryClient();
 
 function InteractiveAnimationsProvider() {
   useInteractiveAnimations();
+  return null;
+}
+
+function VisualEditorProvider() {
+  useVisualEditor();
   return null;
 }
 
@@ -95,6 +101,25 @@ function DesignApplicator() {
     if (s.design_hover_cards) applyAnimClass(".hover-card", s.design_hover_cards);
     if (s.design_hover_buttons) applyAnimClass(".hover-btn", s.design_hover_buttons);
 
+    // Анимации по элементам — применяем к [data-elem-id="..."]
+    if (content?.element_animations) {
+      const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
+      content.element_animations.forEach((ea) => {
+        const el = document.querySelector<HTMLElement>(`[data-elem-id="${ea.elem_id}"]`);
+        if (!el) return;
+        // Hover JS-анимация
+        JS_ANIMS.forEach((a) => el.classList.remove(`anim-${a}`));
+        if (ea.hover_anim !== "inherit" && JS_ANIMS.includes(ea.hover_anim)) {
+          el.classList.add(`anim-${ea.hover_anim}`);
+        }
+        // data-атрибуты для CSS scroll и speed
+        if (ea.scroll_anim !== "inherit") el.dataset.elemScrollAnim = ea.scroll_anim;
+        else delete el.dataset.elemScrollAnim;
+        if (ea.anim_speed !== "inherit") el.dataset.elemAnimSpeed = ea.anim_speed;
+        else delete el.dataset.elemAnimSpeed;
+      });
+    }
+
     // Анимации по секциям — вешаем data-атрибуты на [data-section="..."]
     if (content?.section_animations) {
       content.section_animations.forEach((sa) => {
@@ -124,6 +149,7 @@ const App = () => (
         <LiveChat />
         <DesignApplicator />
         <InteractiveAnimationsProvider />
+        <VisualEditorProvider />
         <BrowserRouter>
           <ScrollToTop />
           <Suspense fallback={null}>

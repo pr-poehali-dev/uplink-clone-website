@@ -42,6 +42,8 @@ function ContactCard({
   return (
     <div
       ref={ref}
+      data-elem-id={`card-contacts-${index}`}
+      data-elem-type="card"
       className={`glass-card hover-card neon-border neon-hover neon-scale-sm rounded-2xl p-7 text-center scroll-anim ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: isVisible ? '0ms' : `${index * 100}ms` }}
     >
@@ -130,6 +132,8 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={onContactClick}
+                data-elem-id="btn-contacts-cta"
+                data-elem-type="btn"
                 className="btn-neon hover-btn px-8 py-4 rounded-xl font-semibold flex items-center gap-2 justify-center"
               >
                 <Icon name="Send" size={18} />
@@ -137,6 +141,8 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
               </button>
               <a
                 href={settings?.phone_href ?? "tel:+79869860136"}
+                data-elem-id="btn-contacts-call"
+                data-elem-type="btn"
                 className="btn-outline-neon hover-btn px-8 py-4 rounded-xl font-semibold flex items-center gap-2 justify-center"
               >
                 <Icon name="Phone" size={18} />

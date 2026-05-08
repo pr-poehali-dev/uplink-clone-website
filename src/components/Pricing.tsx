@@ -233,7 +233,7 @@ function PricingCard({
   index,
   onSelect,
 }: {
-  plan: PlanDisplay;
+  plan: PlanDisplay & { id?: number };
   index: number;
   onSelect: () => void;
 }) {
@@ -241,6 +241,8 @@ function PricingCard({
   return (
     <div
       ref={ref}
+      data-elem-id={`card-pricing-${plan.id ?? index}`}
+      data-elem-type="card"
       className={`relative flex flex-col rounded-2xl p-8 border scroll-anim transition-[opacity,transform] duration-700 ${plan.border ?? plan.border_class ?? "border-gray-700/50"} ${
         (plan.highlight ?? plan.is_highlighted)
           ? "bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 scale-105"
@@ -273,6 +275,8 @@ function PricingCard({
       </ul>
       <button
         onClick={onSelect}
+        data-elem-id={`btn-pricing-${plan.id ?? index}`}
+        data-elem-type="btn"
         className={`${plan.btnClass ?? plan.btn_class ?? "btn-outline-neon"} hover-btn w-full py-3 rounded-xl font-semibold text-sm`}
       >
         Выбрать тариф

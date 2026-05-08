@@ -74,6 +74,8 @@ export default function ServicePageHero({
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={onContactClick}
+                data-elem-id="btn-svc-hero-cta"
+                data-elem-type="btn"
                 className="btn-neon hover-btn px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2"
               >
                 <Icon name="PhoneCall" size={18} />
@@ -82,6 +84,8 @@ export default function ServicePageHero({
               {(isOutsourcing || isVideoSurveillance) && (
                 <a
                   href={isVideoSurveillance ? "#video-calculator" : "#calculator"}
+                  data-elem-id="btn-svc-hero-calc"
+                  data-elem-type="btn"
                   className="btn-outline-neon hover-btn px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2"
                 >
                   <Icon name="Calculator" size={18} />
@@ -93,7 +97,11 @@ export default function ServicePageHero({
 
           {/* Карточка "Что входит" */}
           <div className="animate-fade-in-up delay-200">
-            <div className="glass-card hover-card neon-border rounded-3xl p-7 relative overflow-hidden">
+            <div
+              data-elem-id="card-svc-hero-info"
+              data-elem-type="card"
+              className="glass-card hover-card neon-border rounded-3xl p-7 relative overflow-hidden"
+            >
               <div className="absolute -top-20 -right-20 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-5">

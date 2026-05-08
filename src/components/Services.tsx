@@ -33,7 +33,7 @@ interface CardService {
   slug?: string | null;
 }
 
-function ServiceCard({ s, index, onCalcClick }: { s: CardService; index: number; onCalcClick?: (type: CalcModalType) => void }) {
+function ServiceCard({ s, index, onCalcClick }: { s: CardService & { id?: number }; index: number; onCalcClick?: (type: CalcModalType) => void }) {
   const { ref, isVisible } = useScrollAnimation();
   const hasPage = !!s.slug;
   const calcType = s.slug ? CALC_SLUGS[s.slug] : undefined;
@@ -41,6 +41,8 @@ function ServiceCard({ s, index, onCalcClick }: { s: CardService; index: number;
   return (
     <div
       ref={ref}
+      data-elem-id={`card-services-${s.id ?? index}`}
+      data-elem-type="card"
       className={`glass-card hover-card neon-border neon-hover rounded-2xl p-6 flex flex-col gap-4 scroll-anim transition-[opacity,transform] duration-700 ${
         isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-10"
       }`}
@@ -125,6 +127,8 @@ export default function Services({ onContactClick, onCalcClick, services: cmsSer
         <div className="flex flex-wrap justify-center gap-3">
           <button
             onClick={onContactClick}
+            data-elem-id="btn-services-cta"
+            data-elem-type="btn"
             className="btn-neon hover-btn px-10 py-4 rounded-xl text-base font-semibold flex items-center gap-3 animate-glow"
           >
             <Icon name="PhoneCall" size={20} />

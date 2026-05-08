@@ -16,6 +16,8 @@ export function BenefitCard({ b, i }: { b: { id: number; icon: string; title: st
   return (
     <div
       ref={ref}
+      data-elem-id={`card-svc-benefit-${i}`}
+      data-elem-type="card"
       className={`glass-card hover-card neon-border neon-hover rounded-2xl p-6 scroll-anim transition-all duration-700 group ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-8"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${i * 80}ms` }}
     >
@@ -36,7 +38,11 @@ export function StepCard({ step, index }: { step: { id: number; step_title: stri
       className={`relative scroll-anim transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-10"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 120}ms` }}
     >
-      <div className="glass-card hover-card neon-border rounded-2xl p-6 pt-12 h-full hover:border-cyan-500/40 transition-colors duration-300">
+      <div
+        data-elem-id={`card-svc-step-${index}`}
+        data-elem-type="card"
+        className="glass-card hover-card neon-border rounded-2xl p-6 pt-12 h-full hover:border-cyan-500/40 transition-colors duration-300"
+      >
         <div className="absolute -top-2 left-1/2 -translate-x-1/2 lg:left-6 lg:translate-x-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center font-bold text-2xl text-[#080c14] shadow-lg shadow-cyan-500/40 font-['Oswald'] z-10">
           {index + 1}
         </div>
@@ -57,6 +63,8 @@ export function FaqRow({ f, i }: { f: { question: string; answer: string }; i: n
   return (
     <div
       ref={ref}
+      data-elem-id={`card-svc-faq-${i}`}
+      data-elem-type="card"
       className={`glass-card hover-card rounded-2xl border scroll-anim transition-all duration-500 overflow-hidden ${
         isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-6"
       } ${open ? "border-cyan-500/40" : "border-cyan-500/15 hover:border-cyan-500/30"}`}

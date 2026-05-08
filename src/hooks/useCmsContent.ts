@@ -237,6 +237,16 @@ export interface CmsSectionAnimation {
   anim_speed: string;
 }
 
+export interface CmsElementAnimation {
+  elem_id: string;
+  section_id: string | null;
+  elem_type: string;
+  label: string;
+  hover_anim: string;
+  scroll_anim: string;
+  anim_speed: string;
+}
+
 export interface CmsLead {
   id: number;
   name: string;
@@ -268,6 +278,7 @@ export interface CmsContent {
   video_calc_sliders?: CmsVideoCalcSlider[];
   pages?: CmsPage[];
   section_animations?: CmsSectionAnimation[];
+  element_animations?: CmsElementAnimation[];
 }
 
 const CACHE_KEY = "cms_content_cache_v6";
