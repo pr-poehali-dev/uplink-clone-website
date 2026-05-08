@@ -188,6 +188,8 @@ export interface CmsVideoCameraType {
   icon: string;
   sort_order: number;
   is_active: boolean;
+  min_val: number;
+  max_val: number;
 }
 
 export interface CmsVideoEquipment {

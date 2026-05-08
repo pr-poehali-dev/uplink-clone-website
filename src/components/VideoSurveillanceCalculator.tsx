@@ -18,9 +18,9 @@ const num = (v: number | undefined, d: number) =>
   (v !== undefined && Number.isFinite(v)) ? v : d;
 
 const DEFAULT_CAMERA_TYPES: CmsVideoCameraType[] = [
-  { id: 1, label: "Внутренние камеры", price: 1500, icon: "Camera", sort_order: 1, is_active: true },
-  { id: 2, label: "Уличные камеры", price: 2000, icon: "Camera", sort_order: 2, is_active: true },
-  { id: 3, label: "Поворотные (PTZ)", price: 3000, icon: "ScanEye", sort_order: 3, is_active: true },
+  { id: 1, label: "Внутренние камеры", price: 1500, icon: "Camera", sort_order: 1, is_active: true, min_val: 0, max_val: 32 },
+  { id: 2, label: "Уличные камеры", price: 2000, icon: "Camera", sort_order: 2, is_active: true, min_val: 0, max_val: 32 },
+  { id: 3, label: "Поворотные (PTZ)", price: 3000, icon: "ScanEye", sort_order: 3, is_active: true, min_val: 0, max_val: 32 },
 ];
 
 const DEFAULT_EXTRA_WORKS: CmsVideoEquipment[] = [
@@ -96,8 +96,10 @@ export default function VideoSurveillanceCalculator({
 
   const initCameraVals = () => {
     const vals: Record<string, number> = {};
-    cameraTypes.forEach(c => { vals[String(c.id)] = 0; });
-    if (cameraTypes.length > 0) vals[String(cameraTypes[0].id)] = 4;
+    cameraTypes.forEach(c => { vals[String(c.id)] = c.min_val ?? 0; });
+    if (cameraTypes.length > 0 && (cameraTypes[0].min_val ?? 0) === 0) {
+      vals[String(cameraTypes[0].id)] = 4;
+    }
     return vals;
   };
 
@@ -167,9 +169,9 @@ export default function VideoSurveillanceCalculator({
             <SliderRow
               key={c.id}
               label={`${c.label} (${formatRub(c.price)}/шт.)`}
-              value={cameraVals[String(c.id)] ?? 0}
+              value={cameraVals[String(c.id)] ?? c.min_val ?? 0}
               onChange={v => setCameraVal(String(c.id), v)}
-              min={0} max={32} suffix="шт."
+              min={c.min_val ?? 0} max={c.max_val ?? 32} suffix="шт."
             />
           ))}
         </div>
@@ -313,9 +315,9 @@ export default function VideoSurveillanceCalculator({
                 <SliderRow
                   key={c.id}
                   label={`${c.label} — ${formatRub(c.price)}/шт.`}
-                  value={cameraVals[String(c.id)] ?? 0}
+                  value={cameraVals[String(c.id)] ?? c.min_val ?? 0}
                   onChange={v => setCameraVal(String(c.id), v)}
-                  min={0} max={32} suffix="шт."
+                  min={c.min_val ?? 0} max={c.max_val ?? 32} suffix="шт."
                 />
               ))}
             </div>

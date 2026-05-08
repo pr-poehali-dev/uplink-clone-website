@@ -47,7 +47,7 @@ export function VideoCalcTab({ content, save, saving }: Props) {
     if (t < 0 || t >= cameras.length) return;
     const next = [...cameras]; [next[i], next[t]] = [next[t], next[i]]; setCameras(next);
   };
-  const addCamera = () => setCameras(prev => [...prev, { id: -Date.now(), label: "", price: 0, icon: "Camera", sort_order: prev.length + 1, is_active: true }]);
+  const addCamera = () => setCameras(prev => [...prev, { id: -Date.now(), label: "", price: 0, icon: "Camera", sort_order: prev.length + 1, is_active: true, min_val: 0, max_val: 32 }]);
 
   /* ---- equipment helpers ---- */
   const updateEquip = (id: number, patch: Partial<CmsVideoEquipment>) => setEquipment(prev => prev.map(e => e.id === id ? { ...e, ...patch } : e));
@@ -104,19 +104,30 @@ export function VideoCalcTab({ content, save, saving }: Props) {
             <div key={cam.id} className={`border rounded-xl p-3 transition-opacity ${cam.is_active ? "bg-white/3 border-white/10" : "bg-white/[0.02] border-white/5 opacity-55"}`}>
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="w-24 flex-shrink-0">
+                  <div className={cls.label}>Иконка</div>
                   <input value={cam.icon} onChange={e => updateCamera(cam.id, { icon: e.target.value })} placeholder="Camera" className={cls.input + " font-mono text-xs text-cyan-400"} />
                 </div>
-                <div className="flex-1 min-w-[120px]">
+                <div className="flex-1 min-w-[140px]">
+                  <div className={cls.label}>Название</div>
                   <input value={cam.label} onChange={e => updateCamera(cam.id, { label: e.target.value })} placeholder="Тип камеры" className={cls.input} />
                 </div>
                 <div className="w-36 flex-shrink-0">
-                  <input type="number" value={cam.price} onChange={e => updateCamera(cam.id, { price: Number(e.target.value) })} placeholder="Монтаж (₽/шт.)" className={cls.input} />
+                  <div className={cls.label}>Монтаж (₽/шт.)</div>
+                  <input type="number" value={cam.price} onChange={e => updateCamera(cam.id, { price: Number(e.target.value) })} placeholder="1500" className={cls.input} />
                 </div>
-                <label className="flex items-center gap-1.5 cursor-pointer select-none flex-shrink-0">
-                  <input type="checkbox" checked={cam.is_active} onChange={e => updateCamera(cam.id, { is_active: e.target.checked })} className="accent-cyan-400 w-3.5 h-3.5" />
-                  <span className="text-gray-400 text-xs">Активна</span>
-                </label>
-                <div className="flex items-center gap-0 flex-shrink-0">
+                <div className="w-20 flex-shrink-0">
+                  <div className={cls.label}>Мин. шт.</div>
+                  <input type="number" value={cam.min_val ?? 0} min={0} onChange={e => updateCamera(cam.id, { min_val: Number(e.target.value) })} className={cls.input} />
+                </div>
+                <div className="w-20 flex-shrink-0">
+                  <div className={cls.label}>Макс. шт.</div>
+                  <input type="number" value={cam.max_val ?? 32} min={1} onChange={e => updateCamera(cam.id, { max_val: Number(e.target.value) })} className={cls.input} />
+                </div>
+                <div className="flex items-end gap-1 flex-shrink-0 pb-0.5">
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" checked={cam.is_active} onChange={e => updateCamera(cam.id, { is_active: e.target.checked })} className="accent-cyan-400 w-3.5 h-3.5" />
+                    <span className="text-gray-400 text-xs">Активна</span>
+                  </label>
                   <button onClick={() => moveCamera(i, -1)} disabled={i === 0} className={cls.moveBtn}><Icon name="ChevronUp" size={15} /></button>
                   <button onClick={() => moveCamera(i, 1)} disabled={i === cameras.length - 1} className={cls.moveBtn}><Icon name="ChevronDown" size={15} /></button>
                   <button onClick={() => removeCamera(cam.id)} className={cls.delBtn}><Icon name="X" size={15} /></button>

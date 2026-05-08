@@ -96,8 +96,8 @@ def get_all_content(conn):
     cur.execute("SELECT id, label, href, type, sort_order, is_visible FROM cms_nav_items ORDER BY sort_order")
     nav_items = [{"id": r[0], "label": r[1], "href": r[2], "type": r[3], "sort_order": r[4], "is_visible": r[5]} for r in cur.fetchall()]
 
-    cur.execute("SELECT id, label, price, icon, sort_order, is_active FROM cms_video_camera_types ORDER BY sort_order")
-    video_cameras = [{"id": r[0], "label": r[1], "price": r[2], "icon": r[3], "sort_order": r[4], "is_active": r[5]} for r in cur.fetchall()]
+    cur.execute("SELECT id, label, price, icon, sort_order, is_active, min_val, max_val FROM cms_video_camera_types ORDER BY sort_order")
+    video_cameras = [{"id": r[0], "label": r[1], "price": r[2], "icon": r[3], "sort_order": r[4], "is_active": r[5], "min_val": r[6], "max_val": r[7]} for r in cur.fetchall()]
 
     cur.execute("SELECT id, label, price, icon, default_checked, sort_order, is_active FROM cms_video_equipment ORDER BY sort_order")
     video_equipment = [{"id": r[0], "label": r[1], "price": r[2], "icon": r[3], "default_checked": r[4], "sort_order": r[5], "is_active": r[6]} for r in cur.fetchall()]
@@ -870,15 +870,17 @@ def handler(event: dict, context) -> dict:
             kept = []
             for i, it in enumerate(items):
                 iid = it.get("id")
+                min_v = int(it.get("min_val", 0))
+                max_v = int(it.get("max_val", 32))
                 if iid and iid in existing:
-                    cur.execute("UPDATE cms_video_camera_types SET label='%s', price=%s, icon='%s', sort_order=%s, is_active=%s WHERE id=%s" % (
+                    cur.execute("UPDATE cms_video_camera_types SET label='%s', price=%s, icon='%s', sort_order=%s, is_active=%s, min_val=%s, max_val=%s WHERE id=%s" % (
                         esc(it.get("label")), int(it.get("price",0)), esc(it.get("icon","Camera")),
-                        i+1, "true" if it.get("is_active", True) else "false", int(iid)))
+                        i+1, "true" if it.get("is_active", True) else "false", min_v, max_v, int(iid)))
                     kept.append(iid)
                 else:
-                    cur.execute("INSERT INTO cms_video_camera_types (label, price, icon, sort_order, is_active) VALUES ('%s',%s,'%s',%s,%s) RETURNING id" % (
+                    cur.execute("INSERT INTO cms_video_camera_types (label, price, icon, sort_order, is_active, min_val, max_val) VALUES ('%s',%s,'%s',%s,%s,%s,%s) RETURNING id" % (
                         esc(it.get("label")), int(it.get("price",0)), esc(it.get("icon","Camera")),
-                        i+1, "true" if it.get("is_active", True) else "false"))
+                        i+1, "true" if it.get("is_active", True) else "false", min_v, max_v))
                     kept.append(cur.fetchone()[0])
             for eid in existing:
                 if eid not in kept:
