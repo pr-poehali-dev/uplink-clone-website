@@ -12,6 +12,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { useCmsContent } from "@/hooks/useCmsContent";
 import { useInteractiveAnimations } from "@/hooks/useInteractiveAnimations";
 import { useVisualEditor } from "@/hooks/useVisualEditor";
+import { useElementAnimations } from "@/hooks/useElementAnimations";
 
 const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -136,24 +137,13 @@ function DesignApplicator() {
       });
     }
 
-    // Анимации по КОНКРЕТНЫМ элементам — применяем ПОСЛЕДНИМИ (высший приоритет)
-    if (content?.element_animations) {
-      content.element_animations.forEach((ea) => {
-        const el = document.querySelector<HTMLElement>(`[data-elem-id="${ea.elem_id}"]`);
-        if (!el) return;
-        // Hover JS-анимация — полностью перезаписывает любые глобальные/секционные классы
-        JS_ANIMS.forEach((a) => el.classList.remove(`anim-${a}`));
-        if (ea.hover_anim !== "inherit" && ea.hover_anim !== "none" && JS_ANIMS.includes(ea.hover_anim)) {
-          el.classList.add(`anim-${ea.hover_anim}`);
-        }
-        // data-атрибуты для CSS scroll и speed
-        if (ea.scroll_anim !== "inherit") el.dataset.elemScrollAnim = ea.scroll_anim;
-        else delete el.dataset.elemScrollAnim;
-        if (ea.anim_speed !== "inherit") el.dataset.elemAnimSpeed = ea.anim_speed;
-        else delete el.dataset.elemAnimSpeed;
-      });
-    }
-  }, [content?.settings, content?.element_animations, content?.section_animations]);
+  }, [content?.settings, content?.section_animations]);
+  return null;
+}
+
+function ElementAnimationsProvider() {
+  const { content } = useCmsContent();
+  useElementAnimations(content?.element_animations);
   return null;
 }
 
@@ -170,6 +160,7 @@ const App = () => (
         <VisualEditorProvider />
         <BrowserRouter>
           <ScrollToTop />
+          <ElementAnimationsProvider />
           <Suspense fallback={null}>
             <Routes>
               <Route path="/" element={<Index />} />

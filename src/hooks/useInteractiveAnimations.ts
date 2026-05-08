@@ -19,6 +19,7 @@ function applyMagnetic(el: HTMLElement) {
   return () => {
     el.removeEventListener("mousemove", onMouseMove);
     el.removeEventListener("mouseleave", onMouseLeave);
+    el.style.transform = "";
   };
 }
 
@@ -41,6 +42,7 @@ function applyTilt(el: HTMLElement) {
   return () => {
     el.removeEventListener("mousemove", onMouseMove);
     el.removeEventListener("mouseleave", onMouseLeave);
+    el.style.transform = "";
   };
 }
 
@@ -62,30 +64,86 @@ const JS_ANIM_HANDLERS: Record<string, (el: HTMLElement) => () => void> = {
   "anim-spotlight": applySpotlight,
 };
 
+const ALL_JS_CLASSES = Object.keys(JS_ANIM_HANDLERS);
+
 export function useInteractiveAnimations() {
   useEffect(() => {
-    const cleanups: (() => void)[] = [];
+    // Карта: элемент -> {className -> cleanup}
+    const bindings = new WeakMap<HTMLElement, Map<string, () => void>>();
 
-    Object.entries(JS_ANIM_HANDLERS).forEach(([cls, handler]) => {
-      document.querySelectorAll<HTMLElement>(`.${cls}`).forEach((el) => {
-        cleanups.push(handler(el));
+    const syncElement = (el: HTMLElement) => {
+      let map = bindings.get(el);
+      if (!map) { map = new Map(); bindings.set(el, map); }
+
+      // Какие JS-классы СЕЙЧАС есть на элементе
+      const currentClasses = new Set<string>();
+      ALL_JS_CLASSES.forEach((cls) => { if (el.classList.contains(cls)) currentClasses.add(cls); });
+
+      // Удаляем биндинги классов, которых больше нет
+      for (const [cls, cleanup] of map) {
+        if (!currentClasses.has(cls)) {
+          cleanup();
+          map.delete(cls);
+        }
+      }
+      // Добавляем биндинги для новых классов
+      currentClasses.forEach((cls) => {
+        if (!map.has(cls)) {
+          const handler = JS_ANIM_HANDLERS[cls];
+          if (handler) map.set(cls, handler(el));
+        }
       });
+    };
+
+    const scanAll = () => {
+      const selector = ALL_JS_CLASSES.map((c) => `.${c}`).join(",");
+      document.querySelectorAll<HTMLElement>(selector).forEach(syncElement);
+    };
+
+    // Первоначальный скан
+    scanAll();
+
+    // Наблюдаем за изменениями DOM (новые узлы) И за изменениями classList
+    const observer = new MutationObserver((mutations) => {
+      const elementsToCheck = new Set<HTMLElement>();
+
+      for (const m of mutations) {
+        if (m.type === "childList") {
+          m.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) {
+              const el = node as HTMLElement;
+              ALL_JS_CLASSES.forEach((cls) => {
+                if (el.classList?.contains(cls)) elementsToCheck.add(el);
+                el.querySelectorAll?.<HTMLElement>(`.${cls}`).forEach((c) => elementsToCheck.add(c));
+              });
+            }
+          });
+        } else if (m.type === "attributes" && m.attributeName === "class") {
+          elementsToCheck.add(m.target as HTMLElement);
+        }
+      }
+
+      elementsToCheck.forEach(syncElement);
     });
 
-    // MutationObserver — подхватывает новые элементы (SPA навигация)
-    const observer = new MutationObserver(() => {
-      Object.entries(JS_ANIM_HANDLERS).forEach(([cls, handler]) => {
-        document.querySelectorAll<HTMLElement>(`.${cls}:not([data-anim-bound])`).forEach((el) => {
-          el.dataset.animBound = "1";
-          cleanups.push(handler(el));
-        });
-      });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
     });
-    observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      cleanups.forEach((fn) => fn());
       observer.disconnect();
+      // Очистка: пройдёмся по всем известным элементам
+      const selector = ALL_JS_CLASSES.map((c) => `.${c}`).join(",");
+      document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
+        const map = bindings.get(el);
+        if (map) {
+          map.forEach((cleanup) => cleanup());
+          map.clear();
+        }
+      });
     };
   }, []);
 }

@@ -313,8 +313,12 @@ export function clearCmsCache() {
 }
 
 export function useCmsContent() {
-  const [content, setContent] = useState<CmsContent | null>(() => getCached());
-  const [loading, setLoading] = useState(() => getCached() === null);
+  // В режиме визуального редактора (?__editor=1) — не используем кэш, всегда грузим свежее
+  const isEditorMode = typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("__editor") === "1";
+
+  const [content, setContent] = useState<CmsContent | null>(() => isEditorMode ? null : getCached());
+  const [loading, setLoading] = useState(() => isEditorMode ? true : getCached() === null);
 
   useEffect(() => {
     // Очищаем старые версии кэша
@@ -326,22 +330,44 @@ export function useCmsContent() {
       localStorage.removeItem("cms_content_cache_v5");
     } catch (e) { /* игнорируем */ }
 
-    const cached = getCached();
-    if (cached) {
-      setContent(cached);
-      setLoading(false);
-      return;
+    if (!isEditorMode) {
+      const cached = getCached();
+      if (cached) {
+        setContent(cached);
+        setLoading(false);
+        // Не делаем return — продолжаем фоновое обновление, чтобы свежие данные были на следующий рендер
+        fetch(CMS_API)
+          .then((r) => r.json())
+          .then((data) => { setCache(data); setContent(data); })
+          .catch(() => { /* молча */ });
+        return;
+      }
     }
 
     fetch(CMS_API)
       .then((r) => r.json())
       .then((data) => {
-        setCache(data);
+        if (!isEditorMode) setCache(data);
         setContent(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+
+    // Подписываемся на сообщения от админки для принудительного обновления
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type === "REFETCH_CMS") {
+        fetch(CMS_API)
+          .then((r) => r.json())
+          .then((data) => {
+            if (!isEditorMode) setCache(data);
+            setContent(data);
+          })
+          .catch(() => { /* игнорируем */ });
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [isEditorMode]);
 
   return { content, loading };
 }
