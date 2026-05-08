@@ -14,22 +14,24 @@ interface VideoSurveillanceCalculatorProps {
 const formatRub = (n: number) =>
   new Intl.NumberFormat("ru-RU").format(Math.round(n)) + " ₽";
 
-const DEFAULT_MOUNT_TYPES = [
-  { key: "indoor", label: "Внутренние камеры", price: 1500, icon: "Camera" },
-  { key: "outdoor", label: "Уличные камеры", price: 2000, icon: "Camera" },
-  { key: "ptz", label: "Поворотные (PTZ)", price: 3000, icon: "ScanEye" },
+const num = (v: number | undefined, d: number) =>
+  (v !== undefined && Number.isFinite(v)) ? v : d;
+
+const DEFAULT_CAMERA_TYPES: CmsVideoCameraType[] = [
+  { id: 1, label: "Внутренние камеры", price: 1500, icon: "Camera", sort_order: 1, is_active: true },
+  { id: 2, label: "Уличные камеры", price: 2000, icon: "Camera", sort_order: 2, is_active: true },
+  { id: 3, label: "Поворотные (PTZ)", price: 3000, icon: "ScanEye", sort_order: 3, is_active: true },
 ];
 
-const DEFAULT_EXTRA_WORKS = [
-  { key: "config", label: "Настройка и программирование", price: 3500, icon: "Settings", defaultChecked: true },
-  { key: "cabling", label: "Прокладка кабеля в коробе", price: 2500, icon: "Zap", defaultChecked: false },
-  { key: "hdd", label: "Установка и настройка HDD-архива", price: 2000, icon: "HardDrive", defaultChecked: false },
-  { key: "remote", label: "Настройка удалённого доступа", price: 1500, icon: "Monitor", defaultChecked: false },
+const DEFAULT_EXTRA_WORKS: CmsVideoEquipment[] = [
+  { id: 1, label: "Настройка и программирование", price: 3500, icon: "Settings", default_checked: true, sort_order: 1, is_active: true },
+  { id: 2, label: "Прокладка кабеля в коробе", price: 2500, icon: "Zap", default_checked: false, sort_order: 2, is_active: true },
+  { id: 3, label: "Установка и настройка HDD-архива", price: 2000, icon: "HardDrive", default_checked: false, sort_order: 3, is_active: true },
+  { id: 4, label: "Настройка удалённого доступа", price: 1500, icon: "Monitor", default_checked: false, sort_order: 4, is_active: true },
 ];
 
 const DEFAULT_VIDEO_SLIDERS: CmsVideoCalcSlider[] = [
-  { id: -1, sort_order: 1, key: "cameras", label: "Количество камер", suffix: "шт.", price_per_unit: 0, min_val: 1, max_val: 32, default_val: 4, is_active: true },
-  { id: -2, sort_order: 2, key: "cable", label: "Длина кабельной трассы", suffix: "м", price_per_unit: 80, min_val: 10, max_val: 500, default_val: 50, is_active: true },
+  { id: -1, sort_order: 10, key: "cable", label: "Длина кабельной трассы", suffix: "м", price_per_unit: 80, min_val: 10, max_val: 500, default_val: 50, is_active: true },
 ];
 
 function SliderRow({
@@ -40,10 +42,22 @@ function SliderRow({
 }) {
   const pct = max > min ? ((value - min) / (max - min)) * 100 : 0;
   return (
-    <div className="mb-4">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{label}</span>
-        <span className="text-sm font-bold" style={{ color: "var(--neon-blue)" }}>{value} {suffix}</span>
+    <div className="mb-5">
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm" style={{ color: "var(--text-secondary)" }}>{label}</label>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onChange(Math.max(min, value - 1))}
+            className="w-7 h-7 rounded-lg text-sm flex items-center justify-center transition-all"
+            style={{ background: "var(--range-track)", color: "var(--text-muted)" }}
+          >−</button>
+          <span className="text-sm font-bold min-w-[3.5rem] text-center" style={{ color: "var(--neon-blue)" }}>{value} {suffix}</span>
+          <button
+            onClick={() => onChange(Math.min(max, value + 1))}
+            className="w-7 h-7 rounded-lg text-sm flex items-center justify-center transition-all"
+            style={{ background: "var(--range-track)", color: "var(--text-muted)" }}
+          >+</button>
+        </div>
       </div>
       <input
         type="range" min={min} max={max} value={value}
@@ -61,15 +75,17 @@ function SliderRow({
 export default function VideoSurveillanceCalculator({
   onContactClick, videoCameras, videoEquipment, videoCalcSliders, settings, compact = false,
 }: VideoSurveillanceCalculatorProps) {
-  const mountTypes = (videoCameras?.filter(c => c.is_active) ?? []).length > 0
-    ? videoCameras!.filter(c => c.is_active).map(c => ({ key: String(c.id), label: c.label, price: c.price, icon: c.icon }))
-    : DEFAULT_MOUNT_TYPES;
+  const cameraTypes = ((videoCameras?.filter(c => c.is_active) ?? []).length > 0
+    ? videoCameras!.filter(c => c.is_active)
+    : DEFAULT_CAMERA_TYPES
+  ).sort((a, b) => a.sort_order - b.sort_order);
 
-  const extraWorks = (videoEquipment?.filter(e => e.is_active) ?? []).length > 0
-    ? videoEquipment!.filter(e => e.is_active).map(e => ({ key: String(e.id), label: e.label, price: e.price, icon: e.icon, defaultChecked: e.default_checked }))
-    : DEFAULT_EXTRA_WORKS;
+  const extraWorks = ((videoEquipment?.filter(e => e.is_active) ?? []).length > 0
+    ? videoEquipment!.filter(e => e.is_active)
+    : DEFAULT_EXTRA_WORKS
+  ).sort((a, b) => a.sort_order - b.sort_order);
 
-  const activeSliders = ((videoCalcSliders?.filter(s => s.is_active) ?? []).length > 0
+  const extraSliders = ((videoCalcSliders?.filter(s => s.is_active) ?? []).length > 0
     ? videoCalcSliders!.filter(s => s.is_active)
     : DEFAULT_VIDEO_SLIDERS
   ).sort((a, b) => a.sort_order - b.sort_order);
@@ -78,94 +94,104 @@ export default function VideoSurveillanceCalculator({
   const subtitle = settings?.video_calc_subtitle || "Укажите параметры — ориентировочная стоимость работ за 1 минуту";
   const disclaimer = settings?.video_calc_disclaimer || "Расчёт приблизительный. Точная стоимость — после выезда специалиста.";
 
-  const defaultExtras: Record<string, boolean> = {};
-  extraWorks.forEach(e => { if (e.defaultChecked) defaultExtras[e.key] = true; });
-
-  const initSliderVals = () => {
+  const initCameraVals = () => {
     const vals: Record<string, number> = {};
-    activeSliders.forEach(s => { vals[s.key] = Math.max(s.min_val, s.default_val); });
+    cameraTypes.forEach(c => { vals[String(c.id)] = 0; });
+    if (cameraTypes.length > 0) vals[String(cameraTypes[0].id)] = 4;
     return vals;
   };
 
-  const [mountType, setMountType] = useState<string>(mountTypes[0]?.key ?? "indoor");
-  const [sliderVals, setSliderVals] = useState<Record<string, number>>(initSliderVals);
-  const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>(defaultExtras);
+  const initSliderVals = () => {
+    const vals: Record<string, number> = {};
+    extraSliders.forEach(s => { vals[s.key] = Math.max(s.min_val, s.default_val); });
+    return vals;
+  };
 
+  const initExtras = () => {
+    const vals: Record<string, boolean> = {};
+    extraWorks.forEach(e => { if (e.default_checked) vals[String(e.id)] = true; });
+    return vals;
+  };
+
+  const [cameraVals, setCameraVals] = useState<Record<string, number>>(initCameraVals);
+  const [sliderVals, setSliderVals] = useState<Record<string, number>>(initSliderVals);
+  const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>(initExtras);
+
+  const setCameraVal = (key: string, val: number) => setCameraVals(p => ({ ...p, [key]: val }));
   const setSlider = (key: string, val: number) => setSliderVals(p => ({ ...p, [key]: val }));
   const toggleExtra = (key: string) => setSelectedExtras(p => ({ ...p, [key]: !p[key] }));
 
-  // Слайдер "cameras" используется для расчёта монтажа
-  const cameraCount = sliderVals["cameras"] ?? 4;
+  const totalCameras = useMemo(() =>
+    cameraTypes.reduce((acc, c) => acc + (cameraVals[String(c.id)] ?? 0), 0),
+    [cameraTypes, cameraVals]
+  );
 
   const result = useMemo(() => {
-    const mount = mountTypes.find(m => m.key === mountType) ?? mountTypes[0];
-    const mountTotal = (mount?.price ?? 0) * cameraCount;
-    const slidersTotal = activeSliders
-      .filter(s => s.key !== "cameras")
-      .reduce((acc, s) => acc + (sliderVals[s.key] ?? s.default_val) * s.price_per_unit, 0);
-    const extrasTotal = extraWorks.reduce((acc, w) => acc + (selectedExtras[w.key] ? w.price : 0), 0);
-    const total = mountTotal + slidersTotal + extrasTotal;
-    return { mountTotal, slidersTotal, extrasTotal, total };
-  }, [mountType, cameraCount, sliderVals, selectedExtras, mountTypes, activeSliders, extraWorks]);
+    const cameraTotal = cameraTypes.reduce((acc, c) => {
+      const count = cameraVals[String(c.id)] ?? 0;
+      return acc + count * num(c.price, 0);
+    }, 0);
+    const slidersTotal = extraSliders.reduce((acc, s) => {
+      return acc + (sliderVals[s.key] ?? s.default_val) * s.price_per_unit;
+    }, 0);
+    const extrasTotal = extraWorks.reduce((acc, w) => acc + (selectedExtras[String(w.id)] ? num(w.price, 0) : 0), 0);
+    return { cameraTotal, slidersTotal, extrasTotal, total: cameraTotal + slidersTotal + extrasTotal };
+  }, [cameraTypes, cameraVals, extraSliders, sliderVals, extraWorks, selectedExtras]);
 
   const handleOrder = () => {
-    const extrasList = extraWorks.filter(w => selectedExtras[w.key]).map(w => w.label).join(", ");
-    const mountLabel = mountTypes.find(m => m.key === mountType)?.label ?? "";
-    const slidersStr = activeSliders.map(s => `${s.label}: ${sliderVals[s.key] ?? s.default_val} ${s.suffix}`).join(", ");
+    const camsStr = cameraTypes
+      .filter(c => (cameraVals[String(c.id)] ?? 0) > 0)
+      .map(c => `${c.label}: ${cameraVals[String(c.id)]} шт.`)
+      .join(", ");
+    const slidersStr = extraSliders.map(s => `${s.label}: ${sliderVals[s.key] ?? s.default_val} ${s.suffix}`).join(", ");
+    const extrasList = extraWorks.filter(w => selectedExtras[String(w.id)]).map(w => w.label).join(", ");
     const payload = [
-      `Тип монтажа: ${mountLabel}`,
+      camsStr ? `Камеры: ${camsStr}` : "",
       slidersStr,
       extrasList ? `Доп. работы: ${extrasList}` : "",
-      `Ориентировочная стоимость работ: ${formatRub(result.total)}`,
+      `Ориентировочная стоимость: ${formatRub(result.total)}`,
     ].filter(Boolean).join(" | ");
     onContactClick("Калькулятор монтажа видеонаблюдения", payload);
   };
 
-  const currentMount = mountTypes.find(m => m.key === mountType) ?? mountTypes[0];
-
   if (compact) {
     return (
       <div className="space-y-4">
-        {/* Тип монтажа */}
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
-            <Icon name="Camera" size={13} style={{ color: "var(--neon-blue)" }} />
-            Тип камер
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {mountTypes.map(mt => (
-              <button
-                key={mt.key}
-                onClick={() => setMountType(mt.key)}
-                className="p-2.5 rounded-xl border text-left transition-all"
-                style={mountType === mt.key
-                  ? { background: "rgba(var(--neon-blue-rgb),0.12)", borderColor: "var(--neon-blue)" }
-                  : { background: "var(--range-track)", borderColor: "var(--card-border)" }
-                }
-              >
-                <div className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>{mt.label}</div>
-                <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{formatRub(mt.price)}/шт.</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Слайдеры */}
+        {/* Типы камер — слайдеры */}
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
-            <Icon name="Sliders" size={13} style={{ color: "var(--neon-blue)" }} />
-            Параметры
+            <Icon name="Camera" size={13} style={{ color: "var(--neon-blue)" }} />
+            Количество камер
           </div>
-          {activeSliders.map(s => (
+          {cameraTypes.map(c => (
             <SliderRow
-              key={s.key}
-              label={s.label}
-              value={sliderVals[s.key] ?? s.default_val}
-              onChange={v => setSlider(s.key, v)}
-              min={s.min_val} max={s.max_val} suffix={s.suffix}
+              key={c.id}
+              label={`${c.label} (${formatRub(c.price)}/шт.)`}
+              value={cameraVals[String(c.id)] ?? 0}
+              onChange={v => setCameraVal(String(c.id), v)}
+              min={0} max={32} suffix="шт."
             />
           ))}
         </div>
+
+        {/* Доп. слайдеры */}
+        {extraSliders.length > 0 && (
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
+              <Icon name="Sliders" size={13} style={{ color: "var(--neon-blue)" }} />
+              Параметры
+            </div>
+            {extraSliders.map(s => (
+              <SliderRow
+                key={s.key}
+                label={s.label}
+                value={sliderVals[s.key] ?? s.default_val}
+                onChange={v => setSlider(s.key, v)}
+                min={s.min_val} max={s.max_val} suffix={s.suffix}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Доп. работы */}
         {extraWorks.length > 0 && (
@@ -176,11 +202,11 @@ export default function VideoSurveillanceCalculator({
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {extraWorks.map(w => {
-                const checked = !!selectedExtras[w.key];
+                const checked = !!selectedExtras[String(w.id)];
                 return (
                   <button
-                    key={w.key}
-                    onClick={() => toggleExtra(w.key)}
+                    key={w.id}
+                    onClick={() => toggleExtra(String(w.id))}
                     className="text-left px-3 py-2.5 rounded-xl border transition-all flex items-center gap-2.5"
                     style={checked
                       ? { background: "rgba(var(--neon-blue-rgb),0.08)", borderColor: "var(--neon-blue)" }
@@ -214,11 +240,22 @@ export default function VideoSurveillanceCalculator({
         {/* Итог */}
         <div className="rounded-2xl p-4" style={{ background: "var(--range-track)", border: "1px solid var(--card-border)" }}>
           <div className="space-y-1.5 text-sm mb-3">
-            <div className="flex justify-between">
-              <span style={{ color: "var(--text-muted)" }}>Монтаж {currentMount?.label} ({cameraCount} шт.)</span>
-              <span className="font-medium" style={{ color: "var(--text-primary)" }}>{formatRub(result.mountTotal)}</span>
-            </div>
-            {activeSliders.filter(s => s.key !== "cameras" && s.price_per_unit > 0).map(s => (
+            {cameraTypes.filter(c => (cameraVals[String(c.id)] ?? 0) > 0).map(c => {
+              const count = cameraVals[String(c.id)] ?? 0;
+              return (
+                <div key={c.id} className="flex justify-between">
+                  <span style={{ color: "var(--text-muted)" }}>{c.label} × {count}</span>
+                  <span className="font-medium" style={{ color: "var(--text-primary)" }}>{formatRub(count * c.price)}</span>
+                </div>
+              );
+            })}
+            {totalCameras === 0 && (
+              <div className="flex justify-between">
+                <span style={{ color: "var(--text-muted)" }}>Камеры не выбраны</span>
+                <span className="font-medium" style={{ color: "var(--text-primary)" }}>0 ₽</span>
+              </div>
+            )}
+            {extraSliders.filter(s => s.price_per_unit > 0).map(s => (
               <div key={s.key} className="flex justify-between">
                 <span style={{ color: "var(--text-muted)" }}>{s.label} ({sliderVals[s.key] ?? s.default_val} {s.suffix})</span>
                 <span className="font-medium" style={{ color: "var(--text-primary)" }}>{formatRub((sliderVals[s.key] ?? s.default_val) * s.price_per_unit)}</span>
@@ -265,44 +302,44 @@ export default function VideoSurveillanceCalculator({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           <div className="lg:col-span-2 space-y-5">
-            <div className="glass-card neon-border rounded-2xl p-6">
-              <h3 className="text-base font-bold text-[var(--text-primary)] font-['Oswald'] mb-4 flex items-center gap-2">
-                <Icon name="Camera" size={18} className="text-cyan-400" />
-                Тип камер для монтажа
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {mountTypes.map(mt => (
-                  <button
-                    key={mt.key}
-                    onClick={() => setMountType(mt.key)}
-                    className={`p-4 rounded-xl border text-left transition-all ${
-                      mountType === mt.key ? "bg-cyan-500/15 border-cyan-500/50 text-cyan-400" : "bg-white/5 border-white/10 hover:border-cyan-500/30"
-                    }`}
-                  >
-                    <Icon name={mt.icon as "Camera"} size={20} className={mountType === mt.key ? "text-cyan-400 mb-2" : "text-gray-400 mb-2"} fallback="Camera" />
-                    <div className="text-sm font-semibold">{mt.label}</div>
-                    <div className="text-xs text-gray-500 mt-1">{formatRub(mt.price)}/шт.</div>
-                  </button>
-                ))}
-              </div>
-            </div>
 
+            {/* Слайдеры по типам камер */}
             <div className="glass-card neon-border rounded-2xl p-6">
               <h3 className="text-base font-bold text-[var(--text-primary)] font-['Oswald'] mb-5 flex items-center gap-2">
-                <Icon name="Sliders" size={18} className="text-cyan-400" />
-                Параметры
+                <Icon name="Camera" size={18} className="text-cyan-400" />
+                Количество камер
               </h3>
-              {activeSliders.map(s => (
+              {cameraTypes.map(c => (
                 <SliderRow
-                  key={s.key}
-                  label={s.label}
-                  value={sliderVals[s.key] ?? s.default_val}
-                  onChange={v => setSlider(s.key, v)}
-                  min={s.min_val} max={s.max_val} suffix={s.suffix}
+                  key={c.id}
+                  label={`${c.label} — ${formatRub(c.price)}/шт.`}
+                  value={cameraVals[String(c.id)] ?? 0}
+                  onChange={v => setCameraVal(String(c.id), v)}
+                  min={0} max={32} suffix="шт."
                 />
               ))}
             </div>
 
+            {/* Доп. слайдеры */}
+            {extraSliders.length > 0 && (
+              <div className="glass-card neon-border rounded-2xl p-6">
+                <h3 className="text-base font-bold text-[var(--text-primary)] font-['Oswald'] mb-5 flex items-center gap-2">
+                  <Icon name="Sliders" size={18} className="text-cyan-400" />
+                  Параметры
+                </h3>
+                {extraSliders.map(s => (
+                  <SliderRow
+                    key={s.key}
+                    label={s.label}
+                    value={sliderVals[s.key] ?? s.default_val}
+                    onChange={v => setSlider(s.key, v)}
+                    min={s.min_val} max={s.max_val} suffix={s.suffix}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Доп. работы */}
             {extraWorks.length > 0 && (
               <div className="glass-card neon-border rounded-2xl p-6">
                 <h3 className="text-base font-bold text-[var(--text-primary)] font-['Oswald'] mb-4 flex items-center gap-2">
@@ -311,11 +348,11 @@ export default function VideoSurveillanceCalculator({
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {extraWorks.map(w => {
-                    const checked = !!selectedExtras[w.key];
+                    const checked = !!selectedExtras[String(w.id)];
                     return (
                       <button
-                        key={w.key}
-                        onClick={() => toggleExtra(w.key)}
+                        key={w.id}
+                        onClick={() => toggleExtra(String(w.id))}
                         className={`text-left p-3.5 rounded-xl border transition-all flex items-center gap-3 ${
                           checked ? "bg-cyan-500/10 border-cyan-500/40" : "bg-white/5 border-white/10 hover:border-cyan-500/30"
                         }`}
@@ -338,6 +375,7 @@ export default function VideoSurveillanceCalculator({
             )}
           </div>
 
+          {/* Итог */}
           <div className="lg:col-span-1">
             <div className="glass-card neon-border rounded-2xl p-6 lg:sticky lg:top-24">
               <h3 className="text-base font-bold text-[var(--text-primary)] font-['Oswald'] mb-5 flex items-center gap-2">
@@ -345,8 +383,16 @@ export default function VideoSurveillanceCalculator({
                 Стоимость работ
               </h3>
               <div className="space-y-3 mb-5">
-                <LineItem label={`Монтаж: ${currentMount?.label} (${cameraCount} шт.)`} value={result.mountTotal} />
-                {activeSliders.filter(s => s.key !== "cameras" && s.price_per_unit > 0).map(s => (
+                {cameraTypes.filter(c => (cameraVals[String(c.id)] ?? 0) > 0).map(c => {
+                  const count = cameraVals[String(c.id)] ?? 0;
+                  return (
+                    <LineItem key={c.id} label={`${c.label} (${count} шт.)`} value={count * c.price} />
+                  );
+                })}
+                {totalCameras === 0 && (
+                  <p className="text-sm text-gray-400">Выберите камеры с помощью слайдеров</p>
+                )}
+                {extraSliders.filter(s => s.price_per_unit > 0).map(s => (
                   <LineItem key={s.key} label={`${s.label} (${sliderVals[s.key] ?? s.default_val} ${s.suffix})`} value={(sliderVals[s.key] ?? s.default_val) * s.price_per_unit} />
                 ))}
                 {result.extrasTotal > 0 && <LineItem label="Дополнительные работы" value={result.extrasTotal} />}
