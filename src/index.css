@@ -773,45 +773,73 @@
 }
 
 /* ============================================================
-   БАЗОВАЯ SCROLL-АНИМАЦИЯ — fallback для .scroll-anim
-   Чтобы элементы НЕ были видимы пока не получили класс .visible
+   БАЗОВАЯ SCROLL-АНИМАЦИЯ — единая надёжная система
+   Фазы: невидимый → .visible (анимация) → .anim-done (финал)
+   .anim-done снимает ВСЕ ограничения — hover работает свободно
    ============================================================ */
-.scroll-anim {
+
+/* 1. НЕВИДИМОЕ начальное состояние */
+.scroll-anim:not(.anim-done) {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(28px);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
   will-change: opacity, transform;
 }
-.scroll-anim.visible {
+
+/* 2. ВИДИМОЕ состояние (переход) */
+.scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: translateY(0);
 }
-/* Premium-карта — конечное состояние с масштабом 1.05 */
-.plan-highlighted.scroll-anim.visible {
-  transform: scale(1.05);
+
+/* 3. ФИНАЛЬНОЕ состояние — анимация закончилась, все ограничения сняты */
+.scroll-anim.anim-done {
+  opacity: 1 !important;
+  /* НЕ устанавливаем transform — пусть каждый элемент сам определяет */
+  transition: none;
+  will-change: auto;
+}
+
+/* Premium-карта — своё финальное состояние */
+.plan-highlighted {
+  /* масштаб применяется только после завершения анимации */
+}
+.plan-highlighted.anim-done {
+  transform: scale(1.05) !important;
+}
+.plan-highlighted.anim-done:hover {
+  transform: scale(1.05) translateY(-4px) !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* ============================================================
    ПОЭЛЕМЕНТНЫЕ HOVER-ЭФФЕКТЫ — через классы elem-hover-*
    Работают независимо от секции, имеют максимальный приоритет
    ============================================================ */
+/* elem-hover-* классы — работают через transition, не через !important на transform
+   чтобы не конфликтовать с .anim-done состоянием */
 .elem-hover-lift {
   transition:
     transform 0.25s ease,
-    box-shadow 0.25s ease;
+    box-shadow 0.25s ease !important;
 }
 .elem-hover-lift:hover {
   transform: translateY(-6px) !important;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+}
+.elem-hover-glow {
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease !important;
 }
 .elem-hover-glow:hover {
   box-shadow: 0 0 30px rgba(var(--neon-blue-rgb), 0.4) !important;
   border-color: rgba(var(--neon-blue-rgb), 0.6) !important;
 }
 .elem-hover-scale {
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease !important;
 }
 .elem-hover-scale:hover {
   transform: scale(1.04) !important;
@@ -819,7 +847,7 @@
 .elem-hover-border-glow {
   transition:
     border-color 0.25s ease,
-    box-shadow 0.25s ease;
+    box-shadow 0.25s ease !important;
 }
 .elem-hover-border-glow:hover {
   border-color: var(--neon-blue) !important;
@@ -886,116 +914,112 @@
 }
 
 /* ============================================================
-   ПОЭЛЕМЕНТНЫЕ АНИМАЦИИ ПОЯВЛЕНИЯ — data-elem-scroll-anim
-   Используем !important чтобы перебить inline Tailwind классы
-   (opacity-0, opacity-100, translate-y-10, translate-y-0)
+   ПОЭЛЕМЕНТНЫЕ АНИМАЦИИ — data-elem-scroll-anim
+   Переопределяют базовую .scroll-anim для конкретного элемента.
+   ЛОГИКА: не-visible → анимированное начало → .visible → .anim-done (финал, hover свободен)
    ============================================================ */
-[data-elem-scroll-anim] {
+
+/* Кастомная анимация появления (начальное скрытое состояние) */
+[data-elem-scroll-anim]:not(.anim-done) {
   transition:
     opacity 0.6s ease,
     transform 0.6s ease,
     filter 0.6s ease !important;
 }
-/* НЕВИДИМОЕ состояние (до .visible) — переопределяет любые Tailwind */
-[data-elem-scroll-anim="fade-up"]:not(.visible) {
+[data-elem-scroll-anim="fade-up"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: translateY(30px) !important;
 }
-[data-elem-scroll-anim="fade-down"]:not(.visible) {
+[data-elem-scroll-anim="fade-down"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: translateY(-30px) !important;
 }
-[data-elem-scroll-anim="fade-left"]:not(.visible) {
+[data-elem-scroll-anim="fade-left"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: translateX(-40px) !important;
 }
-[data-elem-scroll-anim="fade-right"]:not(.visible) {
+[data-elem-scroll-anim="fade-right"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: translateX(40px) !important;
 }
-[data-elem-scroll-anim="zoom-in"]:not(.visible) {
+[data-elem-scroll-anim="zoom-in"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: scale(0.85) !important;
 }
-[data-elem-scroll-anim="zoom-out"]:not(.visible) {
+[data-elem-scroll-anim="zoom-out"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: scale(1.15) !important;
 }
-[data-elem-scroll-anim="flip-x"]:not(.visible) {
+[data-elem-scroll-anim="flip-x"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: perspective(600px) rotateX(30deg) !important;
 }
-[data-elem-scroll-anim="flip-y"]:not(.visible) {
+[data-elem-scroll-anim="flip-y"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: perspective(600px) rotateY(30deg) !important;
 }
-[data-elem-scroll-anim="slide-up"]:not(.visible) {
+[data-elem-scroll-anim="slide-up"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: translateY(50px) !important;
 }
-[data-elem-scroll-anim="bounce"]:not(.visible) {
+[data-elem-scroll-anim="bounce"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: translateY(40px) !important;
   transition:
     opacity 0.5s ease,
     transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
-[data-elem-scroll-anim="rotate-in"]:not(.visible) {
+[data-elem-scroll-anim="rotate-in"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   transform: rotate(-8deg) scale(0.9) !important;
 }
-[data-elem-scroll-anim="blur-in"]:not(.visible) {
+[data-elem-scroll-anim="blur-in"]:not(.anim-done):not(.visible) {
   opacity: 0 !important;
   filter: blur(12px) !important;
 }
-/* Принудительно выключенная анимация */
+
+/* .visible — финальное значение перед anim-done */
+[data-elem-scroll-anim].visible:not(.anim-done) {
+  opacity: 1 !important;
+}
+[data-elem-scroll-anim="fade-up"].visible:not(.anim-done),
+[data-elem-scroll-anim="fade-down"].visible:not(.anim-done),
+[data-elem-scroll-anim="fade-left"].visible:not(.anim-done),
+[data-elem-scroll-anim="fade-right"].visible:not(.anim-done),
+[data-elem-scroll-anim="slide-up"].visible:not(.anim-done),
+[data-elem-scroll-anim="bounce"].visible:not(.anim-done) {
+  transform: translateY(0) !important;
+}
+[data-elem-scroll-anim="zoom-in"].visible:not(.anim-done),
+[data-elem-scroll-anim="zoom-out"].visible:not(.anim-done) {
+  transform: scale(1) !important;
+}
+[data-elem-scroll-anim="flip-x"].visible:not(.anim-done) {
+  transform: perspective(600px) rotateX(0deg) !important;
+}
+[data-elem-scroll-anim="flip-y"].visible:not(.anim-done) {
+  transform: perspective(600px) rotateY(0deg) !important;
+}
+[data-elem-scroll-anim="rotate-in"].visible:not(.anim-done) {
+  transform: rotate(0) scale(1) !important;
+}
+[data-elem-scroll-anim="blur-in"].visible:not(.anim-done) {
+  filter: blur(0) !important;
+}
+
+/* .anim-done — анимация закончена, элемент полностью виден, hover работает */
+[data-elem-scroll-anim].anim-done {
+  opacity: 1 !important;
+  filter: none;
+  /* transform НЕ устанавливаем — каждый hover/класс определяет сам */
+}
+
+/* Явное отключение анимации */
 [data-elem-scroll-anim="none"] {
   opacity: 1 !important;
   transform: none !important;
   filter: none !important;
   transition: none !important;
-}
-/* ВИДИМОЕ состояние — у каждого варианта свой "visible" чтобы не сбивать другие transform */
-[data-elem-scroll-anim="fade-up"].visible,
-[data-elem-scroll-anim="fade-down"].visible,
-[data-elem-scroll-anim="fade-left"].visible,
-[data-elem-scroll-anim="fade-right"].visible,
-[data-elem-scroll-anim="slide-up"].visible,
-[data-elem-scroll-anim="bounce"].visible {
-  opacity: 1 !important;
-  transform: translate(0, 0) !important;
-}
-[data-elem-scroll-anim="zoom-in"].visible,
-[data-elem-scroll-anim="zoom-out"].visible {
-  opacity: 1 !important;
-  transform: scale(1) !important;
-}
-[data-elem-scroll-anim="flip-x"].visible {
-  opacity: 1 !important;
-  transform: perspective(600px) rotateX(0deg) !important;
-}
-[data-elem-scroll-anim="flip-y"].visible {
-  opacity: 1 !important;
-  transform: perspective(600px) rotateY(0deg) !important;
-}
-[data-elem-scroll-anim="rotate-in"].visible {
-  opacity: 1 !important;
-  transform: rotate(0deg) scale(1) !important;
-}
-[data-elem-scroll-anim="blur-in"].visible {
-  opacity: 1 !important;
-  filter: blur(0) !important;
-}
-/* После завершения анимации убираем transform чтобы hover-эффекты работали свободно */
-[data-elem-scroll-anim].anim-done {
-  transform: none !important;
-  filter: none !important;
-  transition: none;
-}
-/* Premium-карта тарифа — особый случай: масштаб 1.05 после анимации */
-.plan-highlighted.anim-done,
-.plan-highlighted.visible {
-  transform: scale(1.05) !important;
 }
 
 /* ============================================================
@@ -1005,85 +1029,88 @@
    ============================================================ */
 
 /* scroll-anim внутри секции */
-[data-section][data-scroll-anim] .scroll-anim {
+[data-section][data-scroll-anim] .scroll-anim:not(.anim-done) {
   opacity: 0;
 }
-[data-section][data-scroll-anim="fade-up"] .scroll-anim {
+[data-section][data-scroll-anim="fade-up"] .scroll-anim:not(.anim-done) {
   transform: translateY(30px);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-section][data-scroll-anim="fade-down"] .scroll-anim {
+[data-section][data-scroll-anim="fade-down"] .scroll-anim:not(.anim-done) {
   transform: translateY(-30px);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-section][data-scroll-anim="fade-left"] .scroll-anim {
+[data-section][data-scroll-anim="fade-left"] .scroll-anim:not(.anim-done) {
   transform: translateX(-40px);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-section][data-scroll-anim="fade-right"] .scroll-anim {
+[data-section][data-scroll-anim="fade-right"] .scroll-anim:not(.anim-done) {
   transform: translateX(40px);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-section][data-scroll-anim="zoom-in"] .scroll-anim {
+[data-section][data-scroll-anim="zoom-in"] .scroll-anim:not(.anim-done) {
   transform: scale(0.85);
   transition:
     opacity 0.6s ease,
     transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-[data-section][data-scroll-anim="zoom-out"] .scroll-anim {
+[data-section][data-scroll-anim="zoom-out"] .scroll-anim:not(.anim-done) {
   transform: scale(1.15);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-section][data-scroll-anim="flip-x"] .scroll-anim {
+[data-section][data-scroll-anim="flip-x"] .scroll-anim:not(.anim-done) {
   transform: perspective(600px) rotateX(30deg);
   transition:
     opacity 0.7s ease,
     transform 0.7s ease;
 }
-[data-section][data-scroll-anim="flip-y"] .scroll-anim {
+[data-section][data-scroll-anim="flip-y"] .scroll-anim:not(.anim-done) {
   transform: perspective(600px) rotateY(30deg);
   transition:
     opacity 0.7s ease,
     transform 0.7s ease;
 }
-[data-section][data-scroll-anim="slide-up"] .scroll-anim {
+[data-section][data-scroll-anim="slide-up"] .scroll-anim:not(.anim-done) {
   transform: translateY(50px);
   transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-[data-section][data-scroll-anim="bounce"] .scroll-anim {
+[data-section][data-scroll-anim="bounce"] .scroll-anim:not(.anim-done) {
   transform: translateY(40px);
   transition:
     opacity 0.5s ease,
     transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-[data-section][data-scroll-anim="rotate-in"] .scroll-anim {
+[data-section][data-scroll-anim="rotate-in"] .scroll-anim:not(.anim-done) {
   transform: rotate(-8deg) scale(0.9);
   transition:
     opacity 0.6s ease,
     transform 0.7s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
-[data-section][data-scroll-anim="blur-in"] .scroll-anim {
+[data-section][data-scroll-anim="blur-in"] .scroll-anim:not(.anim-done) {
   filter: blur(12px);
   transition:
     opacity 0.7s ease,
     filter 0.7s ease;
 }
-[data-section][data-scroll-anim] .scroll-anim.visible {
+[data-section][data-scroll-anim] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: none;
   filter: none;
 }
-[data-section][data-scroll-anim="none"] .scroll-anim {
+[data-section][data-scroll-anim] .scroll-anim.anim-done {
+  opacity: 1;
+}
+[data-section][data-scroll-anim="none"] .scroll-anim:not(.anim-done) {
   opacity: 1 !important;
   transform: none !important;
   filter: none !important;
@@ -1152,159 +1179,159 @@
    ============================================================ */
 
 /* --- fade-up (default) --- */
-[data-scroll-anim="fade-up"] .scroll-anim {
+[data-scroll-anim="fade-up"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: translateY(30px);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-scroll-anim="fade-up"] .scroll-anim.visible {
+[data-scroll-anim="fade-up"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: translateY(0);
 }
 
 /* --- fade-down --- */
-[data-scroll-anim="fade-down"] .scroll-anim {
+[data-scroll-anim="fade-down"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: translateY(-30px);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-scroll-anim="fade-down"] .scroll-anim.visible {
+[data-scroll-anim="fade-down"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: translateY(0);
 }
 
 /* --- fade-left --- */
-[data-scroll-anim="fade-left"] .scroll-anim {
+[data-scroll-anim="fade-left"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: translateX(-40px);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-scroll-anim="fade-left"] .scroll-anim.visible {
+[data-scroll-anim="fade-left"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: translateX(0);
 }
 
 /* --- fade-right --- */
-[data-scroll-anim="fade-right"] .scroll-anim {
+[data-scroll-anim="fade-right"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: translateX(40px);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-scroll-anim="fade-right"] .scroll-anim.visible {
+[data-scroll-anim="fade-right"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: translateX(0);
 }
 
 /* --- zoom-in --- */
-[data-scroll-anim="zoom-in"] .scroll-anim {
+[data-scroll-anim="zoom-in"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: scale(0.85);
   transition:
     opacity 0.6s ease,
     transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-[data-scroll-anim="zoom-in"] .scroll-anim.visible {
+[data-scroll-anim="zoom-in"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: scale(1);
 }
 
 /* --- zoom-out --- */
-[data-scroll-anim="zoom-out"] .scroll-anim {
+[data-scroll-anim="zoom-out"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: scale(1.15);
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
 }
-[data-scroll-anim="zoom-out"] .scroll-anim.visible {
+[data-scroll-anim="zoom-out"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: scale(1);
 }
 
 /* --- flip-x --- */
-[data-scroll-anim="flip-x"] .scroll-anim {
+[data-scroll-anim="flip-x"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: perspective(600px) rotateX(30deg);
   transition:
     opacity 0.7s ease,
     transform 0.7s ease;
 }
-[data-scroll-anim="flip-x"] .scroll-anim.visible {
+[data-scroll-anim="flip-x"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: perspective(600px) rotateX(0deg);
 }
 
 /* --- flip-y --- */
-[data-scroll-anim="flip-y"] .scroll-anim {
+[data-scroll-anim="flip-y"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: perspective(600px) rotateY(30deg);
   transition:
     opacity 0.7s ease,
     transform 0.7s ease;
 }
-[data-scroll-anim="flip-y"] .scroll-anim.visible {
+[data-scroll-anim="flip-y"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: perspective(600px) rotateY(0deg);
 }
 
 /* --- slide-up (без fade) --- */
-[data-scroll-anim="slide-up"] .scroll-anim {
+[data-scroll-anim="slide-up"] .scroll-anim:not(.anim-done) {
   transform: translateY(50px);
   transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-[data-scroll-anim="slide-up"] .scroll-anim.visible {
+[data-scroll-anim="slide-up"] .scroll-anim.visible:not(.anim-done) {
   transform: translateY(0);
 }
 
 /* --- bounce --- */
-[data-scroll-anim="bounce"] .scroll-anim {
+[data-scroll-anim="bounce"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: translateY(40px);
   transition:
     opacity 0.5s ease,
     transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-[data-scroll-anim="bounce"] .scroll-anim.visible {
+[data-scroll-anim="bounce"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: translateY(0);
 }
 
 /* --- rotate-in --- */
-[data-scroll-anim="rotate-in"] .scroll-anim {
+[data-scroll-anim="rotate-in"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   transform: rotate(-8deg) scale(0.9);
   transition:
     opacity 0.6s ease,
     transform 0.7s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
-[data-scroll-anim="rotate-in"] .scroll-anim.visible {
+[data-scroll-anim="rotate-in"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   transform: rotate(0deg) scale(1);
 }
 
 /* --- blur-in --- */
-[data-scroll-anim="blur-in"] .scroll-anim {
+[data-scroll-anim="blur-in"] .scroll-anim:not(.anim-done) {
   opacity: 0;
   filter: blur(12px);
   transition:
     opacity 0.7s ease,
     filter 0.7s ease;
 }
-[data-scroll-anim="blur-in"] .scroll-anim.visible {
+[data-scroll-anim="blur-in"] .scroll-anim.visible:not(.anim-done) {
   opacity: 1;
   filter: blur(0px);
 }
 
 /* --- none --- */
-[data-scroll-anim="none"] .scroll-anim {
+[data-scroll-anim="none"] .scroll-anim:not(.anim-done) {
   opacity: 1 !important;
   transform: none !important;
   filter: none !important;

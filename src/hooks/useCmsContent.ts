@@ -307,67 +307,66 @@ function setCache(data: CmsContent) {
 export function clearCmsCache() {
   try {
     localStorage.removeItem(CACHE_KEY);
+    // Уведомляем все useCmsContent-хуки в том же таба о сбросе кэша
+    window.dispatchEvent(new CustomEvent("cms-cache-cleared"));
   } catch {
     // игнорируем
   }
 }
 
 export function useCmsContent() {
-  // В режиме визуального редактора (?__editor=1) — не используем кэш, всегда грузим свежее
   const isEditorMode = typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("__editor") === "1";
 
   const [content, setContent] = useState<CmsContent | null>(() => isEditorMode ? null : getCached());
   const [loading, setLoading] = useState(() => isEditorMode ? true : getCached() === null);
 
-  useEffect(() => {
-    // Очищаем старые версии кэша
-    try {
-      localStorage.removeItem("cms_content_cache");
-      localStorage.removeItem("cms_content_cache_v2");
-      localStorage.removeItem("cms_content_cache_v3");
-      localStorage.removeItem("cms_content_cache_v4");
-      localStorage.removeItem("cms_content_cache_v5");
-    } catch (e) { /* игнорируем */ }
-
-    if (!isEditorMode) {
-      const cached = getCached();
-      if (cached) {
-        setContent(cached);
-        setLoading(false);
-        // Не делаем return — продолжаем фоновое обновление, чтобы свежие данные были на следующий рендер
-        fetch(CMS_API)
-          .then((r) => r.json())
-          .then((data) => { setCache(data); setContent(data); })
-          .catch(() => { /* молча */ });
-        return;
-      }
-    }
-
+  const doFetch = (cache: boolean) =>
     fetch(CMS_API)
       .then((r) => r.json())
-      .then((data) => {
-        if (!isEditorMode) setCache(data);
+      .then((data: CmsContent) => {
+        if (cache) setCache(data);
         setContent(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
 
-    // Подписываемся на сообщения от админки для принудительного обновления
-    const onMessage = (e: MessageEvent) => {
-      if (e.data?.type === "REFETCH_CMS") {
-        fetch(CMS_API)
-          .then((r) => r.json())
-          .then((data) => {
-            if (!isEditorMode) setCache(data);
-            setContent(data);
-          })
-          .catch(() => { /* игнорируем */ });
+  useEffect(() => {
+    // Очищаем старые версии кэша
+    try {
+      ["cms_content_cache","cms_content_cache_v2","cms_content_cache_v3",
+       "cms_content_cache_v4","cms_content_cache_v5"].forEach(k => localStorage.removeItem(k));
+    } catch { /* игнорируем */ }
+
+    // В editor-режиме всегда свежее
+    if (isEditorMode) {
+      doFetch(false);
+    } else {
+      const cached = getCached();
+      if (cached) {
+        setContent(cached);
+        setLoading(false);
+        // Фоновое обновление — всегда, чтобы следующий рендер имел свежие данные
+        doFetch(true);
+      } else {
+        doFetch(true);
       }
+    }
+
+    // Слушаем очистку кэша из того же таба (Admin делает clearCmsCache → событие)
+    const onCacheCleared = () => doFetch(!isEditorMode);
+    // Слушаем postMessage от iframe-редактора
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type === "REFETCH_CMS") doFetch(!isEditorMode);
     };
+
+    window.addEventListener("cms-cache-cleared", onCacheCleared);
     window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, [isEditorMode]);
+    return () => {
+      window.removeEventListener("cms-cache-cleared", onCacheCleared);
+      window.removeEventListener("message", onMessage);
+    };
+  }, [isEditorMode]);  
 
   return { content, loading };
 }

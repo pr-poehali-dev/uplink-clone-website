@@ -11,7 +11,22 @@ export function useScrollAnimation(threshold = 0.05) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), 50);
+          setTimeout(() => {
+            setIsVisible(true);
+            // После завершения transition-анимации добавляем anim-done,
+            // который снимает все transform/opacity ограничения
+            // чтобы hover-эффекты работали свободно
+            const onEnd = () => {
+              el.classList.add("anim-done");
+              el.removeEventListener("transitionend", onEnd);
+            };
+            el.addEventListener("transitionend", onEnd, { once: true });
+            // Fallback на случай если transitionend не сработал (нет анимации)
+            setTimeout(() => {
+              el.classList.add("anim-done");
+              el.removeEventListener("transitionend", onEnd);
+            }, 1200);
+          }, 50);
           observer.unobserve(entry.target);
         }
       },

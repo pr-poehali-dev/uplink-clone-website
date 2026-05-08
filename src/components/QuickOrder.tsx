@@ -84,7 +84,7 @@ function ServiceAccordion({ s }: { s: (typeof services)[0] }) {
   return (
     <div
       ref={ref}
-      className={`glass-card hover-card neon-border neon-hover rounded-2xl overflow-hidden scroll-anim ${isVisible ? "opacity-100 translate-x-0 visible" : "opacity-0 -translate-x-8"}`}
+      className={`glass-card hover-card neon-border neon-hover rounded-2xl overflow-hidden scroll-anim ${isVisible ? "visible" : ""}`}
     >
       <button
         onClick={() => setOpen(!open)}
