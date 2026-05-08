@@ -403,6 +403,811 @@
   scale: 1.05;
 }
 
+/* ============================================================
+   DESIGN SYSTEM — SCROLL ANIMATIONS
+   Управляется через data-scroll-anim на body
+   ============================================================ */
+
+/* --- fade-up (default) --- */
+[data-scroll-anim="fade-up"] .scroll-anim {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-scroll-anim="fade-up"] .scroll-anim.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- fade-down --- */
+[data-scroll-anim="fade-down"] .scroll-anim {
+  opacity: 0;
+  transform: translateY(-30px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-scroll-anim="fade-down"] .scroll-anim.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- fade-left --- */
+[data-scroll-anim="fade-left"] .scroll-anim {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-scroll-anim="fade-left"] .scroll-anim.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* --- fade-right --- */
+[data-scroll-anim="fade-right"] .scroll-anim {
+  opacity: 0;
+  transform: translateX(40px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-scroll-anim="fade-right"] .scroll-anim.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* --- zoom-in --- */
+[data-scroll-anim="zoom-in"] .scroll-anim {
+  opacity: 0;
+  transform: scale(0.85);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+[data-scroll-anim="zoom-in"] .scroll-anim.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* --- zoom-out --- */
+[data-scroll-anim="zoom-out"] .scroll-anim {
+  opacity: 0;
+  transform: scale(1.15);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+[data-scroll-anim="zoom-out"] .scroll-anim.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* --- flip-x --- */
+[data-scroll-anim="flip-x"] .scroll-anim {
+  opacity: 0;
+  transform: perspective(600px) rotateX(30deg);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+[data-scroll-anim="flip-x"] .scroll-anim.visible {
+  opacity: 1;
+  transform: perspective(600px) rotateX(0deg);
+}
+
+/* --- flip-y --- */
+[data-scroll-anim="flip-y"] .scroll-anim {
+  opacity: 0;
+  transform: perspective(600px) rotateY(30deg);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+[data-scroll-anim="flip-y"] .scroll-anim.visible {
+  opacity: 1;
+  transform: perspective(600px) rotateY(0deg);
+}
+
+/* --- slide-up (без fade) --- */
+[data-scroll-anim="slide-up"] .scroll-anim {
+  transform: translateY(50px);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-scroll-anim="slide-up"] .scroll-anim.visible {
+  transform: translateY(0);
+}
+
+/* --- bounce --- */
+[data-scroll-anim="bounce"] .scroll-anim {
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+[data-scroll-anim="bounce"] .scroll-anim.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- rotate-in --- */
+[data-scroll-anim="rotate-in"] .scroll-anim {
+  opacity: 0;
+  transform: rotate(-8deg) scale(0.9);
+  transition:
+    opacity 0.6s ease,
+    transform 0.7s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+[data-scroll-anim="rotate-in"] .scroll-anim.visible {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* --- blur-in --- */
+[data-scroll-anim="blur-in"] .scroll-anim {
+  opacity: 0;
+  filter: blur(12px);
+  transition:
+    opacity 0.7s ease,
+    filter 0.7s ease;
+}
+[data-scroll-anim="blur-in"] .scroll-anim.visible {
+  opacity: 1;
+  filter: blur(0px);
+}
+
+/* --- none --- */
+[data-scroll-anim="none"] .scroll-anim {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Скорость анимаций */
+[data-anim-speed="fast"] .scroll-anim {
+  transition-duration: 0.35s !important;
+}
+[data-anim-speed="slow"] .scroll-anim {
+  transition-duration: 1.1s !important;
+}
+
+/* ============================================================
+   HOVER — КАРТОЧКИ (data-hover-cards на body)
+   ============================================================ */
+[data-hover-cards="lift"] .hover-card {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+[data-hover-cards="lift"] .hover-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+[data-hover-cards="glow"] .hover-card {
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+[data-hover-cards="glow"] .hover-card:hover {
+  box-shadow: 0 0 30px rgba(var(--neon-blue-rgb), 0.35);
+  border-color: rgba(var(--neon-blue-rgb), 0.6) !important;
+}
+
+[data-hover-cards="scale"] .hover-card {
+  transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+[data-hover-cards="scale"] .hover-card:hover {
+  transform: scale(1.03);
+}
+
+[data-hover-cards="border-glow"] .hover-card {
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+[data-hover-cards="border-glow"] .hover-card:hover {
+  border-color: var(--neon-blue) !important;
+  box-shadow:
+    0 0 0 1px var(--neon-blue),
+    0 8px 32px rgba(0, 212, 255, 0.15);
+}
+
+[data-hover-cards="tilt"] .hover-card {
+  transition: transform 0.3s ease;
+}
+[data-hover-cards="tilt"] .hover-card:hover {
+  transform: perspective(800px) rotateY(3deg) rotateX(-2deg) translateY(-4px);
+}
+
+[data-hover-cards="pulse-border"] .hover-card:hover {
+  animation: pulseBorder 1s ease-in-out infinite;
+}
+@keyframes pulseBorder {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--neon-blue-rgb), 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(var(--neon-blue-rgb), 0);
+  }
+}
+
+[data-hover-cards="spotlight"] .hover-card {
+  position: relative;
+  overflow: hidden;
+}
+[data-hover-cards="spotlight"] .hover-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(var(--neon-blue-rgb), 0.12) 0%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+[data-hover-cards="spotlight"] .hover-card:hover::before {
+  opacity: 1;
+}
+
+[data-hover-cards="none"] .hover-card:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+}
+
+/* ============================================================
+   HOVER — КНОПКИ (data-hover-buttons на body)
+   ============================================================ */
+[data-hover-buttons="glow"] .hover-btn {
+  transition: all 0.25s ease;
+}
+[data-hover-buttons="glow"] .hover-btn:hover {
+  box-shadow:
+    0 0 20px rgba(var(--neon-blue-rgb), 0.6),
+    0 0 40px rgba(var(--neon-blue-rgb), 0.3);
+}
+
+[data-hover-buttons="scale"] .hover-btn {
+  transition: transform 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+[data-hover-buttons="scale"] .hover-btn:hover {
+  transform: scale(1.06);
+}
+
+[data-hover-buttons="lift"] .hover-btn {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+[data-hover-buttons="lift"] .hover-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+[data-hover-buttons="pulse"] .hover-btn:hover {
+  animation: btnPulse 0.6s ease;
+}
+@keyframes btnPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+[data-hover-buttons="shake"] .hover-btn:hover {
+  animation: btnShake 0.4s ease;
+}
+@keyframes btnShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+[data-hover-buttons="ripple"] .hover-btn {
+  overflow: hidden;
+  position: relative;
+}
+[data-hover-buttons="ripple"] .hover-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.25) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transform: scale(0);
+  transition:
+    transform 0.4s ease,
+    opacity 0.4s ease;
+}
+[data-hover-buttons="ripple"] .hover-btn:hover::after {
+  opacity: 1;
+  transform: scale(2);
+}
+
+[data-hover-buttons="slide-fill"] .hover-btn {
+  overflow: hidden;
+  position: relative;
+  transition: color 0.25s ease;
+}
+[data-hover-buttons="slide-fill"] .hover-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+[data-hover-buttons="slide-fill"] .hover-btn:hover::before {
+  transform: translateX(0);
+}
+
+[data-hover-buttons="none"] .hover-btn:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+  animation: none !important;
+}
+
+/* ============================================================
+   HOVER — МЕНЮ (data-hover-menu на body)
+   ============================================================ */
+[data-hover-menu="underline"] .hover-nav-item {
+  position: relative;
+}
+[data-hover-menu="underline"] .hover-nav-item::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--neon-blue);
+  transition: width 0.3s ease;
+}
+[data-hover-menu="underline"] .hover-nav-item:hover::after {
+  width: 100%;
+}
+
+[data-hover-menu="glow-text"] .hover-nav-item {
+  transition:
+    color 0.2s ease,
+    text-shadow 0.2s ease;
+}
+[data-hover-menu="glow-text"] .hover-nav-item:hover {
+  color: var(--neon-blue) !important;
+  text-shadow: 0 0 12px rgba(var(--neon-blue-rgb), 0.6);
+}
+
+[data-hover-menu="bg-fill"] .hover-nav-item {
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+[data-hover-menu="bg-fill"] .hover-nav-item:hover {
+  background: rgba(var(--neon-blue-rgb), 0.12);
+  color: var(--neon-blue) !important;
+}
+
+[data-hover-menu="scale"] .hover-nav-item {
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+[data-hover-menu="scale"] .hover-nav-item:hover {
+  transform: scale(1.08);
+}
+
+[data-hover-menu="slide-up"] .hover-nav-item {
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+[data-hover-menu="slide-up"] .hover-nav-item:hover {
+  transform: translateY(-2px);
+}
+
+[data-hover-menu="border-bottom"] .hover-nav-item {
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s ease;
+  padding-bottom: 2px;
+}
+[data-hover-menu="border-bottom"] .hover-nav-item:hover {
+  border-color: var(--neon-blue);
+}
+
+[data-hover-menu="none"] .hover-nav-item::after {
+  display: none !important;
+}
+
+/* ============================================================
+   МОДАЛЬНЫЕ ОКНА (data-modal-anim на body)
+   ============================================================ */
+[data-modal-anim="scale-in"] .modal-anim {
+  animation: modalScaleIn 0.25s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+[data-modal-anim="slide-up"] .modal-anim {
+  animation: modalSlideUp 0.3s ease both;
+}
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-modal-anim="slide-down"] .modal-anim {
+  animation: modalSlideDown 0.3s ease both;
+}
+@keyframes modalSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-modal-anim="flip-in"] .modal-anim {
+  animation: modalFlip 0.35s ease both;
+}
+@keyframes modalFlip {
+  from {
+    opacity: 0;
+    transform: perspective(600px) rotateX(15deg) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(600px) rotateX(0deg) scale(1);
+  }
+}
+
+[data-modal-anim="zoom-blur"] .modal-anim {
+  animation: modalZoomBlur 0.3s ease both;
+}
+@keyframes modalZoomBlur {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+[data-modal-anim="bounce-in"] .modal-anim {
+  animation: modalBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes modalBounce {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+[data-modal-anim="none"] .modal-anim {
+  animation: none !important;
+}
+
+/* ============================================================
+   ЭФФЕКТЫ ФОНА (data-bg-effect на body)
+   Управляет .bg-effect-layer — пустой div в Index.tsx
+   ============================================================ */
+.bg-effect-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* dots */
+[data-bg-effect="dots"] .bg-effect-layer {
+  background-image: radial-gradient(
+    rgba(var(--neon-blue-rgb), 0.15) 1px,
+    transparent 1px
+  );
+  background-size: 30px 30px;
+}
+/* grid уже есть как .grid-bg, просто дублируем для слоя */
+[data-bg-effect="grid"] .bg-effect-layer {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+/* diagonal */
+[data-bg-effect="diagonal"] .bg-effect-layer {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(var(--neon-blue-rgb), 0.04) 0px,
+    rgba(var(--neon-blue-rgb), 0.04) 1px,
+    transparent 1px,
+    transparent 40px
+  );
+}
+/* hexagon */
+[data-bg-effect="hexagon"] .bg-effect-layer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34z' fill='none' stroke='rgba(0,212,255,0.06)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 56px 100px;
+}
+/* circuit */
+[data-bg-effect="circuit"] .bg-effect-layer {
+  background-image:
+    linear-gradient(rgba(var(--neon-blue-rgb), 0.05) 1px, transparent 1px),
+    linear-gradient(
+      90deg,
+      rgba(var(--neon-blue-rgb), 0.05) 1px,
+      transparent 1px
+    ),
+    radial-gradient(
+      circle,
+      rgba(var(--neon-blue-rgb), 0.08) 1px,
+      transparent 1px
+    );
+  background-size:
+    40px 40px,
+    40px 40px,
+    20px 20px;
+}
+/* waves */
+[data-bg-effect="waves"] .bg-effect-layer {
+  background: repeating-radial-gradient(
+    ellipse at 50% 50%,
+    transparent 0px,
+    transparent 28px,
+    rgba(var(--neon-blue-rgb), 0.04) 29px,
+    transparent 30px
+  );
+}
+/* noise */
+[data-bg-effect="noise"] .bg-effect-layer {
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+/* aurora */
+[data-bg-effect="aurora"] .bg-effect-layer {
+  background:
+    radial-gradient(
+      ellipse 80% 40% at 20% 60%,
+      rgba(var(--neon-blue-rgb), 0.07) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 80% 30%,
+      rgba(0, 255, 136, 0.05) 0%,
+      transparent 60%
+    );
+  animation: auroraMove 12s ease-in-out infinite alternate;
+}
+@keyframes auroraMove {
+  0% {
+    background-position:
+      20% 60%,
+      80% 30%;
+  }
+  100% {
+    background-position:
+      40% 40%,
+      60% 50%;
+  }
+}
+/* particles — через CSS анимацию точек */
+[data-bg-effect="particles"] .bg-effect-layer::before,
+[data-bg-effect="particles"] .bg-effect-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    rgba(var(--neon-blue-rgb), 0.4) 1px,
+    transparent 1px
+  );
+  background-size: 80px 80px;
+  animation: particlesDrift 20s linear infinite;
+}
+[data-bg-effect="particles"] .bg-effect-layer::after {
+  background-size: 120px 120px;
+  animation-duration: 30s;
+  animation-direction: reverse;
+  opacity: 0.5;
+}
+@keyframes particlesDrift {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(40px, 40px);
+  }
+}
+/* stars */
+[data-bg-effect="stars"] .bg-effect-layer {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.6) 1px, transparent 1px),
+    radial-gradient(rgba(var(--neon-blue-rgb), 0.5) 1px, transparent 1px);
+  background-size:
+    100px 100px,
+    60px 60px;
+  background-position:
+    0 0,
+    30px 30px;
+  animation: starsFloat 40s linear infinite;
+}
+@keyframes starsFloat {
+  from {
+    background-position:
+      0 0,
+      30px 30px;
+  }
+  to {
+    background-position:
+      100px 100px,
+      130px 130px;
+  }
+}
+/* none */
+[data-bg-effect="none"] .bg-effect-layer {
+  display: none;
+}
+
+/* ============================================================
+   СТИЛЬ КНОПОК (data-btn-style на body)
+   ============================================================ */
+[data-btn-style="rounded"] .btn-neon,
+[data-btn-style="rounded"] .hover-btn {
+  border-radius: 0.75rem !important;
+}
+[data-btn-style="pill"] .btn-neon,
+[data-btn-style="pill"] .hover-btn {
+  border-radius: 9999px !important;
+}
+[data-btn-style="sharp"] .btn-neon,
+[data-btn-style="sharp"] .hover-btn {
+  border-radius: 0 !important;
+}
+[data-btn-style="sharp-sm"] .btn-neon,
+[data-btn-style="sharp-sm"] .hover-btn {
+  border-radius: 4px !important;
+}
+[data-btn-style="squircle"] .btn-neon,
+[data-btn-style="squircle"] .hover-btn {
+  border-radius: 1.5rem !important;
+}
+[data-btn-style="cut-corner"] .btn-neon,
+[data-btn-style="cut-corner"] .hover-btn {
+  border-radius: 0 !important;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+}
+[data-btn-style="outline-only"] .btn-neon {
+  background: transparent !important;
+  border: 2px solid var(--neon-blue) !important;
+  color: var(--neon-blue) !important;
+  box-shadow: none !important;
+}
+[data-btn-style="ghost"] .btn-neon {
+  background: rgba(var(--neon-blue-rgb), 0.1) !important;
+  box-shadow: none !important;
+  color: var(--neon-blue) !important;
+}
+
+/* ============================================================
+   СТИЛЬ КАРТОЧЕК (data-card-style на body)
+   ============================================================ */
+[data-card-style="glass"] .hover-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+}
+[data-card-style="flat"] .hover-card {
+  background: var(--card-bg) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-color: rgba(var(--neon-blue-rgb), 0.08) !important;
+}
+[data-card-style="bordered"] .hover-card {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border: 1px solid rgba(var(--neon-blue-rgb), 0.3) !important;
+  box-shadow: none !important;
+}
+[data-card-style="solid"] .hover-card {
+  background: #0d1421 !important;
+  backdrop-filter: none !important;
+  border: none !important;
+}
+[data-card-style="neon-outline"] .hover-card {
+  background: transparent !important;
+  border: 1px solid var(--neon-blue) !important;
+  box-shadow:
+    0 0 16px rgba(var(--neon-blue-rgb), 0.2),
+    inset 0 0 16px rgba(var(--neon-blue-rgb), 0.04) !important;
+}
+[data-card-style="gradient"] .hover-card {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--neon-blue-rgb), 0.08) 0%,
+    rgba(0, 255, 136, 0.04) 100%
+  ) !important;
+  border-color: rgba(var(--neon-blue-rgb), 0.15) !important;
+}
+[data-card-style="frosted"] .hover-card {
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(40px) saturate(1.5) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ============================================================
+   СТИЛЬ ТЕНЕЙ (data-shadow-style на body)
+   ============================================================ */
+[data-shadow-style="neon"] .hover-card {
+  box-shadow:
+    0 0 20px rgba(var(--neon-blue-rgb), 0.1),
+    inset 0 0 20px rgba(var(--neon-blue-rgb), 0.03);
+}
+[data-shadow-style="soft"] .hover-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+[data-shadow-style="hard"] .hover-card {
+  box-shadow: 4px 4px 0px rgba(var(--neon-blue-rgb), 0.5);
+  border-radius: inherit;
+}
+[data-shadow-style="none"] .hover-card {
+  box-shadow: none !important;
+}
+[data-shadow-style="colored"] .hover-card {
+  box-shadow: 0 8px 32px rgba(var(--neon-blue-rgb), 0.2);
+}
+[data-shadow-style="inner"] .hover-card {
+  box-shadow: inset 0 2px 20px rgba(var(--neon-blue-rgb), 0.08);
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
