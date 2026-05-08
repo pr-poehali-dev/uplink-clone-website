@@ -83,21 +83,21 @@ export function VideoCalcTab({ content, save, saving }: Props) {
   return (
     <div className="space-y-5">
 
-      {/* ── Типы монтажа ── */}
+      {/* ── Типы камер ── */}
       <div className="glass-card neon-border rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-white font-bold font-['Oswald'] text-lg flex items-center gap-2">
             <Icon name="Camera" size={18} className="text-cyan-400" />
-            Виды монтажа (по типу камер)
+            Типы камер (слайдеры)
             <span className="text-gray-500 text-sm font-normal">({cameras.length})</span>
           </h3>
           <button onClick={addCamera} disabled={saving} className={cls.addBtn}>
             <Icon name="Plus" size={14} />Добавить
           </button>
         </div>
-        <p className="text-gray-500 text-xs">Отображаются как переключатели. Цена — стоимость монтажа 1 камеры данного типа (₽/шт.)</p>
+        <p className="text-gray-500 text-xs">Каждый тип отображается отдельным слайдером. Клиент указывает количество камер каждого типа. Цена — стоимость монтажа 1 камеры (₽/шт.)</p>
 
-        {cameras.length === 0 && <p className="text-gray-500 text-sm text-center py-4">Нет видов монтажа. Используются дефолтные (Внутренние, Уличные, PTZ).</p>}
+        {cameras.length === 0 && <p className="text-gray-500 text-sm text-center py-4">Нет типов камер. Используются дефолтные (Внутренние, Уличные, PTZ).</p>}
 
         <div className="space-y-2">
           {cameras.map((cam, i) => (
