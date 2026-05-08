@@ -243,11 +243,11 @@ function PricingCard({
       ref={ref}
       data-elem-id={`card-pricing-${plan.id ?? index}`}
       data-elem-type="card"
-      className={`relative flex flex-col rounded-2xl p-8 border scroll-anim transition-[opacity,transform] duration-700 ${plan.border ?? plan.border_class ?? "border-gray-700/50"} ${
+      className={`relative flex flex-col rounded-2xl p-8 border scroll-anim transition-[opacity,transform] duration-700 hover-card ${plan.border ?? plan.border_class ?? "border-gray-700/50"} ${
         (plan.highlight ?? plan.is_highlighted)
-          ? "bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 scale-105"
-          : "glass-card hover-card"
-      } ${isVisible ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-10"}`}
+          ? "glass-card bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 plan-highlighted"
+          : "glass-card"
+      } ${isVisible ? "opacity-100 visible" : "opacity-0 translate-y-10"}`}
       style={{ transitionDelay: isVisible ? "0ms" : `${index * 120}ms` }}
     >
       {plan.badge && (

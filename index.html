@@ -206,7 +206,36 @@
 </head>
 
 <body>
+<!-- Pre-hydration: применяем сохранённые анимации из кэша CMS чтобы избежать мерцания -->
+<script>
+(function() {
+  try {
+    if (location.search.indexOf('__editor=1') !== -1) return;
+    var raw = localStorage.getItem('cms_content_cache_v6');
+    if (!raw) return;
+    var parsed = JSON.parse(raw);
+    var data = parsed.data;
+    var s = data && data.settings;
+    var body = document.body;
+    if (s) {
+      if (s.design_scroll_animation) body.dataset.scrollAnim = s.design_scroll_animation;
+      if (s.design_anim_speed) body.dataset.animSpeed = s.design_anim_speed;
+      if (s.design_hover_cards) body.dataset.hoverCards = s.design_hover_cards;
+      if (s.design_hover_buttons) body.dataset.hoverButtons = s.design_hover_buttons;
+      if (s.design_bg_effect) body.dataset.bgEffect = s.design_bg_effect;
+      if (s.design_btn_style) body.dataset.btnStyle = s.design_btn_style;
+      if (s.design_card_style) body.dataset.cardStyle = s.design_card_style;
+    }
+    // Сохраняем настройки element_animations глобально, чтобы React-компоненты могли использовать в initial state
+    if (data && data.element_animations) {
+      window.__INITIAL_ELEM_ANIMS__ = data.element_animations;
+    }
+  } catch (e) { /* игнорируем */ }
+})();
+</script>
 <div id="root"></div>
+<!-- Слой для фоновых эффектов (data-bg-effect на body) -->
+<div class="bg-effect-layer" aria-hidden="true"></div>
 <script type="module" src="/src/main.tsx"></script>
 
 <!-- Yandex.Metrika counter -->

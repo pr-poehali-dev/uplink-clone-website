@@ -154,14 +154,23 @@ export function useVisualEditor() {
         const el = document.querySelector<HTMLElement>(`[data-elem-id="${elemId}"]`);
         if (!el) return;
         const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
+        const CSS_HOVER_ANIMS = ["lift","glow","scale","border-glow","pulse","shake","ripple","none"];
         JS_ANIMS.forEach((a) => el.classList.remove(`anim-${a}`));
-        if (hover_anim && hover_anim !== "inherit" && hover_anim !== "none" && JS_ANIMS.includes(hover_anim)) {
-          el.classList.add(`anim-${hover_anim}`);
+        CSS_HOVER_ANIMS.forEach((a) => el.classList.remove(`elem-hover-${a}`));
+        if (hover_anim && hover_anim !== "inherit") {
+          if (JS_ANIMS.includes(hover_anim)) el.classList.add(`anim-${hover_anim}`);
+          else if (CSS_HOVER_ANIMS.includes(hover_anim)) el.classList.add(`elem-hover-${hover_anim}`);
         }
         if (scroll_anim && scroll_anim !== "inherit") el.dataset.elemScrollAnim = scroll_anim;
         else if (scroll_anim === "inherit") delete el.dataset.elemScrollAnim;
-        if (anim_speed && anim_speed !== "inherit") el.dataset.elemAnimSpeed = anim_speed;
-        else if (anim_speed === "inherit") delete el.dataset.elemAnimSpeed;
+        const SPEED_MAP: Record<string,string> = { fast: "0.35s", normal: "0.6s", slow: "1.1s" };
+        if (anim_speed && anim_speed !== "inherit" && SPEED_MAP[anim_speed]) {
+          el.style.setProperty("transition-duration", SPEED_MAP[anim_speed], "important");
+          el.dataset.elemAnimSpeed = anim_speed;
+        } else {
+          el.style.removeProperty("transition-duration");
+          delete el.dataset.elemAnimSpeed;
+        }
       }
     };
 

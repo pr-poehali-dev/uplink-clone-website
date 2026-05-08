@@ -772,8 +772,109 @@
   color: #080c14 !important;
 }
 
+/* Премиум-карточка тарифа — увеличена через CSS, чтобы не конфликтовать с scroll-анимацией */
+.plan-highlighted.visible {
+  transform: scale(1.05) !important;
+}
+.plan-highlighted.visible:hover {
+  /* hover-эффект не должен сбрасывать масштаб */
+  transform: scale(1.05) translateY(-4px) !important;
+}
+
 /* ============================================================
-   ПОЭЛЕМЕНТНЫЕ АНИМАЦИИ — data-elem-scroll-anim
+   ПОЭЛЕМЕНТНЫЕ HOVER-ЭФФЕКТЫ — через классы elem-hover-*
+   Работают независимо от секции, имеют максимальный приоритет
+   ============================================================ */
+.elem-hover-lift {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.elem-hover-lift:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+}
+.elem-hover-glow:hover {
+  box-shadow: 0 0 30px rgba(var(--neon-blue-rgb), 0.4) !important;
+  border-color: rgba(var(--neon-blue-rgb), 0.6) !important;
+}
+.elem-hover-scale {
+  transition: transform 0.25s ease;
+}
+.elem-hover-scale:hover {
+  transform: scale(1.04) !important;
+}
+.elem-hover-border-glow {
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.elem-hover-border-glow:hover {
+  border-color: var(--neon-blue) !important;
+  box-shadow:
+    0 0 0 1px var(--neon-blue),
+    0 8px 32px rgba(0, 212, 255, 0.18) !important;
+}
+.elem-hover-pulse:hover {
+  animation: elemHoverPulse 0.6s ease infinite;
+}
+@keyframes elemHoverPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+.elem-hover-shake:hover {
+  animation: elemHoverShake 0.4s ease;
+}
+@keyframes elemHoverShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+.elem-hover-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.elem-hover-ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle,
+    rgba(var(--neon-blue-rgb), 0.3) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.elem-hover-ripple:hover::after {
+  opacity: 1;
+}
+.elem-hover-none:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+}
+
+/* ============================================================
+   ПОЭЛЕМЕНТНЫЕ АНИМАЦИИ ПОЯВЛЕНИЯ — data-elem-scroll-anim
    Используем !important чтобы перебить inline Tailwind классы
    (opacity-0, opacity-100, translate-y-10, translate-y-0)
    ============================================================ */
@@ -1535,6 +1636,11 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+}
+/* Содержимое сайта должно быть выше фонового слоя */
+#root {
+  position: relative;
+  z-index: 1;
 }
 
 /* dots */
