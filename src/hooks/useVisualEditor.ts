@@ -149,18 +149,19 @@ export function useVisualEditor() {
         hoveredEl = null;
       }
       if (e.data?.type === "UPDATE_ELEM_ANIM") {
-        // Применяем анимацию к элементу в реальном времени
-        const { elemId, hover_anim, scroll_anim } = e.data;
+        // Применяем анимацию к элементу в реальном времени (высший приоритет)
+        const { elemId, hover_anim, scroll_anim, anim_speed } = e.data;
         const el = document.querySelector<HTMLElement>(`[data-elem-id="${elemId}"]`);
         if (!el) return;
         const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
         JS_ANIMS.forEach((a) => el.classList.remove(`anim-${a}`));
-        if (hover_anim !== "inherit" && hover_anim !== "none" && JS_ANIMS.includes(hover_anim)) {
+        if (hover_anim && hover_anim !== "inherit" && hover_anim !== "none" && JS_ANIMS.includes(hover_anim)) {
           el.classList.add(`anim-${hover_anim}`);
         }
-        if (scroll_anim && scroll_anim !== "inherit") {
-          el.dataset.elemScrollAnim = scroll_anim;
-        }
+        if (scroll_anim && scroll_anim !== "inherit") el.dataset.elemScrollAnim = scroll_anim;
+        else if (scroll_anim === "inherit") delete el.dataset.elemScrollAnim;
+        if (anim_speed && anim_speed !== "inherit") el.dataset.elemAnimSpeed = anim_speed;
+        else if (anim_speed === "inherit") delete el.dataset.elemAnimSpeed;
       }
     };
 

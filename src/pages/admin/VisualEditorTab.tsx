@@ -210,9 +210,9 @@ export function VisualEditorTab({ content, save }: Props) {
   ).length;
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-3 flex-1 min-h-0">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-shrink-0">
         <div>
           <h2 className="text-xl font-bold text-white font-['Oswald']">Визуальный редактор</h2>
           <p className="text-gray-500 text-xs mt-0.5">
@@ -228,7 +228,7 @@ export function VisualEditorTab({ content, save }: Props) {
       </div>
 
       {/* Инструкция */}
-      <div className="p-3 rounded-xl bg-cyan-500/5 border border-cyan-500/15 text-gray-400 text-xs flex items-start gap-2">
+      <div className="p-3 rounded-xl bg-cyan-500/5 border border-cyan-500/15 text-gray-400 text-xs flex items-start gap-2 flex-shrink-0">
         <Icon name="MousePointer2" size={14} className="flex-shrink-0 mt-0.5 text-cyan-400" />
         <span>
           <b className="text-white">Как использовать:</b> Выбери страницу → нажми{" "}
@@ -237,9 +237,9 @@ export function VisualEditorTab({ content, save }: Props) {
         </span>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 flex-1 min-h-0">
         {/* Левая панель — iframe */}
-        <div className="flex-1 min-w-0 flex flex-col gap-3">
+        <div className="flex-1 min-w-0 flex flex-col gap-3 min-h-0">
           {/* Тулбар */}
           <div className="flex items-center gap-2 flex-wrap">
             {/* Страницы */}
@@ -280,9 +280,9 @@ export function VisualEditorTab({ content, save }: Props) {
           </div>
 
           {/* iframe */}
-          <div className={`relative rounded-2xl overflow-hidden border transition-all ${
+          <div className={`relative rounded-2xl overflow-hidden border transition-all flex-1 min-h-0 ${
             selectMode ? "border-cyan-500/40 shadow-[0_0_20px_rgba(0,212,255,0.1)]" : "border-white/10"
-          }`} style={{ height: "calc(100vh - 320px)", minHeight: 480 }}>
+          }`}>
             {!iframeReady && (
               <div className="absolute inset-0 flex items-center justify-center bg-[#080c14] z-10">
                 <div className="flex items-center gap-2 text-gray-500 text-sm">
@@ -310,7 +310,7 @@ export function VisualEditorTab({ content, save }: Props) {
         </div>
 
         {/* Правая панель — настройки элемента */}
-        <div className="w-72 flex-shrink-0 space-y-3">
+        <div className="w-72 flex-shrink-0 flex flex-col gap-3 overflow-y-auto">
           {!selected ? (
             <div className="glass-card neon-border rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-3" style={{ minHeight: 200 }}>
               <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
@@ -324,7 +324,7 @@ export function VisualEditorTab({ content, save }: Props) {
               </div>
             </div>
           ) : (
-            <div className="glass-card neon-border rounded-2xl p-4 space-y-4">
+            <div className="glass-card neon-border rounded-2xl p-4 flex flex-col gap-4">
               {/* Заголовок элемента */}
               <div className="flex items-start gap-2 pb-3 border-b border-white/10">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${

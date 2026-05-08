@@ -18,6 +18,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const ServicePage = lazy(() => import("./pages/ServicePage"));
 const PricingPage = lazy(() => import("./pages/Pricing"));
+const ServicesIndex = lazy(() => import("./pages/ServicesIndex"));
 
 const queryClient = new QueryClient();
 
@@ -90,35 +91,18 @@ function DesignApplicator() {
     if (s.design_card_style) body.dataset.cardStyle = s.design_card_style;
     if (s.design_shadow_style) body.dataset.shadowStyle = s.design_shadow_style;
 
-    // Применяем JS-анимации как CSS-классы на .hover-card и .hover-btn
+    // Применяем JS-анимации как CSS-классы на .hover-card и .hover-btn (глобальные)
     const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
     const applyAnimClass = (selector: string, animVal: string) => {
       document.querySelectorAll<HTMLElement>(selector).forEach(el => {
+        // Пропускаем элементы с data-elem-id — у них приоритет выше
+        if (el.dataset.elemId) return;
         JS_ANIMS.forEach(a => el.classList.remove(`anim-${a}`));
         if (JS_ANIMS.includes(animVal)) el.classList.add(`anim-${animVal}`);
       });
     };
     if (s.design_hover_cards) applyAnimClass(".hover-card", s.design_hover_cards);
     if (s.design_hover_buttons) applyAnimClass(".hover-btn", s.design_hover_buttons);
-
-    // Анимации по элементам — применяем к [data-elem-id="..."]
-    if (content?.element_animations) {
-      const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
-      content.element_animations.forEach((ea) => {
-        const el = document.querySelector<HTMLElement>(`[data-elem-id="${ea.elem_id}"]`);
-        if (!el) return;
-        // Hover JS-анимация
-        JS_ANIMS.forEach((a) => el.classList.remove(`anim-${a}`));
-        if (ea.hover_anim !== "inherit" && JS_ANIMS.includes(ea.hover_anim)) {
-          el.classList.add(`anim-${ea.hover_anim}`);
-        }
-        // data-атрибуты для CSS scroll и speed
-        if (ea.scroll_anim !== "inherit") el.dataset.elemScrollAnim = ea.scroll_anim;
-        else delete el.dataset.elemScrollAnim;
-        if (ea.anim_speed !== "inherit") el.dataset.elemAnimSpeed = ea.anim_speed;
-        else delete el.dataset.elemAnimSpeed;
-      });
-    }
 
     // Анимации по секциям — вешаем data-атрибуты на [data-section="..."]
     if (content?.section_animations) {
@@ -133,9 +117,43 @@ function DesignApplicator() {
         else el.removeAttribute("data-hover-buttons");
         if (sa.anim_speed !== "inherit") el.dataset.animSpeed = sa.anim_speed;
         else el.removeAttribute("data-anim-speed");
+
+        // Переопределяем JS-hover-анимацию внутри секции (пропуская элементы с data-elem-id)
+        if (sa.hover_cards !== "inherit") {
+          el.querySelectorAll<HTMLElement>(".hover-card").forEach((card) => {
+            if (card.dataset.elemId) return;
+            JS_ANIMS.forEach(a => card.classList.remove(`anim-${a}`));
+            if (JS_ANIMS.includes(sa.hover_cards)) card.classList.add(`anim-${sa.hover_cards}`);
+          });
+        }
+        if (sa.hover_buttons !== "inherit") {
+          el.querySelectorAll<HTMLElement>(".hover-btn").forEach((btn) => {
+            if (btn.dataset.elemId) return;
+            JS_ANIMS.forEach(a => btn.classList.remove(`anim-${a}`));
+            if (JS_ANIMS.includes(sa.hover_buttons)) btn.classList.add(`anim-${sa.hover_buttons}`);
+          });
+        }
       });
     }
-  }, [content?.settings]);
+
+    // Анимации по КОНКРЕТНЫМ элементам — применяем ПОСЛЕДНИМИ (высший приоритет)
+    if (content?.element_animations) {
+      content.element_animations.forEach((ea) => {
+        const el = document.querySelector<HTMLElement>(`[data-elem-id="${ea.elem_id}"]`);
+        if (!el) return;
+        // Hover JS-анимация — полностью перезаписывает любые глобальные/секционные классы
+        JS_ANIMS.forEach((a) => el.classList.remove(`anim-${a}`));
+        if (ea.hover_anim !== "inherit" && ea.hover_anim !== "none" && JS_ANIMS.includes(ea.hover_anim)) {
+          el.classList.add(`anim-${ea.hover_anim}`);
+        }
+        // data-атрибуты для CSS scroll и speed
+        if (ea.scroll_anim !== "inherit") el.dataset.elemScrollAnim = ea.scroll_anim;
+        else delete el.dataset.elemScrollAnim;
+        if (ea.anim_speed !== "inherit") el.dataset.elemAnimSpeed = ea.anim_speed;
+        else delete el.dataset.elemAnimSpeed;
+      });
+    }
+  }, [content?.settings, content?.element_animations, content?.section_animations]);
   return null;
 }
 
@@ -159,6 +177,7 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/services" element={<ServicesIndex />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

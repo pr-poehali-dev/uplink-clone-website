@@ -222,7 +222,7 @@ export default function Admin() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="p-6 max-w-5xl">
+          <div className={tab === "visual_editor" ? "p-4 h-full flex flex-col" : "p-6 max-w-5xl"}>
             {tab === "dashboard" && <DashboardTab content={content} onNavigate={setTab} />}
             {tab === "leads" && <LeadsTab password={password} cmsApiUrl={CMS_API_URL} />}
             {tab === "livechat" && <LiveChatTab token={auth.token} />}
