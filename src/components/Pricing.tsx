@@ -248,7 +248,7 @@ function PricingCard({
           ? "glass-card bg-gradient-to-b from-cyan-500/10 to-blue-500/5 shadow-2xl shadow-cyan-500/20 plan-highlighted"
           : "glass-card"
       } ${isVisible ? "visible" : ""}`}
-      style={{ animationDelay: `${index * 120}ms` }}
+      style={!isVisible ? { transitionDelay: `${index * 120}ms` } : undefined}
     >
       {plan.badge && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 text-[#080c14] text-xs font-bold shadow-lg shadow-cyan-500/30">

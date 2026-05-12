@@ -97,19 +97,9 @@ function DesignApplicator() {
     body.dataset.cardStyle      = s.design_card_style || "glass";
     body.dataset.shadowStyle    = s.design_shadow_style || "neon";
 
-    // Глобальные JS-анимации (magnetic, tilt, spotlight) — добавляем классы на все карточки/кнопки
-    // CSS-анимации (lift, glow, scale и т.д.) работают через data-атрибут на body через CSS
-    const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
-    const applyGlobalAnimClass = (selector: string, animVal: string) => {
-      document.querySelectorAll<HTMLElement>(selector).forEach(el => {
-        // Элементы с персональными настройками (data-elem-anim-applied) НЕ трогаем
-        if (el.dataset.elemAnimApplied) return;
-        JS_ANIMS.forEach(a => el.classList.remove(`anim-${a}`));
-        if (JS_ANIMS.includes(animVal)) el.classList.add(`anim-${animVal}`);
-      });
-    };
-    applyGlobalAnimClass(".hover-card", hoverCards);
-    applyGlobalAnimClass(".hover-btn", hoverButtons);
+    // JS-анимации для глобального hover вешаются через useElementAnimations
+    // (он читает data-hover-cards с body и применяет как fallback для элементов без персональных настроек)
+    // CSS hover-анимации (lift, glow, scale) работают автоматически через CSS data-атрибут на body
 
   }, [content?.settings, location.pathname]);
   return null;

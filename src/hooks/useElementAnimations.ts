@@ -81,6 +81,28 @@ function resetElementAnim(el: HTMLElement) {
 }
 
 /**
+ * Возвращает глобальный hover из body.dataset как fallback.
+ */
+function getGlobalHoverAnim(selector: string): string[] {
+  const key = selector === ".hover-card" ? "hoverCards" : "hoverButtons";
+  const val = (document.body.dataset[key] || "").trim();
+  if (!val || val === "none") return [];
+  return [val];
+}
+
+/**
+ * Применяет глобальный JS-hover к элементу без персональных настроек.
+ * CSS-hover (lift/glow/scale) работает через body data-атрибут автоматически.
+ */
+function applyGlobalAnimToElement(el: HTMLElement, selector: string) {
+  removeAllHoverClasses(el);
+  const anims = getGlobalHoverAnim(selector);
+  anims.forEach((name) => {
+    if (JS_ANIMS.includes(name)) el.classList.add(`anim-${name}`);
+  });
+}
+
+/**
  * Главный хук для применения поэлементных анимаций.
  */
 export function useElementAnimations(elementAnimations: CmsElementAnimation[] | undefined) {
@@ -106,17 +128,24 @@ export function useElementAnimations(elementAnimations: CmsElementAnimation[] | 
 
     let raf = 0;
     const apply = () => {
+      // 1. Применяем персональные настройки
       animMap.forEach((anim, elemId) => {
         document.querySelectorAll<HTMLElement>(`[data-elem-id="${elemId}"]`).forEach((el) => {
           applyAnimToElement(el, anim);
         });
       });
+      // 2. Сбрасываем элементы удалённые из конфига
       document.querySelectorAll<HTMLElement>("[data-elem-anim-applied]").forEach((el) => {
         const id = el.dataset.elemId;
-        if (id && !animMap.has(id)) {
-          resetElementAnim(el);
-        }
+        if (id && !animMap.has(id)) resetElementAnim(el);
       });
+      // 3. Глобальный JS-hover для элементов БЕЗ персональных настроек
+      for (const selector of [".hover-card", ".hover-btn"]) {
+        document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
+          if (el.dataset.elemAnimApplied) return;
+          applyGlobalAnimToElement(el, selector);
+        });
+      }
     };
 
     apply();
