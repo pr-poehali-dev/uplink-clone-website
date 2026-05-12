@@ -149,18 +149,24 @@ export function useVisualEditor() {
         hoveredEl = null;
       }
       if (e.data?.type === "UPDATE_ELEM_ANIM") {
-        // Применяем анимацию к элементу в реальном времени (высший приоритет)
-        const { elemId, hover_anim, scroll_anim, anim_speed } = e.data;
+        // Live-обновление анимации элемента без перезагрузки
+        const { elemId, hover_anims, hover_anim, scroll_anim, anim_speed } = e.data;
         const el = document.querySelector<HTMLElement>(`[data-elem-id="${elemId}"]`);
         if (!el) return;
         const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
         const CSS_HOVER_ANIMS = ["lift","glow","scale","border-glow","pulse","shake","ripple","none"];
         JS_ANIMS.forEach((a) => el.classList.remove(`anim-${a}`));
         CSS_HOVER_ANIMS.forEach((a) => el.classList.remove(`elem-hover-${a}`));
-        if (hover_anim && hover_anim !== "inherit") {
-          if (JS_ANIMS.includes(hover_anim)) el.classList.add(`anim-${hover_anim}`);
-          else if (CSS_HOVER_ANIMS.includes(hover_anim)) el.classList.add(`elem-hover-${hover_anim}`);
-        }
+
+        // Применяем массив hover-анимаций
+        const anims: string[] = Array.isArray(hover_anims) && hover_anims.length > 0
+          ? hover_anims
+          : (hover_anim && hover_anim !== "inherit" ? [hover_anim] : []);
+        anims.forEach((anim: string) => {
+          if (JS_ANIMS.includes(anim)) el.classList.add(`anim-${anim}`);
+          else if (CSS_HOVER_ANIMS.includes(anim)) el.classList.add(`elem-hover-${anim}`);
+        });
+
         if (scroll_anim && scroll_anim !== "inherit") el.dataset.elemScrollAnim = scroll_anim;
         else if (scroll_anim === "inherit") delete el.dataset.elemScrollAnim;
         const SPEED_MAP: Record<string,string> = { fast: "0.35s", normal: "0.6s", slow: "1.1s" };
@@ -171,6 +177,7 @@ export function useVisualEditor() {
           el.style.removeProperty("transition-duration");
           delete el.dataset.elemAnimSpeed;
         }
+        el.dataset.elemAnimApplied = "1";
       }
     };
 

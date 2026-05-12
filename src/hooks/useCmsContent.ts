@@ -242,7 +242,10 @@ export interface CmsElementAnimation {
   section_id: string | null;
   elem_type: string;
   label: string;
+  /** @deprecated используй hover_anims */
   hover_anim: string;
+  /** Массив hover-анимаций — поддерживает комбинации (например ["lift", "glow"]) */
+  hover_anims: string[];
   scroll_anim: string;
   anim_speed: string;
 }

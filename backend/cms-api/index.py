@@ -114,8 +114,8 @@ def get_all_content(conn):
     cur.execute("SELECT section_id, page, label, scroll_anim, hover_cards, hover_buttons, anim_speed FROM section_animations ORDER BY id")
     section_animations = [{"section_id": r[0], "page": r[1], "label": r[2], "scroll_anim": r[3] or "inherit", "hover_cards": r[4] or "inherit", "hover_buttons": r[5] or "inherit", "anim_speed": r[6] or "inherit"} for r in cur.fetchall()]
 
-    cur.execute("SELECT elem_id, section_id, elem_type, label, hover_anim, scroll_anim, anim_speed FROM element_animations")
-    element_animations = [{"elem_id": r[0], "section_id": r[1], "elem_type": r[2], "label": r[3] or r[0], "hover_anim": r[4] or "inherit", "scroll_anim": r[5] or "inherit", "anim_speed": r[6] or "inherit"} for r in cur.fetchall()]
+    cur.execute("SELECT elem_id, section_id, elem_type, label, hover_anim, scroll_anim, anim_speed, hover_anims FROM element_animations")
+    element_animations = [{"elem_id": r[0], "section_id": r[1], "elem_type": r[2], "label": r[3] or r[0], "hover_anim": r[4] or "inherit", "scroll_anim": r[5] or "inherit", "anim_speed": r[6] or "inherit", "hover_anims": r[7] or []} for r in cur.fetchall()]
 
     cur.close()
     return {
@@ -983,18 +983,27 @@ def handler(event: dict, context) -> dict:
             eid = esc(item.get("elem_id", ""))
             if not eid:
                 return err("elem_id required")
+            # hover_anims — массив строк (мультиселект)
+            hover_anims_raw = item.get("hover_anims", [])
+            if not isinstance(hover_anims_raw, list):
+                hover_anims_raw = [hover_anims_raw] if hover_anims_raw else []
+            # Для обратной совместимости: если hover_anims пустой, читаем старое hover_anim
+            if not hover_anims_raw and item.get("hover_anim") and item.get("hover_anim") != "inherit":
+                hover_anims_raw = [item["hover_anim"]]
+            hover_anims_literal = "ARRAY[%s]::TEXT[]" % ",".join(["'%s'" % esc(a) for a in hover_anims_raw]) if hover_anims_raw else "ARRAY[]::TEXT[]"
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO element_animations (elem_id, section_id, elem_type, label, hover_anim, scroll_anim, anim_speed, updated_at) "
-                "VALUES ('%s', %s, '%s', '%s', '%s', '%s', '%s', NOW()) "
-                "ON CONFLICT (elem_id) DO UPDATE SET section_id=EXCLUDED.section_id, elem_type=EXCLUDED.elem_type, label=EXCLUDED.label, hover_anim=EXCLUDED.hover_anim, scroll_anim=EXCLUDED.scroll_anim, anim_speed=EXCLUDED.anim_speed, updated_at=NOW()" % (
+                "INSERT INTO element_animations (elem_id, section_id, elem_type, label, hover_anim, scroll_anim, anim_speed, hover_anims, updated_at) "
+                "VALUES ('%s', %s, '%s', '%s', '%s', '%s', '%s', %s, NOW()) "
+                "ON CONFLICT (elem_id) DO UPDATE SET section_id=EXCLUDED.section_id, elem_type=EXCLUDED.elem_type, label=EXCLUDED.label, hover_anim=EXCLUDED.hover_anim, scroll_anim=EXCLUDED.scroll_anim, anim_speed=EXCLUDED.anim_speed, hover_anims=EXCLUDED.hover_anims, updated_at=NOW()" % (
                     eid,
                     ("'%s'" % esc(item.get("section_id", ""))) if item.get("section_id") else "NULL",
                     esc(item.get("elem_type", "card")),
                     esc(item.get("label", eid)),
-                    esc(item.get("hover_anim", "inherit")),
+                    esc(hover_anims_raw[0] if hover_anims_raw else "inherit"),
                     esc(item.get("scroll_anim", "inherit")),
                     esc(item.get("anim_speed", "inherit")),
+                    hover_anims_literal,
                 )
             )
             conn.commit()

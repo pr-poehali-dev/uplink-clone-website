@@ -9,33 +9,45 @@ interface Props {
   saving: boolean;
 }
 
-const HOVER_OPTIONS = [
-  { id: "inherit",     label: "Как в секции / глобально" },
-  { id: "none",        label: "Без эффекта" },
-  { id: "lift",        label: "Подъём" },
-  { id: "glow",        label: "Свечение" },
-  { id: "scale",       label: "Масштаб" },
-  { id: "border-glow", label: "Бордер-свечение" },
-  { id: "tilt",        label: "3D-наклон" },
-  { id: "spotlight",   label: "Прожектор" },
-  { id: "magnetic",    label: "Магнит" },
-  { id: "morph",       label: "Морфинг" },
-  { id: "flicker",     label: "Неон-мигание" },
-  { id: "float-up",    label: "Парение" },
-  { id: "trace",       label: "Обводка" },
-  { id: "pulse",       label: "Пульс" },
-  { id: "shake",       label: "Тряска" },
-  { id: "ripple",      label: "Рябь" },
-  { id: "rubber",      label: "Резина" },
-  { id: "jello",       label: "Желе" },
-  { id: "heartbeat",   label: "Сердцебиение" },
-  { id: "shockwave",   label: "Волна-клик" },
-  { id: "wipe",        label: "Неон-заливка" },
-  { id: "glitch",      label: "Глитч" },
+// Hover-анимации разбиты по группам для удобства
+const HOVER_GROUPS = [
+  {
+    label: "CSS-эффекты",
+    options: [
+      { id: "lift",        label: "Подъём",          icon: "ArrowUp" },
+      { id: "glow",        label: "Свечение",         icon: "Sparkles" },
+      { id: "scale",       label: "Масштаб",          icon: "Maximize2" },
+      { id: "border-glow", label: "Бордер-свечение",  icon: "Square" },
+      { id: "pulse",       label: "Пульс",            icon: "Activity" },
+      { id: "ripple",      label: "Рябь",             icon: "Waves" },
+    ],
+  },
+  {
+    label: "JS-эффекты",
+    options: [
+      { id: "tilt",        label: "3D-наклон",        icon: "RotateCcw" },
+      { id: "magnetic",    label: "Магнит",           icon: "Magnet" },
+      { id: "spotlight",   label: "Прожектор",        icon: "Flashlight" },
+      { id: "float-up",    label: "Парение",          icon: "Cloud" },
+      { id: "wipe",        label: "Неон-заливка",     icon: "Paintbrush" },
+      { id: "heartbeat",   label: "Сердцебиение",     icon: "Heart" },
+      { id: "shake",       label: "Тряска",           icon: "Vibrate" },
+      { id: "jello",       label: "Желе",             icon: "Wind" },
+      { id: "rubber",      label: "Резина",           icon: "Zap" },
+      { id: "flicker",     label: "Неон-мигание",     icon: "Lightbulb" },
+      { id: "morph",       label: "Морфинг",          icon: "Layers" },
+      { id: "glitch",      label: "Глитч",            icon: "AlertTriangle" },
+      { id: "trace",       label: "Обводка",          icon: "PenTool" },
+      { id: "shockwave",   label: "Волна-клик",       icon: "Radio" },
+    ],
+  },
 ];
 
+// Плоский список для поиска label по id
+const ALL_HOVER_OPTIONS = HOVER_GROUPS.flatMap((g) => g.options);
+
 const SCROLL_OPTIONS = [
-  { id: "inherit",    label: "Как в секции / глобально" },
+  { id: "inherit",    label: "Как глобально" },
   { id: "none",       label: "Без анимации" },
   { id: "fade-up",    label: "Снизу вверх" },
   { id: "fade-down",  label: "Сверху вниз" },
@@ -52,7 +64,7 @@ const SCROLL_OPTIONS = [
 ];
 
 const SPEED_OPTIONS = [
-  { id: "inherit", label: "Как в секции / глобально" },
+  { id: "inherit", label: "Как глобально" },
   { id: "fast",    label: "Быстро (0.35s)" },
   { id: "normal",  label: "Нормально (0.6s)" },
   { id: "slow",    label: "Медленно (1.1s)" },
@@ -94,16 +106,14 @@ export function VisualEditorTab({ content, save }: Props) {
   const getElemAnim = (elemId: string): CmsElementAnimation => {
     return elemAnims.find((e) => e.elem_id === elemId) ?? {
       elem_id: elemId, section_id: null, elem_type: "card",
-      label: elemId, hover_anim: "inherit", scroll_anim: "inherit", anim_speed: "inherit",
+      label: elemId, hover_anim: "inherit", hover_anims: [], scroll_anim: "inherit", anim_speed: "inherit",
     };
   };
 
-  // Слушаем postMessage от iframe
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === "ELEM_EDITOR_READY") {
         setIframeReady(true);
-        // При готовности — сразу включаем режим выбора
         iframeRef.current?.contentWindow?.postMessage({ type: "ENABLE_SELECT_MODE" }, "*");
       }
       if (e.data?.type === "ELEM_SELECTED") {
@@ -143,11 +153,31 @@ export function VisualEditorTab({ content, save }: Props) {
     setIframeKey((k) => k + 1);
   };
 
-  const onIframeLoad = () => {
-    // iframe сам пришлёт ELEM_EDITOR_READY когда useVisualEditor смонтируется
+  const currentAnim = selected ? getElemAnim(selected.elemId) : null;
+
+  // Получаем итоговый массив hover_anims с учётом обратной совместимости
+  const getCurrentHoverAnims = (): string[] => {
+    if (!currentAnim) return [];
+    if (currentAnim.hover_anims && currentAnim.hover_anims.length > 0) return currentAnim.hover_anims;
+    if (currentAnim.hover_anim && currentAnim.hover_anim !== "inherit") return [currentAnim.hover_anim];
+    return [];
   };
 
-  const currentAnim = selected ? getElemAnim(selected.elemId) : null;
+  const toggleHoverAnim = (animId: string) => {
+    if (!selected) return;
+    const current = getCurrentHoverAnims();
+    const next = current.includes(animId)
+      ? current.filter((a) => a !== animId)
+      : [...current, animId];
+    setElemAnims((prev) => {
+      const exists = prev.find((e) => e.elem_id === selected.elemId);
+      if (exists) return prev.map((e) => e.elem_id === selected.elemId
+        ? { ...e, hover_anims: next, hover_anim: next[0] ?? "inherit" }
+        : e
+      );
+      return [...prev, { ...getElemAnim(selected.elemId), hover_anims: next, hover_anim: next[0] ?? "inherit" }];
+    });
+  };
 
   const updateCurrentAnim = (patch: Partial<CmsElementAnimation>) => {
     if (!selected) return;
@@ -162,26 +192,27 @@ export function VisualEditorTab({ content, save }: Props) {
     if (!selected) return;
     setSavingElem(true);
     const anim = getElemAnim(selected.elemId);
+    const hoverAnims = getCurrentHoverAnims();
     await save("save_element_animation", {
       item: {
         elem_id: selected.elemId,
         section_id: selected.sectionId,
         elem_type: selected.elemType,
         label: selected.label,
-        hover_anim: anim.hover_anim,
+        hover_anims: hoverAnims,
+        hover_anim: hoverAnims[0] ?? "inherit",
         scroll_anim: anim.scroll_anim,
         anim_speed: anim.anim_speed,
       },
     });
     setSavingElem(false);
-    // Чистим кэш CMS чтобы при следующей загрузке сайт получил свежие настройки
     clearCmsCache();
     setSavedMsg("Сохранено!");
-    // Live-обновление в iframe + триггер refetch
     iframeRef.current?.contentWindow?.postMessage({
       type: "UPDATE_ELEM_ANIM",
       elemId: selected.elemId,
-      hover_anim: anim.hover_anim,
+      hover_anims: hoverAnims,
+      hover_anim: hoverAnims[0] ?? "inherit",
       scroll_anim: anim.scroll_anim,
       anim_speed: anim.anim_speed,
     }, "*");
@@ -198,6 +229,7 @@ export function VisualEditorTab({ content, save }: Props) {
     iframeRef.current?.contentWindow?.postMessage({
       type: "UPDATE_ELEM_ANIM",
       elemId: selected.elemId,
+      hover_anims: [],
       hover_anim: "inherit",
       scroll_anim: "inherit",
       anim_speed: "inherit",
@@ -207,8 +239,10 @@ export function VisualEditorTab({ content, save }: Props) {
   };
 
   const customizedCount = elemAnims.filter(
-    (e) => e.hover_anim !== "inherit" || e.scroll_anim !== "inherit" || e.anim_speed !== "inherit"
+    (e) => (e.hover_anims && e.hover_anims.length > 0) || e.hover_anim !== "inherit" || e.scroll_anim !== "inherit" || e.anim_speed !== "inherit"
   ).length;
+
+  const selectedHoverAnims = getCurrentHoverAnims();
 
   return (
     <div className="flex flex-col gap-3 flex-1 min-h-0">
@@ -231,7 +265,6 @@ export function VisualEditorTab({ content, save }: Props) {
       <div className="flex gap-4 flex-1 min-h-0">
         {/* Левая панель — iframe */}
         <div className="flex-1 min-w-0 flex flex-col gap-3 min-h-0">
-          {/* Тулбар */}
           <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
             <div className="flex gap-1 bg-white/5 rounded-xl p-1">
               {PAGES.map((p) => (
@@ -243,7 +276,6 @@ export function VisualEditorTab({ content, save }: Props) {
                 </button>
               ))}
             </div>
-
             <button onClick={toggleSelectMode}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
                 selectMode
@@ -253,13 +285,11 @@ export function VisualEditorTab({ content, save }: Props) {
               <Icon name={selectMode ? "MousePointer2" : "MousePointer"} size={13} />
               {selectMode ? "Выбор активен" : "Включить выбор"}
             </button>
-
             <button onClick={reloadIframe}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white text-xs transition-all">
               <Icon name="RefreshCw" size={13} />
               Обновить
             </button>
-
             <a href={activePage} target="_blank" rel="noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white text-xs transition-all ml-auto">
               <Icon name="ExternalLink" size={13} />
@@ -267,7 +297,6 @@ export function VisualEditorTab({ content, save }: Props) {
             </a>
           </div>
 
-          {/* iframe */}
           <div className={`relative rounded-2xl overflow-hidden border transition-all flex-1 min-h-0 ${
             selectMode ? "border-cyan-500/40 shadow-[0_0_20px_rgba(0,212,255,0.1)]" : "border-white/10"
           }`}>
@@ -283,7 +312,7 @@ export function VisualEditorTab({ content, save }: Props) {
               key={iframeKey}
               ref={iframeRef}
               src={`${activePage}?__editor=1`}
-              onLoad={onIframeLoad}
+              onLoad={() => {}}
               className="w-full h-full"
               style={{ border: "none", display: "block" }}
               title="Visual Editor"
@@ -312,6 +341,7 @@ export function VisualEditorTab({ content, save }: Props) {
             </div>
           ) : (
             <div className="glass-card neon-border rounded-2xl p-4 flex flex-col gap-4">
+              {/* Заголовок элемента */}
               <div className="flex items-start gap-2 pb-3 border-b border-white/10">
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
                   selected.elemType === "btn" ? "bg-purple-500/15 border border-purple-500/25" : "bg-cyan-500/10 border border-cyan-500/20"
@@ -320,7 +350,7 @@ export function VisualEditorTab({ content, save }: Props) {
                     className={selected.elemType === "btn" ? "text-purple-400" : "text-cyan-400"} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">
+                  <p className="text-white text-sm font-medium">
                     {selected.elemType === "btn" ? "Кнопка" : "Карточка"}
                   </p>
                   <p className="text-gray-600 text-[10px] font-mono mt-0.5 truncate">{selected.elemId}</p>
@@ -330,15 +360,64 @@ export function VisualEditorTab({ content, save }: Props) {
                 </button>
               </div>
 
+              {/* Hover-анимации — мультиселект */}
               <div>
-                <label className={cls.label}>Эффект при наведении</label>
-                <select value={currentAnim?.hover_anim ?? "inherit"}
-                  onChange={(e) => updateCurrentAnim({ hover_anim: e.target.value })}
-                  className={cls.select}>
-                  {HOVER_OPTIONS.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-                </select>
+                <label className={cls.label}>
+                  Эффекты при наведении
+                  {selectedHoverAnims.length > 0 && (
+                    <span className="ml-2 text-cyan-400 font-medium">· выбрано: {selectedHoverAnims.length}</span>
+                  )}
+                </label>
+
+                {/* Выбранные анимации — теги */}
+                {selectedHoverAnims.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {selectedHoverAnims.map((a) => {
+                      const opt = ALL_HOVER_OPTIONS.find((o) => o.id === a);
+                      return (
+                        <span key={a}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-medium cursor-pointer hover:bg-red-500/20 hover:border-red-500/30 hover:text-red-400 transition-colors"
+                          onClick={() => toggleHoverAnim(a)}
+                          title="Кликни чтобы убрать">
+                          {opt?.label ?? a}
+                          <Icon name="X" size={9} />
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Сетка кнопок выбора */}
+                {HOVER_GROUPS.map((group) => (
+                  <div key={group.label} className="mb-2">
+                    <p className="text-gray-600 text-[10px] uppercase tracking-wider mb-1">{group.label}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {group.options.map((opt) => {
+                        const active = selectedHoverAnims.includes(opt.id);
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => toggleHoverAnim(opt.id)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-medium transition-all border ${
+                              active
+                                ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-400"
+                                : "bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/20"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {selectedHoverAnims.length === 0 && (
+                  <p className="text-gray-600 text-[10px] mt-1">Нет эффектов — берётся из глобальных настроек</p>
+                )}
               </div>
 
+              {/* Анимация появления */}
               <div>
                 <label className={cls.label}>Анимация появления при скролле</label>
                 <select value={currentAnim?.scroll_anim ?? "inherit"}
@@ -348,6 +427,7 @@ export function VisualEditorTab({ content, save }: Props) {
                 </select>
               </div>
 
+              {/* Скорость */}
               <div>
                 <label className={cls.label}>Скорость анимации</label>
                 <select value={currentAnim?.anim_speed ?? "inherit"}
@@ -357,21 +437,25 @@ export function VisualEditorTab({ content, save }: Props) {
                 </select>
               </div>
 
+              {/* Кнопки */}
               <div className="flex gap-2 pt-1">
                 <button onClick={handleSaveElem} disabled={savingElem}
                   className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-cyan-500 text-[#080c14] text-xs font-bold transition-all hover:bg-cyan-400 disabled:opacity-50">
-                  {savingElem ? <div className="w-3 h-3 border-2 border-[#080c14]/30 border-t-[#080c14] rounded-full animate-spin" /> : <Icon name="Save" size={12} />}
+                  {savingElem
+                    ? <div className="w-3 h-3 border-2 border-[#080c14]/30 border-t-[#080c14] rounded-full animate-spin" />
+                    : <Icon name="Save" size={12} />}
                   Сохранить
                 </button>
                 <button onClick={handleResetElem}
                   className="px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-red-400 hover:border-red-500/30 text-xs transition-all"
-                  title="Сбросить эту настройку">
+                  title="Сбросить настройки элемента">
                   <Icon name="RotateCcw" size={12} />
                 </button>
               </div>
 
               <p className="text-[10px] text-gray-600 leading-relaxed">
-                «Как в секции / глобально» — берёт значение из настроек секции или общих настроек дизайна.
+                Если эффекты не выбраны — элемент берёт настройки из раздела «Дизайн».
+                Можно комбинировать: например, «Магнит» + «Свечение».
               </p>
             </div>
           )}

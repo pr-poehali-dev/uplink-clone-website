@@ -13,7 +13,6 @@ const JS_ANIMS = [
   "rubber", "swing", "jello", "float-up", "trace", "heartbeat", "wipe", "shockwave"
 ];
 
-// CSS hover-эффекты — через классы elem-hover-X
 const CSS_HOVER_ANIMS = ["lift", "glow", "scale", "border-glow", "pulse", "shake", "ripple", "none"];
 
 const SPEED_MAP: Record<string, string> = {
@@ -28,20 +27,31 @@ const removeAllHoverClasses = (el: HTMLElement) => {
 };
 
 /**
+ * Нормализует hover_anims: объединяет новый массив и старое поле hover_anim.
+ * Возвращает итоговый массив анимаций.
+ */
+function resolveHoverAnims(anim: CmsElementAnimation): string[] {
+  const anims = Array.isArray(anim.hover_anims) && anim.hover_anims.length > 0
+    ? anim.hover_anims
+    : (anim.hover_anim && anim.hover_anim !== "inherit" ? [anim.hover_anim] : []);
+  return anims.filter(Boolean);
+}
+
+/**
  * Применяет настройки анимации к одному элементу.
+ * Поддерживает массив hover_anims — несколько классов одновременно.
  */
 function applyAnimToElement(el: HTMLElement, anim: CmsElementAnimation) {
-  // Сначала чистим все возможные hover-классы (и JS, и CSS)
   removeAllHoverClasses(el);
 
-  // Применяем JS или CSS hover-анимацию
-  if (anim.hover_anim !== "inherit") {
-    if (JS_ANIMS.includes(anim.hover_anim)) {
-      el.classList.add(`anim-${anim.hover_anim}`);
-    } else if (CSS_HOVER_ANIMS.includes(anim.hover_anim)) {
-      el.classList.add(`elem-hover-${anim.hover_anim}`);
+  const anims = resolveHoverAnims(anim);
+  anims.forEach((name) => {
+    if (JS_ANIMS.includes(name)) {
+      el.classList.add(`anim-${name}`);
+    } else if (CSS_HOVER_ANIMS.includes(name)) {
+      el.classList.add(`elem-hover-${name}`);
     }
-  }
+  });
 
   // Скорость анимации
   if (anim.anim_speed !== "inherit" && SPEED_MAP[anim.anim_speed]) {
@@ -72,15 +82,10 @@ function resetElementAnim(el: HTMLElement) {
 
 /**
  * Главный хук для применения поэлементных анимаций.
- * - Применяет настройки сразу при загрузке контента
- * - Переприменяет при изменении роута (для lazy-страниц)
- * - Использует MutationObserver для динамически добавленных элементов
  */
 export function useElementAnimations(elementAnimations: CmsElementAnimation[] | undefined) {
   const location = useLocation();
 
-  // Применяем pre-hydration настройки СИНХРОННО при каждом ре-рендере (включая навигацию)
-  // Это предотвращает мерцание — элементы получают правильную анимацию ДО IntersectionObserver
   useLayoutEffect(() => {
     const initial = window.__INITIAL_ELEM_ANIMS__;
     if (!initial || initial.length === 0) return;
@@ -94,7 +99,6 @@ export function useElementAnimations(elementAnimations: CmsElementAnimation[] | 
   useEffect(() => {
     if (!elementAnimations) return;
 
-    // Обновляем глобальный массив для будущих навигаций (используется в useLayoutEffect)
     window.__INITIAL_ELEM_ANIMS__ = elementAnimations;
 
     const animMap = new Map<string, CmsElementAnimation>();
@@ -102,13 +106,11 @@ export function useElementAnimations(elementAnimations: CmsElementAnimation[] | 
 
     let raf = 0;
     const apply = () => {
-      // Сначала применяем настройки ко всем найденным
       animMap.forEach((anim, elemId) => {
         document.querySelectorAll<HTMLElement>(`[data-elem-id="${elemId}"]`).forEach((el) => {
           applyAnimToElement(el, anim);
         });
       });
-      // Потом сбрасываем элементы которые ранее были настроены, но сейчас удалены из конфига
       document.querySelectorAll<HTMLElement>("[data-elem-anim-applied]").forEach((el) => {
         const id = el.dataset.elemId;
         if (id && !animMap.has(id)) {
@@ -117,12 +119,9 @@ export function useElementAnimations(elementAnimations: CmsElementAnimation[] | 
       });
     };
 
-    // Применяем сразу
     apply();
-    // И ещё раз через RAF — на случай если компоненты ещё рендерятся
     raf = requestAnimationFrame(apply);
 
-    // MutationObserver — реагирует на новые элементы (SPA навигация, lazy-загрузка)
     const observer = new MutationObserver((mutations) => {
       let needApply = false;
       for (const m of mutations) {
@@ -140,7 +139,6 @@ export function useElementAnimations(elementAnimations: CmsElementAnimation[] | 
         if (needApply) break;
       }
       if (needApply) {
-        // Дебаунс через RAF
         cancelAnimationFrame(raf);
         raf = requestAnimationFrame(apply);
       }

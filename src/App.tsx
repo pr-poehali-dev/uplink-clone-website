@@ -83,10 +83,13 @@ function DesignApplicator() {
     }
     // Анимации и эффекты — всегда устанавливаем data-атрибуты на body
     // (не используем if-check чтобы не оставлять старые значения от pre-hydration)
+    const hoverCards   = s.design_hover_cards   || "lift";
+    const hoverButtons = s.design_hover_buttons || "glow";
+
     body.dataset.scrollAnim     = s.design_scroll_animation || "fade-up";
     body.dataset.animSpeed      = s.design_anim_speed || "normal";
-    body.dataset.hoverCards     = s.design_hover_cards || "lift";
-    body.dataset.hoverButtons   = s.design_hover_buttons || "glow";
+    body.dataset.hoverCards     = hoverCards;
+    body.dataset.hoverButtons   = hoverButtons;
     body.dataset.hoverMenu      = s.design_hover_menu || "underline";
     body.dataset.modalAnim      = s.design_modal_animation || "scale-in";
     body.dataset.bgEffect       = s.design_bg_effect || "none";
@@ -94,52 +97,21 @@ function DesignApplicator() {
     body.dataset.cardStyle      = s.design_card_style || "glass";
     body.dataset.shadowStyle    = s.design_shadow_style || "neon";
 
-    // Применяем JS-анимации как CSS-классы на .hover-card и .hover-btn (глобальные)
+    // Глобальные JS-анимации (magnetic, tilt, spotlight) — добавляем классы на все карточки/кнопки
+    // CSS-анимации (lift, glow, scale и т.д.) работают через data-атрибут на body через CSS
     const JS_ANIMS = ["magnetic","tilt","spotlight","glitch","morph","flicker","rubber","swing","jello","float-up","trace","heartbeat","wipe","shockwave"];
-    const applyAnimClass = (selector: string, animVal: string) => {
+    const applyGlobalAnimClass = (selector: string, animVal: string) => {
       document.querySelectorAll<HTMLElement>(selector).forEach(el => {
-        // Пропускаем элементы с data-elem-id — у них приоритет выше
-        if (el.dataset.elemId) return;
+        // Элементы с персональными настройками (data-elem-anim-applied) НЕ трогаем
+        if (el.dataset.elemAnimApplied) return;
         JS_ANIMS.forEach(a => el.classList.remove(`anim-${a}`));
         if (JS_ANIMS.includes(animVal)) el.classList.add(`anim-${animVal}`);
       });
     };
-    if (s.design_hover_cards) applyAnimClass(".hover-card", s.design_hover_cards);
-    if (s.design_hover_buttons) applyAnimClass(".hover-btn", s.design_hover_buttons);
+    applyGlobalAnimClass(".hover-card", hoverCards);
+    applyGlobalAnimClass(".hover-btn", hoverButtons);
 
-    // Анимации по секциям — вешаем data-атрибуты на [data-section="..."]
-    if (content?.section_animations) {
-      content.section_animations.forEach((sa) => {
-        const el = document.querySelector<HTMLElement>(`[data-section="${sa.section_id}"]`);
-        if (!el) return;
-        if (sa.scroll_anim !== "inherit") el.dataset.scrollAnim = sa.scroll_anim;
-        else el.removeAttribute("data-scroll-anim");
-        if (sa.hover_cards !== "inherit") el.dataset.hoverCards = sa.hover_cards;
-        else el.removeAttribute("data-hover-cards");
-        if (sa.hover_buttons !== "inherit") el.dataset.hoverButtons = sa.hover_buttons;
-        else el.removeAttribute("data-hover-buttons");
-        if (sa.anim_speed !== "inherit") el.dataset.animSpeed = sa.anim_speed;
-        else el.removeAttribute("data-anim-speed");
-
-        // Переопределяем JS-hover-анимацию внутри секции (пропуская элементы с data-elem-id)
-        if (sa.hover_cards !== "inherit") {
-          el.querySelectorAll<HTMLElement>(".hover-card").forEach((card) => {
-            if (card.dataset.elemId) return;
-            JS_ANIMS.forEach(a => card.classList.remove(`anim-${a}`));
-            if (JS_ANIMS.includes(sa.hover_cards)) card.classList.add(`anim-${sa.hover_cards}`);
-          });
-        }
-        if (sa.hover_buttons !== "inherit") {
-          el.querySelectorAll<HTMLElement>(".hover-btn").forEach((btn) => {
-            if (btn.dataset.elemId) return;
-            JS_ANIMS.forEach(a => btn.classList.remove(`anim-${a}`));
-            if (JS_ANIMS.includes(sa.hover_buttons)) btn.classList.add(`anim-${sa.hover_buttons}`);
-          });
-        }
-      });
-    }
-
-  }, [content?.settings, content?.section_animations, location.pathname]);
+  }, [content?.settings, location.pathname]);
   return null;
 }
 

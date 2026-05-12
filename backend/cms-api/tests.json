@@ -1,7 +1,7 @@
 {
   "tests": [
     {
-      "name": "GET all content includes section_animations",
+      "name": "GET all content includes element_animations with hover_anims",
       "method": "GET",
       "path": "/",
       "expectedStatus": 200,
