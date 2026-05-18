@@ -377,7 +377,7 @@ export function TeamTab({ content, password, save, saving }: { content: CmsConte
 }
 
 // ---- PASSWORD TAB ----
-export function PasswordTab({ password, setPassword, save, saving }: { password: string; setPassword: (p: string) => void; save: SaveFn; saving: boolean }) {
+export function PasswordTab({ save, saving }: { password: string; save: SaveFn; saving: boolean }) {
   const [newPwd, setNewPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [error, setError] = useState("");
@@ -387,7 +387,6 @@ export function PasswordTab({ password, setPassword, save, saving }: { password:
     if (newPwd !== confirmPwd) { setError("Пароли не совпадают"); return; }
     setError("");
     save("save_password", { new_password: newPwd });
-    setPassword(newPwd);
     setNewPwd("");
     setConfirmPwd("");
   };

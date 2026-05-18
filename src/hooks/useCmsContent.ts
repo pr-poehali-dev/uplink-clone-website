@@ -284,15 +284,27 @@ export interface CmsContent {
   element_animations?: CmsElementAnimation[];
 }
 
-const CACHE_KEY = "cms_content_cache_v6";
-const CACHE_TTL = 10 * 60 * 1000; // 10 минут
+const CACHE_KEY = "cms_content_cache_v7";
+const VERSION_KEY = "cms_content_version";
+const CACHE_TTL = 60 * 1000; // 1 минута — страховка, основная инвалидация через версию
+
+function getCacheVersion(): string {
+  try { return localStorage.getItem(VERSION_KEY) || "0"; } catch { return "0"; }
+}
+
+function bumpCacheVersion(): string {
+  const v = String(Date.now());
+  try { localStorage.setItem(VERSION_KEY, v); } catch (e) { void e; }
+  return v;
+}
 
 function getCached(): CmsContent | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    const { data, ts } = JSON.parse(raw);
+    const { data, ts, ver } = JSON.parse(raw);
     if (Date.now() - ts > CACHE_TTL) return null;
+    if (ver !== getCacheVersion()) return null;
     return data as CmsContent;
   } catch {
     return null;
@@ -301,20 +313,16 @@ function getCached(): CmsContent | null {
 
 function setCache(data: CmsContent) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
-  } catch {
-    // localStorage недоступен — игнорируем
-  }
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now(), ver: getCacheVersion() }));
+  } catch (e) { void e; }
 }
 
 export function clearCmsCache() {
   try {
+    bumpCacheVersion();
     localStorage.removeItem(CACHE_KEY);
-    // Уведомляем все useCmsContent-хуки в том же таба о сбросе кэша
     window.dispatchEvent(new CustomEvent("cms-cache-cleared"));
-  } catch {
-    // игнорируем
-  }
+  } catch (e) { void e; }
 }
 
 export function useCmsContent() {
@@ -338,7 +346,7 @@ export function useCmsContent() {
     // Очищаем старые версии кэша
     try {
       ["cms_content_cache","cms_content_cache_v2","cms_content_cache_v3",
-       "cms_content_cache_v4","cms_content_cache_v5"].forEach(k => localStorage.removeItem(k));
+       "cms_content_cache_v4","cms_content_cache_v5","cms_content_cache_v6"].forEach(k => localStorage.removeItem(k));
     } catch { /* игнорируем */ }
 
     // В editor-режиме всегда свежее

@@ -30,7 +30,6 @@ export default function Admin() {
   const [loginStep, setLoginStep] = useState<"username" | "password">("username");
   const [loginUsername, setLoginUsername] = useState("owner");
   const [loginPassword, setLoginPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [setupNewPassword, setSetupNewPassword] = useState("");
   const [setupConfirm, setSetupConfirm] = useState("");
   const [setupError, setSetupError] = useState("");
@@ -194,8 +193,6 @@ export default function Admin() {
   ];
 
   void setUnreadLeads;
-  void newPassword;
-  void setNewPassword;
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white flex flex-col">
@@ -247,7 +244,6 @@ export default function Admin() {
             {tab === "password" && (
               <PasswordTab
                 password={password}
-                setPassword={() => {}}
                 save={save}
                 saving={saving}
               />
