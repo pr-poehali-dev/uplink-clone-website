@@ -62,13 +62,9 @@ export default function Hero({ onContactClick, settings }: HeroProps) {
             className={`transition-all duration-700 delay-100 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
             <h1 className="section-title text-white mb-6">
-              {title1.includes("Аплинк") ? (
-                <>ИТК <span className="gradient-text">Аплинк-IT</span></>
-              ) : title1}
+              <span className="gradient-text">{title1}</span>
               <br />
               <span className="text-gray-300">{title2}</span>
-              <br />
-              для вашего бизнеса
             </h1>
           </div>
 

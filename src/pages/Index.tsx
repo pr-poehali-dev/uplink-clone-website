@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
@@ -45,6 +45,17 @@ export default function Index() {
     setModalSource(source);
     setModalOpen(true);
   };
+
+  useEffect(() => {
+    const homePage = content?.pages?.find(p => p.route === "/");
+    if (homePage?.seo_title) document.title = homePage.seo_title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (homePage?.seo_description && metaDesc) metaDesc.setAttribute("content", homePage.seo_description);
+    const metaOgTitle = document.querySelector('meta[property="og:title"]');
+    if (homePage?.og_title && metaOgTitle) metaOgTitle.setAttribute("content", homePage.og_title);
+    const metaOgDesc = document.querySelector('meta[property="og:description"]');
+    if (homePage?.og_description && metaOgDesc) metaOgDesc.setAttribute("content", homePage.og_description);
+  }, [content?.pages]);
 
   const s = content?.settings;
   const show = (id: string) => !s || s[`section_${id}_visible`] !== "false";

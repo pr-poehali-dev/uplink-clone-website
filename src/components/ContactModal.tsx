@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Icon from "@/components/ui/icon";
+import { useCmsContent } from "@/hooks/useCmsContent";
 
 const SEND_EMAIL_URL = "https://functions.poehali.dev/97638ab8-62ea-4ada-8078-f5aa05a3f044";
 
@@ -46,6 +47,10 @@ function isNameValid(name: string): boolean {
 }
 
 export default function ContactModal({ open, onClose, source = "Не указан", prefillMessage, prefillService }: ContactModalProps) {
+  const { content } = useCmsContent();
+  const phone = content?.settings?.phone ?? "8 (845) 239-77-38";
+  const phoneHref = content?.settings?.phone_href ?? "tel:+78452397738";
+
   const [form, setForm] = useState({
     name: "",
     phone: "+7",
@@ -146,8 +151,8 @@ export default function ContactModal({ open, onClose, source = "Не указа�
               </h3>
               <p className="text-gray-400 mb-6">
                 Наш менеджер свяжется с вами в ближайшие 15 минут в рабочее время. Или позвоните нам:{" "}
-                <a href="tel:+78452397738" className="text-cyan-400 hover:underline">
-                  8 (845) 239-77-38
+                <a href={phoneHref} className="text-cyan-400 hover:underline">
+                  {phone}
                 </a>
               </p>
               <button onClick={handleClose} className="btn-neon hover-btn px-8 py-3 rounded-xl font-semibold">

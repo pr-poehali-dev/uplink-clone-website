@@ -7,29 +7,7 @@ interface ContactsProps {
   settings?: CmsSettings;
 }
 
-const contactItems = [
-  {
-    icon: "Phone",
-    title: "Телефон",
-    lines: ["8 (845) 239-77-38"],
-    link: "tel:+78452397738",
-    accent: "from-cyan-400 to-blue-500",
-  },
-  {
-    icon: "Mail",
-    title: "Email",
-    lines: ["support@uplink-it.ru", "Отвечаем в течение часа"],
-    link: "mailto:info@uplink-it.ru",
-    accent: "from-purple-400 to-cyan-400",
-  },
-  {
-    icon: "MapPin",
-    title: "Адрес",
-    lines: ["Саратов, Россия", "Выезд по всему Саратову и СО"],
-    link: null,
-    accent: "from-green-400 to-cyan-400",
-  },
-];
+
 
 function ContactCard({
   item,
@@ -86,8 +64,8 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
       itemType="https://schema.org/LocalBusiness"
     >
       <meta itemProp="name" content="ИТК Аплинк-IT" />
-      <meta itemProp="telephone" content="+78452397738" />
-      <meta itemProp="email" content="support@uplink-it.ru" />
+      <meta itemProp="telephone" content={settings?.phone_href?.replace("tel:", "") ?? "+78452397738"} />
+      <meta itemProp="email" content={settings?.email_support ?? "support@uplink-it.ru"} />
       <meta itemProp="priceRange" content="от 7000 ₽/мес" />
       <div itemProp="address" itemScope itemType="https://schema.org/PostalAddress" className="hidden">
         <meta itemProp="addressLocality" content="Саратов" />
@@ -139,7 +117,7 @@ export default function Contacts({ onContactClick, settings }: ContactsProps) {
                 Оставить заявку
               </button>
               <a
-                href={settings?.phone_href ?? "tel:+79869860136"}
+                href={settings?.phone_href ?? "tel:+78452397738"}
                 data-elem-id="btn-contacts-call"
                 data-elem-type="btn"
                 className="btn-outline-neon hover-btn px-8 py-4 rounded-xl font-semibold flex items-center gap-2 justify-center"
