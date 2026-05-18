@@ -77,11 +77,11 @@ export default function Index() {
     <div className="min-h-screen bg-[#080c14]">
       {/* Слой для фоновых эффектов (data-bg-effect на body управляет стилями) */}
       <div className="bg-effect-layer" aria-hidden="true" />
-      <Header onContactClick={() => openModal("Шапка сайта")} settings={s} services={content?.services} />
+      <Header onContactClick={() => openModal("Шапка сайта")} settings={s} services={content?.services} navItems={content?.nav_items} />
 
       {order.map(id => show(id) ? <div key={id}>{sectionMap[id]}</div> : null)}
 
-      <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} />
+      <Footer onContactClick={() => openModal("Подвал сайта")} settings={s} navItems={content?.nav_items} services={content?.services} />
 
       <Suspense fallback={null}>
         <ContactModal

@@ -146,7 +146,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--dark-bg)", color: "var(--text-primary)" }}>
-      <Header onContactClick={() => setModalOpen(true)} settings={content?.settings} services={content?.services} />
+      <Header onContactClick={() => setModalOpen(true)} settings={content?.settings} services={content?.services} navItems={content?.nav_items} />
 
       {heroSection}
 
@@ -231,7 +231,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      <Footer onContactClick={() => setModalOpen(true)} settings={content?.settings} />
+      <Footer onContactClick={() => setModalOpen(true)} settings={content?.settings} navItems={content?.nav_items} services={content?.services} />
       <ContactModal open={modalOpen} onClose={() => setModalOpen(false)} source="Страница прайса" />
     </div>
   );

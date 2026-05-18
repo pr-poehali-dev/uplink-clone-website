@@ -110,7 +110,7 @@ export default function ServicePage() {
   if (!service) {
     return (
       <div className="min-h-screen bg-[#080c14] text-white">
-        <Header onContactClick={() => openModal("Шапка")} settings={content?.settings} services={content?.services} />
+        <Header onContactClick={() => openModal("Шапка")} settings={content?.settings} services={content?.services} navItems={content?.nav_items} />
         <div className="container mx-auto px-4 py-32 text-center">
           <Icon name="AlertCircle" size={48} className="text-cyan-400 mx-auto mb-4" />
           <h1 className="text-3xl font-bold font-['Oswald'] mb-3">Услуга не найдена</h1>
@@ -119,7 +119,7 @@ export default function ServicePage() {
             На главную
           </button>
         </div>
-        <Footer onContactClick={() => openModal("Подвал")} settings={content?.settings} />
+        <Footer onContactClick={() => openModal("Подвал")} settings={content?.settings} navItems={content?.nav_items} services={content?.services} />
       </div>
     );
   }
@@ -143,7 +143,7 @@ export default function ServicePage() {
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white">
-      <Header onContactClick={() => openModal("Шапка сайта")} settings={content?.settings} services={content?.services} />
+      <Header onContactClick={() => openModal("Шапка сайта")} settings={content?.settings} services={content?.services} navItems={content?.nav_items} />
 
       <ServicePageHero
         service={service}
@@ -187,7 +187,7 @@ export default function ServicePage() {
         </>
       )}
 
-      <Footer onContactClick={() => openModal("Подвал")} settings={content?.settings} />
+      <Footer onContactClick={() => openModal("Подвал")} settings={content?.settings} navItems={content?.nav_items} services={content?.services} />
 
       <ContactModal
         open={modalOpen}

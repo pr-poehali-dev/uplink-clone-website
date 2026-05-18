@@ -27,6 +27,7 @@ export default function ServicesIndex() {
         onContactClick={() => open("Шапка сайта")}
         settings={content?.settings}
         services={content?.services}
+        navItems={content?.nav_items}
       />
 
       <section className="pt-32 pb-12 relative overflow-hidden">
@@ -75,7 +76,7 @@ export default function ServicesIndex() {
         </div>
       </section>
 
-      <Footer onContactClick={() => open("Подвал")} settings={content?.settings} />
+      <Footer onContactClick={() => open("Подвал")} settings={content?.settings} navItems={content?.nav_items} services={content?.services} />
 
       <ContactModal open={modalOpen} onClose={() => setModalOpen(false)} source={source} />
     </div>

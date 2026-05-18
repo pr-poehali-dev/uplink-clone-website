@@ -1,31 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
-import { CmsSettings, CmsService } from "@/hooks/useCmsContent";
+import { CmsSettings, CmsService, CmsNavItem } from "@/hooks/useCmsContent";
 import { useTheme } from "@/hooks/useTheme";
 
 interface HeaderProps {
   onContactClick: () => void;
   settings?: CmsSettings;
   services?: CmsService[];
+  navItems?: CmsNavItem[];
 }
 
-interface NavLink {
-  label: string;
-  href: string;
-}
-
-const navLinks: NavLink[] = [
-  { label: "Главная", href: "/" },
-  { label: "О компании", href: "/#about" },
-  { label: "Проекты", href: "/#projects" },
-  { label: "Цены", href: "/#pricing" },
-  { label: "Контакты", href: "/#contacts" },
-];
-
-export default function Header({ onContactClick, settings, services }: HeaderProps) {
+export default function Header({ onContactClick, settings, services, navItems }: HeaderProps) {
   const phone = settings?.phone ?? "8 (845) 239-77-38";
   const phoneHref = settings?.phone_href ?? "tel:+78452397738";
+  const logoName = settings?.nav_logo_name || "ИТК Аплинк-IT";
+  const logoSubtitle = settings?.nav_logo_subtitle || "IT-услуги для вашего бизнеса";
+  const logoIcon = settings?.nav_logo_icon || "Wifi";
+  const ctaText = settings?.nav_cta_text || "Связаться";
+
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
@@ -38,13 +31,17 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
   const themeToggleEnabled = settings?.theme_toggle_enabled !== "false";
   const activeServices = (services || []).filter((s) => s.is_active && s.slug);
 
+  // Пункты меню из CMS (только видимые), отсортированные
+  const cmsNavItems = (navItems ?? [])
+    .filter((n) => n.is_visible)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // hover-логика с задержкой закрытия для удобства
   const openServices = () => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
@@ -57,7 +54,6 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
     closeTimeoutRef.current = setTimeout(() => setServicesOpen(false), 180);
   };
 
-  // Скролл к якорю при изменении hash (для перехода с других страниц)
   useEffect(() => {
     if (location.hash) {
       const id = location.hash.slice(1);
@@ -65,7 +61,6 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
         const el = document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
       };
-      // даём странице отрендериться
       setTimeout(tryScroll, 80);
     }
   }, [location.pathname, location.hash]);
@@ -89,9 +84,23 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
       } else {
         navigate("/");
       }
+    } else if (href.startsWith("http")) {
+      window.open(href, "_blank", "noopener noreferrer");
     } else {
       navigate(href);
     }
+  };
+
+  // Разбиваем название логотипа на части для стилизации
+  const renderLogoName = () => {
+    const parts = logoName.split(" ");
+    if (parts.length === 1) return <span className="text-cyan-400">{logoName}</span>;
+    return (
+      <>
+        {parts.slice(0, -1).join(" ")}{" "}
+        <span className="text-cyan-400">{parts[parts.length - 1]}</span>
+      </>
+    );
   };
 
   return (
@@ -104,116 +113,98 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
       itemScope
       itemType="https://schema.org/Organization"
     >
-      <meta itemProp="name" content="ИТК Аплинк-IT" />
+      <meta itemProp="name" content={logoName} />
       <meta itemProp="url" content="https://uplink-it.ru" />
-      <meta itemProp="description" content="IT-аутсорсинг и обслуживание IT-инфраструктуры для бизнеса в Саратове" />
-      <link itemProp="sameAs" href="https://uplink-it.ru" />
       <div className="container mx-auto px-4 flex items-center justify-between h-20">
-        <button
-          onClick={() => handleNav("/")}
-          className="flex items-center gap-3 group"
-        >
+
+        {/* Логотип */}
+        <button onClick={() => handleNav("/")} className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 group-hover:shadow-cyan-500/50 transition-all duration-300">
-            <Icon name="Wifi" size={22} className="text-[#080c14]" />
+            <Icon name={logoIcon as "Wifi"} size={22} className="text-[#080c14]" fallback="Wifi" />
           </div>
           <div className="text-left">
             <div className="font-bold text-lg leading-none text-white font-['Oswald'] tracking-wide">
-              ИТК <span className="text-cyan-400">Аплинк-IT</span>
+              {renderLogoName()}
             </div>
-            <div className="text-xs text-gray-400 leading-none mt-0.5">
-              IT-услуги для вашего бизнеса
-            </div>
+            <div className="text-xs text-gray-400 leading-none mt-0.5">{logoSubtitle}</div>
           </div>
         </button>
 
+        {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-1">
-          <button
-            onClick={() => handleNav("/")}
-            className="hover-nav-item px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
-          >
-            Главная
-          </button>
-
-          {/* Услуги — выпадающее меню по hover */}
-          <div
-            className="relative"
-            onMouseEnter={openServices}
-            onMouseLeave={closeServicesDelayed}
-          >
-            <button
-              onClick={() => setServicesOpen((p) => !p)}
-              className={`hover-nav-item px-4 py-2 text-sm transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium flex items-center gap-1 ${
-                servicesOpen || location.pathname.startsWith("/services")
-                  ? "text-cyan-400"
-                  : "text-gray-300 hover:text-cyan-400"
-              }`}
-            >
-              Услуги
-              <Icon
-                name="ChevronDown"
-                size={14}
-                className={`transition-transform duration-300 ${servicesOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {/* Невидимый мост для удержания hover */}
-            <div
-              className={`absolute top-full left-0 h-3 w-full ${servicesOpen ? "" : "pointer-events-none"}`}
-            />
-
-            <div
-              className={`absolute top-[calc(100%+8px)] left-0 w-80 origin-top transition-all duration-300 ${
-                servicesOpen
-                  ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
-                  : "opacity-0 -translate-y-3 scale-95 pointer-events-none"
-              }`}
-            >
-              <div className="glass-card neon-border rounded-2xl p-2 shadow-2xl shadow-cyan-500/10">
-                {activeServices.map((s, i) => (
-                  <Link
-                    key={s.id}
-                    to={`/services/${s.slug}`}
-                    onClick={() => setServicesOpen(false)}
-                    className="hover-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cyan-500/10 transition-all group"
-                    style={{
-                      animation: servicesOpen ? `fadeInUp 0.3s ${i * 40}ms both` : "none",
-                    }}
+          {cmsNavItems.map((item) => {
+            // Пункт "Услуги" — специальный с дропдауном
+            const isServicesItem = ["/services", "/services/", "#services", "/#services"].includes(item.href);
+            if (isServicesItem) {
+              return (
+                <div
+                  key={item.id}
+                  className="relative"
+                  onMouseEnter={openServices}
+                  onMouseLeave={closeServicesDelayed}
+                >
+                  <button
+                    onClick={() => setServicesOpen((p) => !p)}
+                    className={`hover-nav-item px-4 py-2 text-sm transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium flex items-center gap-1 ${
+                      servicesOpen || location.pathname.startsWith("/services")
+                        ? "text-cyan-400"
+                        : "text-gray-300 hover:text-cyan-400"
+                    }`}
                   >
-                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.accent || "from-cyan-400 to-blue-500"} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon name={s.icon as "Monitor"} size={16} className="text-[#080c14]" fallback="Settings" />
+                    {item.label}
+                    <Icon
+                      name="ChevronDown"
+                      size={14}
+                      className={`transition-transform duration-300 ${servicesOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  <div className={`absolute top-full left-0 h-3 w-full ${servicesOpen ? "" : "pointer-events-none"}`} />
+                  <div
+                    className={`absolute top-[calc(100%+8px)] left-0 w-80 origin-top transition-all duration-300 ${
+                      servicesOpen
+                        ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+                        : "opacity-0 -translate-y-3 scale-95 pointer-events-none"
+                    }`}
+                  >
+                    <div className="glass-card neon-border rounded-2xl p-2 shadow-2xl shadow-cyan-500/10">
+                      {activeServices.map((s, i) => (
+                        <Link
+                          key={s.id}
+                          to={`/services/${s.slug}`}
+                          onClick={() => setServicesOpen(false)}
+                          className="hover-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-cyan-500/10 transition-all group"
+                          style={{ animation: servicesOpen ? `fadeInUp 0.3s ${i * 40}ms both` : "none" }}
+                        >
+                          <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${s.accent || "from-cyan-400 to-blue-500"} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+                            <Icon name={s.icon as "Monitor"} size={16} className="text-[#080c14]" fallback="Settings" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors truncate">{s.title}</div>
+                            {s.short_desc && <div className="text-xs text-gray-500 truncate">{s.short_desc}</div>}
+                          </div>
+                          <Icon name="ChevronRight" size={14} className="text-gray-600 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
+                        </Link>
+                      ))}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors truncate">
-                        {s.title}
-                      </div>
-                      {s.short_desc && (
-                        <div className="text-xs text-gray-500 truncate">{s.short_desc}</div>
-                      )}
-                    </div>
-                    <Icon name="ChevronRight" size={14} className="text-gray-600 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
+                  </div>
+                </div>
+              );
+            }
 
-          {navLinks.slice(1).map((l) => (
-            <button
-              key={l.href}
-              onClick={() => handleNav(l.href)}
-              className="hover-nav-item px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
-            >
-              {l.label}
-            </button>
-          ))}
-          <Link
-            to="/pricing"
-            className="hover-nav-item px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
-          >
-            Прайс
-          </Link>
+            // Обычный пункт
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNav(item.href)}
+                className="hover-nav-item px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors duration-200 rounded-lg hover:bg-cyan-500/5 font-medium"
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
 
+        {/* Desktop right */}
         <div className="hidden lg:flex items-center gap-3">
           {themeToggleEnabled && (
             <button
@@ -241,10 +232,11 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
             onClick={onContactClick}
             className="btn-neon px-5 py-2.5 rounded-lg text-sm font-semibold"
           >
-            Связаться
+            {ctaText}
           </button>
         </div>
 
+        {/* Mobile right */}
         <div className="lg:hidden flex items-center gap-2">
           {themeToggleEnabled && (
             <button
@@ -275,72 +267,57 @@ export default function Header({ onContactClick, settings, services }: HeaderPro
         </div>
       </div>
 
+      {/* Mobile menu */}
       {menuOpen && (
         <div className="lg:hidden bg-[#080c14]/98 backdrop-blur-md border-t border-cyan-500/10 px-4 py-4 max-h-[calc(100vh-5rem)] overflow-y-auto animate-fade-in">
-          <button
-            onClick={() => handleNav("/")}
-            className="hover-nav-item block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
-          >
-            Главная
-          </button>
-
-          {/* Mobile: Услуги аккордеон */}
-          <div className="border-b border-gray-800/50">
-            <button
-              onClick={() => setMobileServicesOpen((p) => !p)}
-              className="hover-nav-item w-full flex items-center justify-between py-3 text-gray-300 hover:text-cyan-400 transition-colors text-sm font-medium"
-            >
-              Услуги
-              <Icon name="ChevronDown" size={16} className={`transition-transform ${mobileServicesOpen ? "rotate-180" : ""}`} />
-            </button>
-            {mobileServicesOpen && (
-              <div className="pb-2 pl-3 space-y-1 animate-fade-in">
-                {activeServices.map((s) => (
-                  <Link
-                    key={s.id}
-                    to={`/services/${s.slug}`}
-                    onClick={() => setMenuOpen(false)}
-                    className="hover-nav-item block py-2 text-sm text-gray-400 hover:text-cyan-400"
+          {cmsNavItems.map((item) => {
+            if (["/services", "/services/", "#services", "/#services"].includes(item.href)) {
+              return (
+                <div key={item.id} className="border-b border-gray-800/50">
+                  <button
+                    onClick={() => setMobileServicesOpen((p) => !p)}
+                    className="hover-nav-item w-full flex items-center justify-between py-3 text-gray-300 hover:text-cyan-400 transition-colors text-sm font-medium"
                   >
-                    {s.title}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {navLinks.slice(1).map((l) => (
-            <button
-              key={l.href}
-              onClick={() => handleNav(l.href)}
-              className="hover-nav-item block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
-            >
-              {l.label}
-            </button>
-          ))}
-          <Link
-            to="/pricing"
-            onClick={() => setMenuOpen(false)}
-            className="hover-nav-item block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
-          >
-            Прайс
-          </Link>
+                    {item.label}
+                    <Icon name="ChevronDown" size={16} className={`transition-transform ${mobileServicesOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {mobileServicesOpen && (
+                    <div className="pb-2 pl-3 space-y-1 animate-fade-in">
+                      {activeServices.map((s) => (
+                        <Link
+                          key={s.id}
+                          to={`/services/${s.slug}`}
+                          onClick={() => setMenuOpen(false)}
+                          className="hover-nav-item block py-2 text-sm text-gray-400 hover:text-cyan-400"
+                        >
+                          {s.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNav(item.href)}
+                className="hover-nav-item block w-full text-left py-3 text-gray-300 hover:text-cyan-400 border-b border-gray-800/50 transition-colors text-sm font-medium"
+              >
+                {item.label}
+              </button>
+            );
+          })}
           <div className="pt-4 flex flex-col gap-2">
-            <a
-              href={phoneHref}
-              className="flex items-center gap-2 text-cyan-400 text-sm font-medium"
-            >
+            <a href={phoneHref} className="flex items-center gap-2 text-cyan-400 text-sm font-medium">
               <Icon name="Phone" size={16} />
               {phone}
             </a>
             <button
-              onClick={() => {
-                setMenuOpen(false);
-                onContactClick();
-              }}
+              onClick={() => { setMenuOpen(false); onContactClick(); }}
               className="btn-neon px-5 py-2.5 rounded-lg text-sm font-semibold mt-1"
             >
-              Связаться с нами
+              {ctaText}
             </button>
           </div>
         </div>
