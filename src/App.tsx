@@ -8,7 +8,7 @@ import Index from "./pages/Index";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollToTop from "@/components/ScrollToTop";
 import LiveChat from "@/components/LiveChat";
-import { ThemeProvider } from "@/hooks/useTheme";
+import { ThemeProvider, useTheme } from "@/hooks/useTheme";
 import { useCmsContent } from "@/hooks/useCmsContent";
 import { useInteractiveAnimations } from "@/hooks/useInteractiveAnimations";
 import { useVisualEditor } from "@/hooks/useVisualEditor";
