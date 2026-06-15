@@ -57,11 +57,36 @@ interface ChatSettings {
 
 type Step = "welcome" | "form" | "chat";
 
+// Маска телефона: +7 (XXX) XXX-XX-XX
+function formatPhone(raw: string): string {
+  let d = raw.replace(/\D/g, "");
+  if (d.startsWith("8")) d = "7" + d.slice(1);
+  if (!d.startsWith("7")) d = "7" + d;
+  d = d.slice(0, 11);
+  let res = "+7";
+  if (d.length > 1) res += " (" + d.slice(1, 4);
+  if (d.length >= 4) res += ") " + d.slice(4, 7);
+  if (d.length >= 7) res += "-" + d.slice(7, 9);
+  if (d.length >= 9) res += "-" + d.slice(9, 11);
+  return res;
+}
+
+function isPhoneValid(phone: string): boolean {
+  return phone.replace(/\D/g, "").length === 11;
+}
+
+function isEmailValid(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
 export default function LiveChat() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>("welcome");
   const [selectedService, setSelectedService] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("+7");
+  const [email, setEmail] = useState("");
+  const [touched, setTouched] = useState({ name: false, phone: false, email: false });
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -87,6 +112,9 @@ export default function LiveChat() {
     setLastId(0);
     setInput("");
     setName("");
+    setPhone("+7");
+    setEmail("");
+    setTouched({ name: false, phone: false, email: false });
     setQuestion("");
     setSelectedService("");
     setUnread(0);
@@ -239,6 +267,10 @@ export default function LiveChat() {
   // ----------------------------------------------------------------
   const startChat = async () => {
     if (!name.trim() || !question.trim() || !selectedService) return;
+    if (!isPhoneValid(phone) || !isEmailValid(email)) {
+      setTouched({ name: true, phone: true, email: true });
+      return;
+    }
     setSending(true);
     try {
       const res = await fetch(`${LIVE_CHAT_URL}?action=send`, {
@@ -247,6 +279,8 @@ export default function LiveChat() {
         body: JSON.stringify({
           text: question.trim(),
           name: name.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
           service_topic: selectedService,
         }),
       });
@@ -294,7 +328,8 @@ export default function LiveChat() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
-  const canSubmit = name.trim().length > 0 && question.trim().length > 0 && selectedService !== "";
+  const canSubmit = name.trim().length > 0 && question.trim().length > 0 && selectedService !== ""
+    && isPhoneValid(phone) && isEmailValid(email);
 
   return (
     <>
@@ -398,22 +433,69 @@ export default function LiveChat() {
               </div>
 
               <p className="text-sm" style={{ color: "hsl(var(--foreground))" }}>
-                Как вас зовут и в чём вопрос?
+                Заполните контакты и опишите вопрос:
               </p>
 
-              <input
-                autoFocus
-                type="text"
-                placeholder="Ваше имя"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-                style={{ background: "hsl(var(--secondary))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}
-              />
+              <div>
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="Ваше имя *"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  onBlur={() => setTouched(t => ({ ...t, name: true }))}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                  style={{
+                    background: "hsl(var(--secondary))",
+                    color: "hsl(var(--foreground))",
+                    border: `1px solid ${touched.name && !name.trim() ? "rgba(239,68,68,0.6)" : "hsl(var(--border))"}`,
+                  }}
+                />
+              </div>
+
+              <div>
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  placeholder="+7 (___) ___-__-__ *"
+                  value={phone}
+                  onChange={e => setPhone(formatPhone(e.target.value))}
+                  onBlur={() => setTouched(t => ({ ...t, phone: true }))}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                  style={{
+                    background: "hsl(var(--secondary))",
+                    color: "hsl(var(--foreground))",
+                    border: `1px solid ${touched.phone && !isPhoneValid(phone) ? "rgba(239,68,68,0.6)" : "hsl(var(--border))"}`,
+                  }}
+                />
+                {touched.phone && !isPhoneValid(phone) && (
+                  <p className="text-xs mt-1" style={{ color: "rgb(248,113,113)" }}>Введите корректный номер телефона</p>
+                )}
+              </div>
+
+              <div>
+                <input
+                  type="email"
+                  inputMode="email"
+                  placeholder="E-mail *"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  onBlur={() => setTouched(t => ({ ...t, email: true }))}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                  style={{
+                    background: "hsl(var(--secondary))",
+                    color: "hsl(var(--foreground))",
+                    border: `1px solid ${touched.email && !isEmailValid(email) ? "rgba(239,68,68,0.6)" : "hsl(var(--border))"}`,
+                  }}
+                />
+                {touched.email && !isEmailValid(email) && (
+                  <p className="text-xs mt-1" style={{ color: "rgb(248,113,113)" }}>Введите корректный e-mail</p>
+                )}
+              </div>
 
               <textarea
                 rows={3}
-                placeholder="Опишите ваш вопрос..."
+                placeholder="Опишите ваш вопрос... *"
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && canSubmit) { e.preventDefault(); startChat(); } }}

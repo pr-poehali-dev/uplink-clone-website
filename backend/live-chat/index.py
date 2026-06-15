@@ -78,6 +78,8 @@ def send_visitor_message_to_maax(
     service_topic: str,
     text: str,
     is_first: bool,
+    visitor_phone: str = "",
+    visitor_email: str = "",
 ) -> str:
     """
     Отправляет сообщение клиента в групповой чат MAX.
@@ -87,6 +89,10 @@ def send_visitor_message_to_maax(
     short_id = session_id[:8]
     if is_first:
         header = f"🆕 Новый клиент\n👤 {visitor_name}"
+        if visitor_phone:
+            header += f"\n📞 {visitor_phone}"
+        if visitor_email:
+            header += f"\n✉️ {visitor_email}"
         if service_topic:
             header += f"\n📋 Тема: {service_topic}"
         header += f"\n🆔 Диалог #{short_id}"
@@ -270,6 +276,7 @@ def handler(event: dict, context) -> dict:
             session_id = body.get("session_id") or ""
             visitor_name = (body.get("name") or "Посетитель").strip()
             visitor_email = (body.get("email") or "").strip()
+            visitor_phone = (body.get("phone") or "").strip()
             service_topic = (body.get("service_topic") or "").strip()
             is_operator = body.get("sender") == "operator"
 
@@ -312,8 +319,8 @@ def handler(event: dict, context) -> dict:
             if not session_id:
                 session_id = make_session_id(ip)
                 cur.execute(
-                    f"INSERT INTO {SCHEMA}.live_chat_sessions (session_id, visitor_name, visitor_email, service_topic) VALUES (%s, %s, %s, %s)",
-                    (session_id, visitor_name, visitor_email, service_topic or None),
+                    f"INSERT INTO {SCHEMA}.live_chat_sessions (session_id, visitor_name, visitor_email, visitor_phone, service_topic) VALUES (%s, %s, %s, %s, %s)",
+                    (session_id, visitor_name, visitor_email, visitor_phone or None, service_topic or None),
                 )
                 conn.commit()
 
@@ -347,6 +354,8 @@ def handler(event: dict, context) -> dict:
                     api_key, notify_chat_id, session_id,
                     visitor_name, service_topic, text,
                     is_first=(msg_count <= 1),
+                    visitor_phone=visitor_phone,
+                    visitor_email=visitor_email,
                 )
                 # Сохраняем mid последнего сообщения — по нему роутим ответы оператора
                 if mid:
@@ -389,6 +398,7 @@ def handler(event: dict, context) -> dict:
             cur.execute(f"""
                 SELECT s.session_id, s.visitor_name, s.visitor_email, s.created_at,
                        s.last_message_at, s.is_closed, s.service_topic, s.maax_chat_id,
+                       s.visitor_phone,
                     (SELECT COUNT(*) FROM {SCHEMA}.live_chat_messages m
                      WHERE m.session_id = s.session_id AND m.is_read = FALSE AND m.sender = 'visitor') as unread
                 FROM {SCHEMA}.live_chat_sessions s
@@ -400,7 +410,8 @@ def handler(event: dict, context) -> dict:
                 {
                     "session_id": r[0], "visitor_name": r[1], "visitor_email": r[2],
                     "created_at": str(r[3]), "last_message_at": str(r[4]),
-                    "is_closed": r[5], "service_topic": r[6], "maax_chat_id": r[7], "unread": r[8]
+                    "is_closed": r[5], "service_topic": r[6], "maax_chat_id": r[7],
+                    "visitor_phone": r[8], "unread": r[9]
                 }
                 for r in rows
             ]
