@@ -32,6 +32,8 @@ type DesignVals = {
   design_btn_style: string;
   design_card_style: string;
   design_shadow_style: string;
+  default_theme: string;
+  theme_toggle_enabled: string;
 };
 
 function makeDefaults(s: Record<string, string>): DesignVals {
@@ -53,6 +55,8 @@ function makeDefaults(s: Record<string, string>): DesignVals {
     design_btn_style:          s.design_btn_style          ?? "rounded",
     design_card_style:         s.design_card_style         ?? "glass",
     design_shadow_style:       s.design_shadow_style       ?? "neon",
+    default_theme:             s.default_theme             ?? "dark",
+    theme_toggle_enabled:      s.theme_toggle_enabled      ?? "true",
   };
 }
 
@@ -88,7 +92,46 @@ export function DesignTab({ content, save, saving }: DesignTabProps) {
       </div>
 
       {section === "colors" && (
-        <DesignColorsTab vals={vals} set={set} />
+        <>
+          <div className="glass-card neon-border rounded-2xl p-5 space-y-4">
+            <h3 className="text-white font-bold font-['Oswald'] flex items-center gap-2">
+              <Icon name="Moon" size={16} className="text-cyan-400" />
+              Тема сайта
+            </h3>
+            <div>
+              <label className="block text-gray-400 text-xs mb-2">Тема по умолчанию для новых посетителей</label>
+              <div className="flex gap-2">
+                {[
+                  { val: "dark", label: "Тёмная", icon: "Moon" },
+                  { val: "light", label: "Светлая", icon: "Sun" },
+                ].map((opt) => (
+                  <button
+                    key={opt.val}
+                    onClick={() => set("default_theme", opt.val)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all ${
+                      vals.default_theme === opt.val
+                        ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40"
+                        : "bg-white/5 text-gray-400 border-white/10 hover:text-white"
+                    }`}
+                  >
+                    <Icon name={opt.icon as "Moon"} size={15} />
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={vals.theme_toggle_enabled !== "false"}
+                onChange={(e) => set("theme_toggle_enabled", e.target.checked ? "true" : "false")}
+                className="accent-cyan-400 w-4 h-4"
+              />
+              <span className="text-gray-300 text-sm">Показывать переключатель темы в шапке</span>
+            </label>
+          </div>
+          <DesignColorsTab vals={vals} set={set} />
+        </>
       )}
       {section === "animations" && (
         <DesignAnimationsTab vals={vals} set={set} />

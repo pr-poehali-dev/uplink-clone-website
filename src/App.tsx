@@ -36,9 +36,14 @@ function VisualEditorProvider() {
 function DesignApplicator() {
   const { content } = useCmsContent();
   const location = useLocation();
+  const { applyDefaultTheme } = useTheme();
   useEffect(() => {
     if (!content?.settings) return;
     const s = content.settings;
+    // Тема по умолчанию из админки (если пользователь не переключал вручную)
+    if (s.default_theme === "light" || s.default_theme === "dark") {
+      applyDefaultTheme(s.default_theme);
+    }
     if (s.site_meta_description) {
       document.querySelector('meta[name="description"]')?.setAttribute("content", s.site_meta_description);
     }

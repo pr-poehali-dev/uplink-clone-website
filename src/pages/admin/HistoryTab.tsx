@@ -18,9 +18,12 @@ interface Props {
 
 const ACTION_LABELS: Record<string, string> = {
   save_settings: "Настройки",
-  save_service: "Услуга",
-  save_plan: "Тариф",
-  save_project: "Проект",
+  save_service: "Услуги",
+  add_service: "Услуги",
+  delete_service: "Услуги",
+  save_plan: "Тарифы",
+  save_project: "Проекты",
+  save_team: "Команда",
   save_pages: "Страницы",
   save_nav_items: "Навигация",
   save_whyus_cards: "Почему мы",
@@ -28,11 +31,12 @@ const ACTION_LABELS: Record<string, string> = {
   save_pricing_items: "Прайс",
   save_faq: "FAQ",
   save_calc_options: "Калькулятор",
+  save_calc_sliders: "Калькулятор",
+  save_calc_settings: "Калькулятор",
   save_video_cameras: "Камеры",
   save_video_equipment: "Оборудование",
+  save_video_calc_sliders: "Видеокалькулятор",
   rollback: "Откат",
-  add_service: "Добавлена услуга",
-  delete_service: "Удалена услуга",
 };
 
 const ACTION_COLORS: Record<string, string> = {
@@ -184,7 +188,7 @@ export function HistoryTab({ token, cmsApiUrl }: Props) {
                   >
                     <Icon name="Eye" size={14} />
                   </button>
-                  {(h.entity_type === "settings") && (
+                  {h.action !== "rollback" && (
                     <button
                       onClick={() => setRollbackId(h.id)}
                       title="Откатить к этой версии"

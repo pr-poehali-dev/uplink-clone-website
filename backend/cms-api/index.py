@@ -202,6 +202,98 @@ def save_history(conn, action, entity_type, entity_id, snapshot, description, us
         pass
 
 
+# Маппинг action -> (таблица, человекочитаемое имя сущности)
+# Используется для универсального снапшота ВСЕХ изменений и отката
+HISTORY_TABLES = {
+    "save_service":           ("cms_services", "Услуги"),
+    "add_service":            ("cms_services", "Услуги"),
+    "delete_service":         ("cms_services", "Услуги"),
+    "save_plan":              ("cms_plans", "Тарифы"),
+    "save_project":           ("cms_projects", "Проекты"),
+    "save_team":              ("cms_team", "Команда"),
+    "save_faq":               ("cms_faq", "FAQ"),
+    "save_whyus_cards":       ("cms_whyus_cards", "Почему мы"),
+    "save_quickorder_steps":  ("cms_quickorder_steps", "Быстрый заказ"),
+    "save_pricing_items":     ("cms_pricing_items", "Прайс"),
+    "save_nav_items":         ("cms_nav_items", "Навигация"),
+    "save_calc_options":      ("cms_calc_options", "Калькулятор"),
+    "save_calc_sliders":      ("cms_calc_sliders", "Калькулятор (слайдеры)"),
+    "save_calc_settings":     ("cms_calc_settings", "Калькулятор (настройки)"),
+    "save_video_cameras":     ("cms_video_camera_types", "Камеры"),
+    "save_video_equipment":   ("cms_video_equipment", "Оборудование"),
+    "save_video_calc_sliders": ("cms_video_calc_sliders", "Видеокалькулятор"),
+}
+
+
+def get_table_columns(conn, table):
+    """Получить список колонок таблицы (кроме служебных)."""
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_schema='public' AND table_name='%s' ORDER BY ordinal_position" % table.replace("'", "''")
+    )
+    cols = [r[0] for r in cur.fetchall()]
+    cur.close()
+    return cols
+
+
+def snapshot_table(conn, table):
+    """Снять полный снапшот таблицы (все строки как список словарей)."""
+    try:
+        cols = get_table_columns(conn, table)
+        if not cols:
+            return None
+        cur = conn.cursor()
+        cur.execute("SELECT %s FROM %s" % (", ".join(cols), table))
+        rows = cur.fetchall()
+        cur.close()
+        return {"__table__": table, "__columns__": cols, "rows": [list(r) for r in rows]}
+    except Exception:
+        return None
+
+
+def restore_table(conn, snapshot):
+    """Восстановить таблицу из снапшота: очистить и залить строки обратно."""
+    table = snapshot.get("__table__")
+    cols = snapshot.get("__columns__") or []
+    rows = snapshot.get("rows") or []
+    if not table or not cols:
+        return False
+    cur = conn.cursor()
+    cur.execute("DELETE FROM %s" % table)
+    for row in rows:
+        vals = []
+        for v in row:
+            if v is None:
+                vals.append("NULL")
+            elif isinstance(v, bool):
+                vals.append("true" if v else "false")
+            elif isinstance(v, (int, float)):
+                vals.append(str(v))
+            elif isinstance(v, (list, dict)):
+                vals.append("'%s'" % json.dumps(v, ensure_ascii=False).replace("'", "''"))
+            else:
+                vals.append("'%s'" % str(v).replace("'", "''"))
+        cur.execute("INSERT INTO %s (%s) OVERRIDING SYSTEM VALUE VALUES (%s)" % (
+            table, ", ".join(cols), ", ".join(vals)))
+    conn.commit()
+    cur.close()
+    return True
+
+
+def log_change(conn, action, user_id, username):
+    """Универсальное логирование: снимает снапшот таблицы ДО изменения.
+    Вызывать ПЕРЕД выполнением UPDATE/INSERT/DELETE."""
+    info = HISTORY_TABLES.get(action)
+    if not info:
+        return
+    table, label = info
+    snap = snapshot_table(conn, table)
+    if snap is None:
+        return
+    save_history(conn, action, table, "all", snap, "Изменено: %s" % label, user_id, username)
+
+
 def handler(event: dict, context) -> dict:
     """CMS API — управление контентом сайта"""
     if event.get("httpMethod") == "OPTIONS":
@@ -274,6 +366,12 @@ def handler(event: dict, context) -> dict:
             return err("Неверный пароль или токен", 401)
 
         user_id, username = get_token_user(conn, token) if token else (None, body.get("_user", "admin"))
+
+        # Универсальное логирование: снимаем снапшот таблицы ДО изменения
+        # (для settings и pages история пишется отдельно ниже — со старым форматом)
+        if action in HISTORY_TABLES:
+            log_change(conn, action, user_id, username)
+            conn.commit()
 
         # --- save_settings ---
         if action == "save_settings":
@@ -1053,16 +1151,43 @@ def handler(event: dict, context) -> dict:
                 return err("Запись истории не найдена", 404)
             snapshot, entity_type, hist_action = row
             cur.close()
+            # Откат настроек (старый формат: {key: value})
             if entity_type == "settings":
                 cur = conn.cursor()
                 for key, value in snapshot.items():
                     cur.execute("INSERT INTO cms_settings (key, value, label, updated_at) VALUES ('%s', '%s', '', NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()" % (
                         esc(key), esc(str(value))))
                 conn.commit()
-                save_history(conn, "rollback", "settings", "all", snapshot, "Откат к версии #%s" % hist_id, user_id, username)
+                save_history(conn, "rollback", "settings", "all", snapshot, "Откат настроек к версии #%s" % hist_id, user_id, username)
                 conn.commit()
                 cur.close()
                 return ok({"ok": True})
+            # Откат страниц (старый формат: список dict)
+            if entity_type == "pages":
+                cur = conn.cursor()
+                for p in snapshot:
+                    metrika_val = ("'%s'" % esc(p.get("metrika_counter", ""))) if p.get("metrika_counter") else "NULL"
+                    cur.execute("UPDATE cms_pages SET title='%s', seo_title='%s', seo_description='%s', og_title='%s', og_description='%s', og_image_url='%s', is_active=%s, is_published=%s, metrika_counter=%s, updated_at=NOW() WHERE id=%s" % (
+                        esc(p.get("title")), esc(p.get("seo_title")), esc(p.get("seo_description")),
+                        esc(p.get("og_title")), esc(p.get("og_description")), esc(p.get("og_image_url")),
+                        "true" if p.get("is_active", True) else "false",
+                        "true" if p.get("is_published", True) else "false",
+                        metrika_val, int(p.get("id"))))
+                conn.commit()
+                save_history(conn, "rollback", "pages", "all", snapshot, "Откат страниц к версии #%s" % hist_id, user_id, username)
+                conn.commit()
+                cur.close()
+                return ok({"ok": True})
+            # Универсальный откат таблицы (новый формат: {__table__, __columns__, rows})
+            if isinstance(snapshot, dict) and snapshot.get("__table__"):
+                cur_snap = snapshot_table(conn, snapshot["__table__"])
+                ok_restore = restore_table(conn, snapshot)
+                if ok_restore:
+                    if cur_snap:
+                        save_history(conn, "rollback", snapshot["__table__"], "all", cur_snap, "Откат к версии #%s" % hist_id, user_id, username)
+                        conn.commit()
+                    return ok({"ok": True})
+                return err("Не удалось восстановить данные", 500)
             return err("Тип '%s' не поддерживает откат через API" % entity_type, 400)
 
         return err("Unknown action", 404)
