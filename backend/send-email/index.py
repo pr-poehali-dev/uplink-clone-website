@@ -123,10 +123,11 @@ def handler(event: dict, context) -> dict:
 
     # ── EMAIL ──────────────────────────────────────────────────────────
     try:
-        smtp_host = os.environ["SMTP_HOST"]
-        smtp_port = int(os.environ["SMTP_PORT"])
-        smtp_user = os.environ["SMTP_USER"]
-        smtp_password = os.environ["SMTP_PASSWORD"]
+        # Приоритет — значения из БД (редактируются в админке), затем env
+        smtp_host = secret("SMTP_HOST") or os.environ["SMTP_HOST"]
+        smtp_port = int(secret("SMTP_PORT") or os.environ["SMTP_PORT"])
+        smtp_user = secret("SMTP_USER") or os.environ["SMTP_USER"]
+        smtp_password = secret("SMTP_PASSWORD") or os.environ["SMTP_PASSWORD"]
         recipient = secret("RECIPIENT_EMAIL") or os.environ["RECIPIENT_EMAIL"]
 
         email_row = f"""<tr>
