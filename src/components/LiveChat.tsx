@@ -234,16 +234,15 @@ export default function LiveChat() {
       {/* Плавающая кнопка */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
-        style={{ background: "hsl(var(--primary))" }}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-110 bg-gradient-to-br from-cyan-400 to-cyan-600 shadow-lg shadow-cyan-500/40"
         aria-label="Открыть чат"
       >
         {open
-          ? <Icon name="X" size={24} style={{ color: "hsl(var(--primary-foreground))" }} />
-          : <Icon name="MessageCircle" size={26} style={{ color: "hsl(var(--primary-foreground))" }} />
+          ? <Icon name="X" size={24} className="text-[#080c14]" />
+          : <Icon name="MessageCircle" size={26} className="text-[#080c14]" />
         }
         {unread > 0 && !open && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
+          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold border-2 border-[#080c14]">
             {unread}
           </span>
         )}

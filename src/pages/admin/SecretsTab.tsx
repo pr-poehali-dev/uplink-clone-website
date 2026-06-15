@@ -7,6 +7,7 @@ interface AppSecret {
   key: string;
   value: string;
   filled: boolean;
+  from_env?: boolean;
   description: string;
   is_sensitive: boolean;
   updated_at: string;
@@ -356,6 +357,11 @@ export function SecretsTab({ password }: SecretsTabProps) {
                 <span className={`text-xs px-2 py-0.5 rounded-full ${s.filled ? "bg-green-500/15 text-green-400" : "bg-red-500/15 text-red-400"}`}>
                   {s.filled ? "Заполнен" : "Пустой"}
                 </span>
+                {s.from_env && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400" title="Значение задано в системных настройках хостинга">
+                    Из системы
+                  </span>
+                )}
               </div>
               {s.description && <p className="text-gray-500 text-xs mb-2">{s.description}</p>}
               {s.filled && (

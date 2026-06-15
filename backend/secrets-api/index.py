@@ -64,9 +64,11 @@ def handler(event: dict, context) -> dict:
                 row = cur.fetchone()
                 if not row:
                     return err(404, "Секрет не найден")
+                # Если в БД пусто — показываем значение из системного окружения
+                val = row[1] or os.environ.get(row[0], "")
                 return ok({
                     "key": row[0],
-                    "value": row[1],
+                    "value": val,
                     "description": row[2],
                     "is_sensitive": row[3],
                     "updated_at": str(row[4]),
@@ -80,10 +82,14 @@ def handler(event: dict, context) -> dict:
             for r in rows:
                 is_sens = r[3]
                 val = r[1]
+                # Если в БД пусто, но ключ задан в системном окружении — считаем заполненным "из системы"
+                env_val = os.environ.get(r[0], "")
+                in_env = bool(env_val) and not val
                 result.append({
                     "key": r[0],
                     "value": ("*" * min(len(val), 8) if is_sens and val else val),
-                    "filled": bool(val),
+                    "filled": bool(val) or in_env,
+                    "from_env": in_env,
                     "description": r[2],
                     "is_sensitive": is_sens,
                     "updated_at": str(r[4]),
