@@ -142,8 +142,14 @@ def handler(event: dict, context) -> dict:
     try:
         secrets = get_secrets_from_db(cur)
         api_key = secrets.get("MAAX_API_KEY") or os.environ.get("MAAX_API_KEY", "")
-        # MAAX_LIVE_CHAT_ID — групповой чат куда бот шлёт уведомления о новых клиентах
-        notify_chat_id = secrets.get("MAAX_LIVE_CHAT_ID") or os.environ.get("MAAX_LIVE_CHAT_ID", "")
+        # Чат Max для сообщений живого чата.
+        # Приоритет: отдельный MAAX_LIVE_CHAT_ID, иначе — общий MAAX_CHAT_ID (тот же что для заявок).
+        notify_chat_id = (
+            secrets.get("MAAX_LIVE_CHAT_ID")
+            or os.environ.get("MAAX_LIVE_CHAT_ID", "")
+            or secrets.get("MAAX_CHAT_ID")
+            or os.environ.get("MAAX_CHAT_ID", "")
+        )
 
         # ================================================================
         # ПУБЛИЧНЫЕ НАСТРОЙКИ (без авторизации — нужны виджету на сайте)
