@@ -85,13 +85,24 @@ def send_visitor_message_to_maax(
     чтобы роутить ответы оператора через нативный reply в MAX.
     """
     short_id = session_id[:8]
-    topic_line = f" · {service_topic}" if service_topic else ""
-    prefix = "🆕 Новый клиент" if is_first else "✉️ Сообщение"
-    msg_text = (
-        f"{prefix} | 👤 {visitor_name}{topic_line} | #{short_id}\n"
-        f"\n"
-        f"{text}"
-    )
+    if is_first:
+        header = f"🆕 Новый клиент\n👤 {visitor_name}"
+        if service_topic:
+            header += f"\n📋 Тема: {service_topic}"
+        header += f"\n🆔 Диалог #{short_id}"
+        msg_text = (
+            f"{header}\n"
+            f"━━━━━━━━━━━━━━\n"
+            f"{text}\n"
+            f"━━━━━━━━━━━━━━\n"
+            f"💬 Ответьте на это сообщение (Reply), чтобы написать клиенту"
+        )
+    else:
+        msg_text = (
+            f"✉️ {visitor_name} · #{short_id}\n"
+            f"\n"
+            f"{text}"
+        )
     resp = maax_request(api_key, "POST", f"/messages?chat_id={chat_id}", {"text": msg_text})
     # MAX возвращает mid в разных местах в зависимости от версии API
     mid = (

@@ -6,7 +6,18 @@ const POLL_INTERVAL = 4000;
 const SESSION_KEY = "live_chat_session_id";
 const SESSION_TS_KEY = "live_chat_session_ts";
 const MAX_MSG_ID_KEY = "live_chat_last_id";
-const SESSION_TTL_MS = 3 * 60 * 60 * 1000; // 3 часа
+// Если клиент 10 минут не пишет — чат сбрасывается к форме приветствия
+const INACTIVITY_MS = 10 * 60 * 1000; // 10 минут бездействия клиента
+
+function touchActivity() {
+  localStorage.setItem(SESSION_TS_KEY, String(Date.now()));
+}
+
+function clearSessionStorage() {
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(SESSION_TS_KEY);
+  localStorage.removeItem(MAX_MSG_ID_KEY);
+}
 
 function getSavedSession(): string {
   const sid = localStorage.getItem(SESSION_KEY) || "";
@@ -14,14 +25,12 @@ function getSavedSession(): string {
   const ts = parseInt(localStorage.getItem(SESSION_TS_KEY) || "0");
   // Если ts нет — сессия создана до нашего обновления, считаем её живой и ставим ts сейчас
   if (!ts) {
-    localStorage.setItem(SESSION_TS_KEY, String(Date.now()));
+    touchActivity();
     return sid;
   }
-  if (Date.now() - ts < SESSION_TTL_MS) return sid;
-  // Сессия протухла — чистим
-  localStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem(SESSION_TS_KEY);
-  localStorage.removeItem(MAX_MSG_ID_KEY);
+  // Сброс при бездействии клиента дольше 10 минут
+  if (Date.now() - ts < INACTIVITY_MS) return sid;
+  clearSessionStorage();
   return "";
 }
 
@@ -59,6 +68,36 @@ export default function LiveChat() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Фоновая сессия — существует даже если форма показана заново
   const bgSessionId = useRef<string>(getSavedSession());
+
+  // Сброс чата к форме приветствия (при бездействии клиента 10 минут)
+  const resetChat = useCallback(() => {
+    clearSessionStorage();
+    bgSessionId.current = "";
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+    setSessionId("");
+    setMessages([]);
+    setLastId(0);
+    setInput("");
+    setName("");
+    setQuestion("");
+    setSelectedService("");
+    setUnread(0);
+    setStep("welcome");
+  }, []);
+
+  // Таймер бездействия: каждую минуту проверяем, не молчит ли клиент дольше 10 минут
+  useEffect(() => {
+    const check = () => {
+      const sid = localStorage.getItem(SESSION_KEY);
+      if (!sid) return;
+      const ts = parseInt(localStorage.getItem(SESSION_TS_KEY) || "0");
+      if (ts && Date.now() - ts >= INACTIVITY_MS) {
+        resetChat();
+      }
+    };
+    const timer = setInterval(check, 30 * 1000); // проверка каждые 30 сек
+    return () => clearInterval(timer);
+  }, [resetChat]);
 
   // Загружаем настройки с бэкенда
   useEffect(() => {
@@ -187,7 +226,7 @@ export default function LiveChat() {
       const data = await res.json();
       if (data.session_id) {
         localStorage.setItem(SESSION_KEY, data.session_id);
-        localStorage.setItem(SESSION_TS_KEY, String(Date.now()));
+        touchActivity();
         bgSessionId.current = data.session_id;
         setSessionId(data.session_id);
         const msg: Message = { id: Date.now(), sender: "visitor", text: question.trim(), created_at: new Date().toISOString() };
@@ -208,6 +247,7 @@ export default function LiveChat() {
     if (!text || !sessionId || sending) return;
     setInput("");
     setSending(true);
+    touchActivity(); // клиент активен — продлеваем сессию
     const tempMsg: Message = { id: Date.now(), sender: "visitor", text, created_at: new Date().toISOString() };
     setMessages(prev => [...prev, tempMsg]);
     scrollToBottom();
