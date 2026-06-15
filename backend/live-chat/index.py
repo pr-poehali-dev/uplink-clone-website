@@ -219,6 +219,22 @@ def handler(event: dict, context) -> dict:
                         session_id = row[0]
                         print(f"[WEBHOOK] routed by /reply short_id={short_id} -> session={session_id}")
 
+            # --- Роутинг 3: единственная активная сессия (fallback) ---
+            # Если оператор просто написал сообщение без reply/команды —
+            # направляем в последнюю активную сессию, если она одна.
+            if not session_id:
+                cur.execute(
+                    f"SELECT session_id FROM {SCHEMA}.live_chat_sessions "
+                    f"WHERE is_closed = FALSE AND last_message_at > NOW() - INTERVAL '6 hours' "
+                    f"ORDER BY last_message_at DESC LIMIT 2"
+                )
+                active = cur.fetchall()
+                if len(active) == 1:
+                    session_id = active[0][0]
+                    print(f"[WEBHOOK] routed by single-active-session -> session={session_id}")
+                elif len(active) > 1:
+                    print(f"[WEBHOOK] {len(active)} active sessions — нужен reply на сообщение клиента для маршрутизации")
+
             if not session_id:
                 print(f"[WEBHOOK] cannot route message, ignoring")
                 return ok({"ok": True})
