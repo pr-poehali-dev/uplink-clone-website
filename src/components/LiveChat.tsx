@@ -64,6 +64,7 @@ export default function LiveChat() {
   const [unread, setUnread] = useState(0);
   const [settings, setSettings] = useState<ChatSettings | null>(null);
   const [restoringSession, setRestoringSession] = useState(false);
+  const [expiredNotice, setExpiredNotice] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Фоновая сессия — существует даже если форма показана заново
@@ -82,22 +83,35 @@ export default function LiveChat() {
     setQuestion("");
     setSelectedService("");
     setUnread(0);
+    setExpiredNotice(false);
     setStep("welcome");
   }, []);
 
-  // Таймер бездействия: каждую минуту проверяем, не молчит ли клиент дольше 10 минут
+  // Завершение диалога по неактивности: показываем уведомление, затем сбрасываем
+  const expireChat = useCallback(() => {
+    // Чистим хранилище сразу, чтобы сессия не восстановилась
+    clearSessionStorage();
+    bgSessionId.current = "";
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+    setSessionId("");
+    setExpiredNotice(true);
+    // Через 3.5 сек сбрасываем чат к форме приветствия
+    setTimeout(() => resetChat(), 3500);
+  }, [resetChat]);
+
+  // Таймер бездействия: проверяем, не молчит ли клиент дольше 10 минут
   useEffect(() => {
     const check = () => {
       const sid = localStorage.getItem(SESSION_KEY);
       if (!sid) return;
       const ts = parseInt(localStorage.getItem(SESSION_TS_KEY) || "0");
       if (ts && Date.now() - ts >= INACTIVITY_MS) {
-        resetChat();
+        expireChat();
       }
     };
     const timer = setInterval(check, 30 * 1000); // проверка каждые 30 сек
     return () => clearInterval(timer);
-  }, [resetChat]);
+  }, [expireChat]);
 
   // Загружаем настройки с бэкенда
   useEffect(() => {
@@ -309,8 +323,23 @@ export default function LiveChat() {
             </div>
           </div>
 
+          {/* Уведомление о завершении диалога по неактивности */}
+          {expiredNotice && (
+            <div className="flex flex-col items-center justify-center gap-2 px-6 py-10 text-center">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-1" style={{ background: "hsl(var(--secondary))" }}>
+                <Icon name="Clock" size={24} className="text-cyan-400" />
+              </div>
+              <p className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>
+                Диалог завершён из-за неактивности
+              </p>
+              <p className="text-xs opacity-70" style={{ color: "hsl(var(--foreground))" }}>
+                Начинаем заново — сейчас откроется форма обращения
+              </p>
+            </div>
+          )}
+
           {/* ШАГ 1: Приветствие + выбор услуги */}
-          {step === "welcome" && (
+          {!expiredNotice && step === "welcome" && (
             <div className="flex flex-col overflow-y-auto" style={{ maxHeight: "460px" }}>
               <div className="px-4 pt-4 pb-2">
                 <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "hsl(var(--foreground))" }}>
@@ -337,7 +366,7 @@ export default function LiveChat() {
           )}
 
           {/* ШАГ 2: Имя + вопрос */}
-          {step === "form" && (
+          {!expiredNotice && step === "form" && (
             <div className="flex flex-col gap-3 p-4 overflow-y-auto" style={{ maxHeight: "460px" }}>
               <div className="flex items-center gap-2">
                 <button
@@ -391,7 +420,7 @@ export default function LiveChat() {
           )}
 
           {/* ШАГ 3: Чат */}
-          {step === "chat" && (
+          {!expiredNotice && step === "chat" && (
             <>
               <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2" style={{ minHeight: 0, maxHeight: "360px" }}>
                 {messages.length === 0 && (
