@@ -16,6 +16,64 @@ interface SecretsTabProps {
   password: string;
 }
 
+// Категории секретов по префиксу ключа
+interface SecretGroupDef {
+  id: string;
+  label: string;
+  icon: string;
+  description?: string;
+  match: (key: string) => boolean;
+}
+
+const SECRET_GROUPS: SecretGroupDef[] = [
+  {
+    id: "max",
+    label: "Max (мессенджер)",
+    icon: "MessageCircle",
+    description: "Уведомления о заявках и сообщения живого чата в Max",
+    match: (k) => k.startsWith("MAAX"),
+  },
+  {
+    id: "telegram",
+    label: "Telegram",
+    icon: "Send",
+    description: "Уведомления о заявках в Telegram-чат",
+    match: (k) => k.startsWith("TELEGRAM"),
+  },
+  {
+    id: "email",
+    label: "Email (SMTP)",
+    icon: "Mail",
+    description: "Отправка заявок на почту",
+    match: (k) => k.startsWith("SMTP") || k === "RECIPIENT_EMAIL",
+  },
+  {
+    id: "ai",
+    label: "Искусственный интеллект",
+    icon: "Sparkles",
+    description: "Генерация текстов через ИИ в админке",
+    match: (k) => k.startsWith("OPENROUTER") || k.startsWith("OPENAI"),
+  },
+];
+
+function groupSecrets(secrets: AppSecret[]): { id: string; label: string; icon: string; description?: string; items: AppSecret[] }[] {
+  const groups = SECRET_GROUPS.map((g) => ({
+    id: g.id,
+    label: g.label,
+    icon: g.icon,
+    description: g.description,
+    items: secrets.filter((s) => g.match(s.key)).sort((a, b) => a.key.localeCompare(b.key)),
+  }));
+  // Прочие секреты, не попавшие ни в одну категорию
+  const matched = new Set<string>();
+  SECRET_GROUPS.forEach((g) => secrets.forEach((s) => { if (g.match(s.key)) matched.add(s.key); }));
+  const other = secrets.filter((s) => !matched.has(s.key)).sort((a, b) => a.key.localeCompare(b.key));
+  if (other.length > 0) {
+    groups.push({ id: "other", label: "Прочее", icon: "KeyRound", description: undefined, items: other });
+  }
+  return groups.filter((g) => g.items.length > 0);
+}
+
 export function SecretsTab({ password }: SecretsTabProps) {
   const [secrets, setSecrets] = useState<AppSecret[]>([]);
   const [loading, setLoading] = useState(true);
@@ -239,92 +297,109 @@ export function SecretsTab({ password }: SecretsTabProps) {
         </div>
       )}
 
-      {/* Список секретов */}
+      {/* Список секретов по категориям */}
       {loading ? (
         <div className="text-center text-gray-500 py-10">Загрузка...</div>
       ) : (
-        <div className="space-y-2">
-          {secrets.map((s) => (
-            <div key={s.key} className="glass-card rounded-xl border border-white/5 p-4">
-              {editKey === s.key ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-cyan-400 text-sm font-bold">{s.key}</span>
-                    {s.is_sensitive && <span className="text-xs text-gray-600 bg-white/5 px-2 py-0.5 rounded">конфиденциальный</span>}
-                  </div>
-                  {s.description && <p className="text-gray-500 text-xs">{s.description}</p>}
-                  <input
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    type={s.is_sensitive ? "text" : "text"}
-                    className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-cyan-500/40 text-white text-sm focus:outline-none font-mono"
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
-                    <button onClick={() => saveEdit(s.key)} disabled={saving} className="btn-neon px-4 py-1.5 rounded-lg text-sm font-semibold">
-                      Сохранить
-                    </button>
-                    <button onClick={() => setEditKey(null)} className="px-4 py-1.5 rounded-lg text-sm text-gray-400 hover:text-white border border-white/10 transition-colors">
-                      Отмена
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-cyan-400 text-sm font-bold">{s.key}</span>
-                      {s.is_sensitive && <Icon name="Lock" size={12} className="text-gray-600" />}
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${s.filled ? "bg-green-500/15 text-green-400" : "bg-red-500/15 text-red-400"}`}>
-                        {s.filled ? "Заполнен" : "Пустой"}
-                      </span>
-                    </div>
-                    {s.description && <p className="text-gray-500 text-xs mb-2">{s.description}</p>}
-                    {s.filled && (
-                      <div className="flex items-center gap-2">
-                        <code className="text-gray-400 text-xs font-mono bg-white/5 px-2 py-1 rounded">
-                          {showValue[s.key] && revealedValues[s.key] !== undefined
-                            ? revealedValues[s.key]
-                            : "••••••••"}
-                        </code>
-                        {s.is_sensitive && (
-                          <button onClick={() => revealValue(s.key)} className="text-gray-600 hover:text-cyan-400 transition-colors">
-                            <Icon name={showValue[s.key] ? "EyeOff" : "Eye"} size={13} />
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button
-                      onClick={() => startEdit(s.key)}
-                      className="p-1.5 rounded-lg text-gray-500 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors"
-                      title="Редактировать"
-                    >
-                      <Icon name="Pencil" size={14} />
-                    </button>
-                    {deleteConfirm === s.key ? (
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs text-red-400">Удалить?</span>
-                        <button onClick={() => deleteSecret(s.key)} className="px-2 py-1 text-xs bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors">Да</button>
-                        <button onClick={() => setDeleteConfirm(null)} className="px-2 py-1 text-xs text-gray-500 rounded hover:text-white transition-colors">Нет</button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setDeleteConfirm(s.key)}
-                        className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                        title="Удалить"
-                      >
-                        <Icon name="Trash2" size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
+        <div className="space-y-6">
+          {groupSecrets(secrets).map((group) => (
+            <div key={group.id} className="space-y-2">
+              <div className="flex items-center gap-2 px-1">
+                <Icon name={group.icon as "Settings"} size={15} className="text-cyan-400" />
+                <h3 className="text-sm font-semibold text-white font-['Oswald'] tracking-wide">{group.label}</h3>
+                <span className="text-xs text-gray-600">({group.items.length})</span>
+                <div className="flex-1 h-px bg-white/5 ml-2" />
+              </div>
+              {group.description && <p className="text-gray-600 text-xs px-1 -mt-1">{group.description}</p>}
+              <div className="space-y-2">
+                {group.items.map((s) => renderSecret(s))}
+              </div>
             </div>
           ))}
         </div>
       )}
     </div>
   );
+
+  function renderSecret(s: AppSecret) {
+    return (
+      <div key={s.key} className="glass-card rounded-xl border border-white/5 p-4">
+        {editKey === s.key ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-cyan-400 text-sm font-bold">{s.key}</span>
+              {s.is_sensitive && <span className="text-xs text-gray-600 bg-white/5 px-2 py-0.5 rounded">конфиденциальный</span>}
+            </div>
+            {s.description && <p className="text-gray-500 text-xs">{s.description}</p>}
+            <input
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              type="text"
+              className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-cyan-500/40 text-white text-sm focus:outline-none font-mono"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button onClick={() => saveEdit(s.key)} disabled={saving} className="btn-neon px-4 py-1.5 rounded-lg text-sm font-semibold">
+                Сохранить
+              </button>
+              <button onClick={() => setEditKey(null)} className="px-4 py-1.5 rounded-lg text-sm text-gray-400 hover:text-white border border-white/10 transition-colors">
+                Отмена
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-mono text-cyan-400 text-sm font-bold">{s.key}</span>
+                {s.is_sensitive && <Icon name="Lock" size={12} className="text-gray-600" />}
+                <span className={`text-xs px-2 py-0.5 rounded-full ${s.filled ? "bg-green-500/15 text-green-400" : "bg-red-500/15 text-red-400"}`}>
+                  {s.filled ? "Заполнен" : "Пустой"}
+                </span>
+              </div>
+              {s.description && <p className="text-gray-500 text-xs mb-2">{s.description}</p>}
+              {s.filled && (
+                <div className="flex items-center gap-2">
+                  <code className="text-gray-400 text-xs font-mono bg-white/5 px-2 py-1 rounded">
+                    {showValue[s.key] && revealedValues[s.key] !== undefined
+                      ? revealedValues[s.key]
+                      : "••••••••"}
+                  </code>
+                  {s.is_sensitive && (
+                    <button onClick={() => revealValue(s.key)} className="text-gray-600 hover:text-cyan-400 transition-colors">
+                      <Icon name={showValue[s.key] ? "EyeOff" : "Eye"} size={13} />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button
+                onClick={() => startEdit(s.key)}
+                className="p-1.5 rounded-lg text-gray-500 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors"
+                title="Редактировать"
+              >
+                <Icon name="Pencil" size={14} />
+              </button>
+              {deleteConfirm === s.key ? (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-red-400">Удалить?</span>
+                  <button onClick={() => deleteSecret(s.key)} className="px-2 py-1 text-xs bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors">Да</button>
+                  <button onClick={() => setDeleteConfirm(null)} className="px-2 py-1 text-xs text-gray-500 rounded hover:text-white transition-colors">Нет</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setDeleteConfirm(s.key)}
+                  className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  title="Удалить"
+                >
+                  <Icon name="Trash2" size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 }
