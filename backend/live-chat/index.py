@@ -478,7 +478,7 @@ def handler(event: dict, context) -> dict:
             body = json.loads(event.get("body") or "{}")
             settings = body.get("settings") or {}
             for key, value in settings.items():
-                if key in ("welcome_text", "services", "header_title", "header_subtitle"):
+                if key in ("welcome_text", "services", "header_title", "header_subtitle", "inactivity_minutes"):
                     cur.execute(f"""
                         INSERT INTO {SCHEMA}.live_chat_settings (key, value, updated_at)
                         VALUES (%s, %s, NOW())

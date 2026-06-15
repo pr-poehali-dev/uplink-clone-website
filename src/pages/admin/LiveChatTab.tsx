@@ -32,6 +32,7 @@ interface ChatSettings {
   services: string;
   header_title: string;
   header_subtitle: string;
+  inactivity_minutes: string;
 }
 
 interface LiveChatTabProps {
@@ -61,6 +62,7 @@ export function LiveChatTab({ token }: LiveChatTabProps) {
     services: "",
     header_title: "",
     header_subtitle: "",
+    inactivity_minutes: "10",
   });
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -186,7 +188,15 @@ export function LiveChatTab({ token }: LiveChatTabProps) {
     try {
       const res = await fetch(`${LIVE_CHAT_URL}?action=settings`);
       const data = await res.json();
-      if (data.settings) setSettings(data.settings as ChatSettings);
+      if (data.settings) {
+        setSettings({
+          welcome_text: data.settings.welcome_text || "",
+          services: data.settings.services || "",
+          header_title: data.settings.header_title || "",
+          header_subtitle: data.settings.header_subtitle || "",
+          inactivity_minutes: data.settings.inactivity_minutes || "10",
+        });
+      }
     } catch (e) {
       console.warn("[LiveChatTab] loadSettings error", e);
     }

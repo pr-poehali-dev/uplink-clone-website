@@ -5,6 +5,7 @@ interface ChatSettings {
   services: string;
   header_title: string;
   header_subtitle: string;
+  inactivity_minutes: string;
 }
 
 interface ChatSettingsTabProps {
@@ -121,6 +122,24 @@ export function ChatSettingsTab({
                   style={inputStyle}
                   placeholder={"IT-аутсорсинг\nВидеонаблюдение\nДругой вопрос"}
                 />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-gray-400">
+                  Сброс чата при бездействии <span className="text-gray-600">(минут)</span>
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={1440}
+                  value={settings.inactivity_minutes}
+                  onChange={e => onSettingsChange({ ...settings, inactivity_minutes: e.target.value })}
+                  className="rounded-xl px-3 py-2 text-sm outline-none w-32"
+                  style={inputStyle}
+                />
+                <p className="text-xs text-gray-600">
+                  Если клиент молчит дольше этого времени — чат на сайте сбрасывается к форме обращения.
+                </p>
               </div>
             </div>
 

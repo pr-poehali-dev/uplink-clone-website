@@ -6,8 +6,14 @@ const POLL_INTERVAL = 4000;
 const SESSION_KEY = "live_chat_session_id";
 const SESSION_TS_KEY = "live_chat_session_ts";
 const MAX_MSG_ID_KEY = "live_chat_last_id";
-// Если клиент 10 минут не пишет — чат сбрасывается к форме приветствия
-const INACTIVITY_MS = 10 * 60 * 1000; // 10 минут бездействия клиента
+// Время бездействия клиента до сброса чата (настраивается из админки).
+// По умолчанию 10 минут; обновляется после загрузки настроек.
+const DEFAULT_INACTIVITY_MIN = 10;
+let inactivityMs = DEFAULT_INACTIVITY_MIN * 60 * 1000;
+
+function setInactivityMinutes(min: number) {
+  if (min && min > 0) inactivityMs = min * 60 * 1000;
+}
 
 function touchActivity() {
   localStorage.setItem(SESSION_TS_KEY, String(Date.now()));
@@ -28,8 +34,8 @@ function getSavedSession(): string {
     touchActivity();
     return sid;
   }
-  // Сброс при бездействии клиента дольше 10 минут
-  if (Date.now() - ts < INACTIVITY_MS) return sid;
+  // Сброс при бездействии клиента дольше заданного времени
+  if (Date.now() - ts < inactivityMs) return sid;
   clearSessionStorage();
   return "";
 }
@@ -46,6 +52,7 @@ interface ChatSettings {
   services: string;
   header_title: string;
   header_subtitle: string;
+  inactivity_minutes?: string;
 }
 
 type Step = "welcome" | "form" | "chat";
@@ -105,7 +112,7 @@ export default function LiveChat() {
       const sid = localStorage.getItem(SESSION_KEY);
       if (!sid) return;
       const ts = parseInt(localStorage.getItem(SESSION_TS_KEY) || "0");
-      if (ts && Date.now() - ts >= INACTIVITY_MS) {
+      if (ts && Date.now() - ts >= inactivityMs) {
         expireChat();
       }
     };
@@ -117,7 +124,13 @@ export default function LiveChat() {
   useEffect(() => {
     fetch(`${LIVE_CHAT_URL}?action=settings`)
       .then(r => r.json())
-      .then(d => { if (d.settings) setSettings(d.settings); })
+      .then(d => {
+        if (d.settings) {
+          setSettings(d.settings);
+          const min = parseInt(d.settings.inactivity_minutes || "");
+          if (min > 0) setInactivityMinutes(min);
+        }
+      })
       .catch(() => {});
   }, []);
 
