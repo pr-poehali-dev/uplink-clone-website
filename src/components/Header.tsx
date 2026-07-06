@@ -105,10 +105,10 @@ export default function Header({ onContactClick, settings, services, navItems }:
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-[#080c14]/80 backdrop-blur-xl border-b border-white/[0.06]"
-          : "bg-transparent border-b border-transparent"
+          ? "bg-[#080c14]/95 backdrop-blur-md shadow-lg shadow-cyan-500/10 border-b border-cyan-500/10"
+          : "bg-transparent"
       }`}
       itemScope
       itemType="https://schema.org/Organization"
