@@ -262,6 +262,18 @@
   }
 }
 
+/* Корпоративный фон hero в стиле референса */
+.hero-corp {
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 0%, rgba(0, 212, 255, 0.06), transparent 60%),
+    linear-gradient(180deg, #080c14 0%, #0a0f1a 60%, #080c14 100%);
+}
+.light .hero-corp {
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 0%, rgba(2, 132, 199, 0.08), transparent 60%),
+    linear-gradient(180deg, #f8fafc 0%, #eff6ff 60%, #f8fafc 100%);
+}
+
 /* === KEYFRAMES === */
 @keyframes float {
   0%,
